@@ -17,7 +17,8 @@ interface Props {
 }
 
 const { site, links, cta } = Astro.props
-const local = (to: string) => (/^(https?:)?\/\//.test(to) ? to : href(site, to, site))
+// A path on this site, or anything with a scheme (https:, mailto:) as written.
+const local = (to: string) => (/^([a-z][a-z+.-]*:|\/\/)/i.test(to) ? to : href(site, to, site))
 ---
 
 <header class="wrap">

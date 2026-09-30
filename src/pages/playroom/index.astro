@@ -1,11 +1,11 @@
 ---
+import Base from '../../layouts/Base.astro'
 import '../../styles/playroom.css'
 import BeforeAfter from '../../components/playroom/BeforeAfter.astro'
 import ToolShowcase from '../../components/playroom/ToolShowcase.astro'
 import Mark from '../../components/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { COST_3Y, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
-import Base from '../../layouts/Base.astro'
 import { href, media } from '../../lib/links'
 
 const own = (p: string) => href('playroom', p, 'playroom')
@@ -77,7 +77,7 @@ const icon = {
   <!-- ── why ──────────────────────────────────────────────────── -->
   <section class="wrap why" aria-labelledby="why-title">
     <h2 class="sr-only" id="why-title">Why Playroom</h2>
-    <ul class="why-grid">
+    <ul class="cards">
       <li>
         <span class="b-micro">Own it</span>
         <h3 class="b-disp">One price. No renewals.</h3>
@@ -136,7 +136,7 @@ const icon = {
   </div>
 
   <!-- ── before / after ───────────────────────────────────────── -->
-  <section class="wrap developed" id="developed" aria-labelledby="dev-title">
+  <section class="wrap band developed" id="developed" aria-labelledby="dev-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="dev-title">Straight off the card.<br /><span class="accent">Finished in Playroom.</span></h2>
       <p class="b-body">Real RAW files from an entry-level camera. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
@@ -145,7 +145,7 @@ const icon = {
   </section>
 
   <!-- ── tools ────────────────────────────────────────────────── -->
-  <section class="wrap tools" id="tools" aria-labelledby="tools-title">
+  <section class="wrap band tools" id="tools" aria-labelledby="tools-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="tools-title">Every tool you reach for.<br /><span class="accent">On one thumb-wheel.</span></h2>
       <p class="b-body">Ten tools, one at a time, so the photo keeps the screen. Every slider updates the picture and the histogram as you drag. Pick one to see it in the app.</p>
@@ -154,7 +154,7 @@ const icon = {
   </section>
 
   <!-- ── cost ─────────────────────────────────────────────────── -->
-  <section class="wrap cost" aria-labelledby="cost-title">
+  <section class="wrap band cost" aria-labelledby="cost-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="cost-title">What three years of editing costs.</h2>
       <p class="b-body">A subscription is never finished being paid for. Playroom is paid for once.</p>
@@ -180,7 +180,7 @@ const icon = {
   </section>
 
   <!-- ── pricing ──────────────────────────────────────────────── -->
-  <section class="wrap pricing" id="pricing" aria-labelledby="price-title">
+  <section class="wrap band pricing" id="pricing" aria-labelledby="price-title">
     <div class="price-head">
       <Mark site="playroom" size={96} class="price-mark" />
       <h2 class="b-disp" id="price-title">Yours to keep.</h2>
@@ -223,7 +223,7 @@ const icon = {
   </section>
 
   <!-- ── faq ──────────────────────────────────────────────────── -->
-  <section class="wrap faq" id="faq" aria-labelledby="faq-title">
+  <section class="wrap band faq" id="faq" aria-labelledby="faq-title">
     <h2 class="b-disp h2" id="faq-title">Questions</h2>
     <div class="faq-list">
       {

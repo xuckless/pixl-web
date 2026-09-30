@@ -1,8 +1,135 @@
 ---
-import Stub from '../../components/Stub.astro'
 import Base from '../../layouts/Base.astro'
+import '../../styles/space.css'
+import Mark from '../../components/Mark.astro'
+import Wordmark from '../../components/Wordmark.astro'
+import { href } from '../../lib/links'
+
+// Savings are the engine's measurements, as Space Pixl's recommender uses them
+// (space-pixl README, "How a conversion happens").
+const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Space%20Pixl%20launches'
+const icon = {
+  check: 'M5 12.5l4.5 4.5L19 7.5',
+  mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
+}
+const STEPS = [
+  { n: '01', title: 'Analyse', text: 'Space Pixl reads each photo: its format, how it was encoded and what its pixels look like.' },
+  { n: '02', title: 'Recommend', text: 'It ranks the conversions worth making for that photo, with the saving you can expect, and says when one isn\'t worth it.' },
+  { n: '03', title: 'Preview', text: 'Every setting you change runs the real encode. The size you see is the real file\'s size, and the picture is its real pixels.' },
+  { n: '04', title: 'Convert', text: 'The new file is written beside the original. Nothing is overwritten, and you decide when the originals go.' },
+]
 ---
 
-<Base site="space" title="Space Pixl · Reclaim your storage" description="Space Pixl re-encodes a photo library to reclaim storage, and shows you exactly what it did.">
-  <Stub chip="Space Pixl" title={'Keep every photo.<br><span class="accent">Lose the bulk.</span>'} lede="The Space Pixl site is on its way." />
+<Base
+  site="space"
+  title="Space Pixl · Keep every photo. Lose the bulk."
+  description="Space Pixl reclaims storage by re-encoding your photo library into modern formats. It previews every change for real and never overwrites an original."
+  nav={[
+    { label: 'Why', to: '#why' },
+    { label: 'How it works', to: '#how' },
+    { label: 'Features', to: '#features' },
+  ]}
+  cta={{ label: 'Get notified', to: notify }}
+>
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <Mark site="space" size={120} class="hero-mark" />
+    <span class="b-chip">The photo storage optimiser · macOS &amp; Windows</span>
+    <h1 class="b-disp" id="hero-title">Keep every photo.<br /><span class="accent">Lose the bulk.</span></h1>
+    <p class="b-body lede">
+      Space Pixl re-encodes your photo library into modern formats that take a fraction of the space. It measures every
+      photo before recommending anything, shows you the real result first, and never touches an original.
+    </p>
+    <div class="ctas">
+      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
+      <a class="b-cta sec" href="#how">See how it works</a>
+    </div>
+    <ul class="proof b-body" aria-label="At a glance">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Originals never overwritten</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Real previews, real file sizes</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Runs on your own computer</li>
+    </ul>
+  </section>
+
+  <section class="wrap" aria-label="Typical savings">
+    <ul class="stats three">
+      <li><span class="b-disp">−68%</span><span class="b-body">a JPEG re-encoded as AVIF</span></li>
+      <li><span class="b-disp">−19%</span><span class="b-body">a JPEG repacked as JPEG XL, reversible to the original byte</span></li>
+      <li><span class="b-disp">−14%</span><span class="b-body">a camera RAW archived as lossless DNG</span></li>
+    </ul>
+  </section>
+
+  <!-- ── why ──────────────────────────────────────────────────── -->
+  <section class="wrap feature" id="why" aria-labelledby="why-title">
+    <div class="copy">
+      <span class="b-micro">Why it measures</span>
+      <h2 class="b-disp h2" id="why-title">Newer isn't always smaller.</h2>
+      <p class="b-body">
+        The same 8 MB photo is 68% smaller as AVIF and 20% bigger as HEIC. An optimiser that assumes the newest format
+        wins will grow your library. Space Pixl checks each photo and only recommends what actually saves space.
+      </p>
+      <div class="b-rule sp"></div>
+    </div>
+    <figure class="figure chart"><img src="/shared/engine/sizes.svg" width="900" height="452" loading="lazy" decoding="async" alt="One 8.04 MB JPEG re-encoded eight ways: AVIF 2.58 MB, WebP 3.26 MB, JPEG XL 5.53 MB, JPEG XL repack 6.55 MB, HEIC 9.66 MB, JPEG XL lossless 22.93 MB, PNG 38.70 MB, TIFF 56.06 MB." /></figure>
+  </section>
+
+  <!-- ── how ──────────────────────────────────────────────────── -->
+  <section class="wrap band" id="how" aria-labelledby="how-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="how-title">Four steps.<br /><span class="accent">No surprises.</span></h2>
+      <p class="b-body">You see the exact file you'll get, at its exact size, before anything is written.</p>
+    </div>
+    <ol class="steps">
+      {
+        STEPS.map((s) => (
+          <li>
+            <span class="b-mono step-n">{s.n}</span>
+            <h3 class="b-disp">{s.title}</h3>
+            <p class="b-body">{s.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- ── features ─────────────────────────────────────────────── -->
+  <section class="wrap band" id="features" aria-labelledby="feat-title">
+    <h2 class="sr-only" id="feat-title">Features</h2>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">The free lunch</span>
+        <h3 class="b-disp">Smaller, and undoable.</h3>
+        <p class="b-body">JPEG to JPEG XL repacking saves about a fifth of every JPEG without decoding a pixel, and the original can be rebuilt bit for bit.</p>
+      </li>
+      <li>
+        <span class="b-micro">Your call</span>
+        <h3 class="b-disp">Every dial, if you want it.</h3>
+        <p class="b-body">Take the recommendation, or set the format, quality, size, bit depth, colour handling and metadata yourself.</p>
+      </li>
+      <li>
+        <span class="b-micro">Nothing lost</span>
+        <h3 class="b-disp">Colour and metadata intact.</h3>
+        <p class="b-body">Colours are converted properly, never just re-labelled, and camera metadata is carried across as it was.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="wrap">
+    <a class="engine-card" href={href('engine', '/', 'space')}>
+      <div class="copy">
+        <Wordmark site="engine" size={14} />
+        <h2 class="b-disp h2">Built on PIXL Engine.</h2>
+        <p class="b-body">Space Pixl's conversions run on PIXL Engine, which never guesses with your photos and reports exactly what it did to each one.</p>
+        <span class="textlink b-body">Meet the engine</span>
+      </div>
+      <Mark site="engine" size={220} class="engine-mark" />
+    </a>
+  </section>
+
+  <section class="wrap closing" aria-labelledby="close-title">
+    <h2 class="b-disp" id="close-title">Get your storage back.<br /><span class="accent">Keep every memory.</span></h2>
+    <div class="ctas">
+      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
+      <a class="b-cta sec" href={href('playroom', '/', 'space')}>Meet Playroom</a>
+    </div>
+  </section>
 </Base>

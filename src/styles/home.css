@@ -1,0 +1,54 @@
+/* pixlfoundation.com: what only the company page has. */
+
+.hero { padding-top: 120px; }
+
+/* ── products ───────────────────────────────────────────────── */
+.products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.product {
+  --tint: rgba(157, 139, 234, .14);
+  display: flex; flex-direction: column; gap: 18px; padding: 36px;
+  border: 1px solid var(--line); background: radial-gradient(110% 80% at 0% 0%, var(--tint), #050507 62%);
+  transition: border-color .2s var(--b-ease), transform .2s var(--b-ease);
+}
+.product.space { --tint: rgba(147, 164, 255, .14); }
+.product.engine { --tint: rgba(235, 233, 243, .08); }
+.product:hover { border-color: rgba(157, 139, 234, .45); transform: translateY(-2px); }
+.product-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.product-top .b-chip { height: auto; min-height: 28px; padding: 5px 10px; font-size: 11px; color: var(--ink-3); }
+.product h3 { font-size: clamp(22px, 1.9vw, 28px); }
+.product p { font-size: 16px; color: var(--ink-2); flex-grow: 1; }
+.product .textlink { align-self: flex-start; }
+
+/* ── the foundation stack ───────────────────────────────────── */
+.found-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px); gap: 72px; align-items: center; }
+.found-grid .textlink { align-self: flex-start; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.stack-apps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.stack-app {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  min-height: 150px; padding: 18px 10px; border: 1px solid rgba(157, 139, 234, .35);
+  background: linear-gradient(180deg, rgba(157, 139, 234, .12), rgba(157, 139, 234, .02));
+}
+.stack-app.sp { border-color: rgba(147, 164, 255, .35); background: linear-gradient(180deg, rgba(147, 164, 255, .12), rgba(147, 164, 255, .02)); }
+.stack-app.next { border-style: dashed; border-color: rgba(255, 255, 255, .16); background: none; }
+.stack-app.next .b-micro { color: var(--ink-4); }
+.stack-engine {
+  display: flex; align-items: center; justify-content: center; gap: 16px; padding: 26px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background: radial-gradient(80% 160% at 50% 0%, #1d1736, #07060c 70%);
+  box-shadow: 0 30px 100px -40px rgba(157, 139, 234, .6);
+}
+
+.closing-lede { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+
+@media (max-width: 1100px) {
+  .products { grid-template-columns: minmax(0, 1fr); }
+  .found-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+}
+
+@media (max-width: 760px) {
+  .hero { padding-top: 56px; }
+  .product { padding: 28px 22px; }
+  .stack-app { min-height: 120px; }
+  .stack-app .b-wm { font-size: 9px !important; letter-spacing: .18em; }
+}

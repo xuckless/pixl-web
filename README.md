@@ -38,7 +38,7 @@ pnpm install
 pnpm dev        # astro dev: every site under its folder, e.g. localhost:4321/playroom/
 pnpm preview    # a real build through the Worker: localhost:8787, playroom.localhost:8787, …
 pnpm check      # astro check + the Worker's types
-pnpm deploy     # build and wrangler deploy (needs `wrangler login`)
+pnpm run deploy # build and wrangler deploy (needs `wrangler login`; plain `pnpm deploy` is a pnpm built-in)
 ```
 
 `pnpm preview` builds with `PUBLIC_ROOT_DOMAIN=localhost:8787`, so links between
