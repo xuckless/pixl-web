@@ -1,0 +1,140 @@
+/* Page foundations shared by every site: fonts, tokens, reset, nav, footer.
+   Breakpoints: 1100 (two columns fold to one) and 760 (phones). */
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/shared/fonts/space-grotesk.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/shared/fonts/manrope.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/shared/fonts/jetbrains-mono.woff2') format('woff2');
+}
+
+:root {
+  --ink: #ebe9f3;
+  --ink-2: #b8b5c7;
+  --ink-3: #8e8aa6;
+  --ink-4: #7a7790;
+  --line: rgba(255, 255, 255, .08);
+  --bg: #000;
+  --gutter: 64px;
+  --max: 1440px;
+  /* each site sets its own accent on <body data-site> */
+  --accent: var(--pl);
+  --accent-soft: #c9bdf7;
+  color-scheme: dark;
+}
+body[data-site='space'] { --accent: var(--sp); --accent-soft: #c3ccff; --blob-a: #4d63ff; --blob-b: #93a4ff; --blob-d: #7fd4ff; }
+body[data-site='engine'] { --accent: #b8b5c7; --accent-soft: #ebe9f3; --blob-a: #4a4466; --blob-b: #7b68d8; --blob-d: #93a4ff; }
+body[data-site='home'] { --accent: var(--pl); --blob-d: #93a4ff; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--bg); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+img, video, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: #fff; }
+button { font: inherit; color: inherit; }
+h1, h2, h3, p { margin: 0; }
+
+:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; border-radius: 2px; }
+
+.skip {
+  position: absolute; left: 16px; top: -60px; z-index: 100;
+  padding: 10px 14px; background: var(--ink); color: #0d0a1f; font-weight: 600;
+}
+.skip:focus { top: 16px; }
+
+.wrap { position: relative; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.accent { color: var(--accent); }
+
+/* hero backdrop */
+.backdrop { position: absolute; left: 0; right: 0; top: 0; height: 1500px; pointer-events: none; }
+.backdrop .ambient { bottom: auto; height: 100%; }
+.backdrop .fade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, var(--bg) 96%); }
+
+/* ── nav ─────────────────────────────────────────────────────── */
+.nav { position: relative; z-index: 10; height: 88px; display: flex; align-items: center; gap: 40px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand img { width: 36px; height: 36px; flex: none; }
+.nav .grow { flex-grow: 1; }
+.nav-links { display: flex; align-items: center; gap: 36px; margin: 0; padding: 0; list-style: none; }
+.nav-links a { font-size: 15px; color: var(--ink-2); }
+.nav-links a:hover, .nav-links a[aria-current='page'] { color: #fff; }
+.nav .b-cta { height: 42px; font-size: 14px; padding: 0 18px; }
+.nav-toggle {
+  display: none; width: 42px; height: 42px; padding: 0; border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .03); cursor: pointer;
+}
+.nav-toggle svg { width: 20px; height: 20px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+
+/* ── CTAs ───────────────────────────────────────────────────── */
+.ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.b-cta { border: 0; cursor: pointer; }
+.b-cta[aria-disabled='true'] { cursor: default; }
+.b-cta[aria-disabled='true']:hover { transform: none; }
+.b-cta .soon { margin-left: -5px; font-weight: 500; opacity: .78; }
+.textlink { color: var(--ink-2); border-bottom: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); padding-bottom: 1px; }
+.textlink:hover { color: #fff; border-color: var(--accent); }
+
+/* ── placeholder hero (sites not yet written) ─────────────────── */
+.stub { position: relative; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 120px 0 160px; text-align: center; }
+.stub .b-chip { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent-soft); }
+.stub h1 { font-size: clamp(40px, 6vw, 88px); max-width: 1000px; }
+.stub p { font-size: clamp(17px, 1.4vw, 20px); color: var(--ink-2); max-width: 680px; }
+
+/* ── footer ─────────────────────────────────────────────────── */
+.foot { border-top: 1px solid var(--line); margin-top: 80px; padding: 56px 0 48px; }
+.foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 40px; }
+.foot-grid h2 { font-size: 12px; margin-bottom: 16px; }
+.foot-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.foot-grid a { font-size: 15px; color: var(--ink-2); }
+.foot-grid a:hover { color: #fff; }
+.foot-about p { font-size: 14px; color: var(--ink-3); margin-top: 16px; max-width: 320px; }
+.foot-base { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; font-size: 13px; color: var(--ink-4); }
+
+@media (max-width: 1100px) {
+  :root { --gutter: 40px; }
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .foot-about { grid-column: 1 / -1; }
+}
+
+@media (max-width: 760px) {
+  :root { --gutter: 16px; }
+  .nav { height: 72px; gap: 12px; }
+  .nav-toggle { display: grid; }
+  .nav .b-cta { display: none; }
+  .nav-links {
+    display: none; position: absolute; top: 72px; left: 0; right: 0;
+    flex-direction: column; align-items: stretch; gap: 0;
+    background: rgba(8, 6, 16, .96); border: 1px solid var(--line); backdrop-filter: blur(16px);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { display: block; padding: 16px 20px; font-size: 17px; }
+  .stub { padding: 72px 0 96px; }
+  .foot-grid { grid-template-columns: 1fr; }
+}

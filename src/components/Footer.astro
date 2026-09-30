@@ -1,0 +1,51 @@
+---
+import { href } from '../lib/links'
+import type { SiteId } from '../lib/sites'
+import Wordmark from './Wordmark.astro'
+
+interface Props {
+  site: SiteId
+}
+
+const { site } = Astro.props
+const year = new Date().getFullYear()
+---
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a href={href('home', '/', site)}><Wordmark site="home" size={13} /></a>
+        <p class="b-body">Photo software you own, built on one colour-true imaging engine.</p>
+      </div>
+      <div>
+        <h2 class="b-micro">Products</h2>
+        <ul class="b-body">
+          <li><a href={href('playroom', '/', site)}>Pixl Playroom</a></li>
+          <li><a href={href('space', '/', site)}>Space Pixl</a></li>
+          <li><a href={href('engine', '/', site)}>PIXL Engine</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="b-micro">Company</h2>
+        <ul class="b-body">
+          <li><a href={href('home', '/#about', site)}>About</a></li>
+          <li><a href="https://github.com/xuckless">GitHub</a></li>
+          <li><a href="mailto:hello@pixlfoundation.com">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2 class="b-micro">Legal</h2>
+        <ul class="b-body">
+          <li><a href={href('home', '/legal/eula/', site)}>Licence agreement</a></li>
+          <li><a href={href('home', '/legal/privacy/', site)}>Privacy</a></li>
+          <li><a href={href('home', '/legal/third-party/', site)}>Third-party notices</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-base b-body">
+      <span>© {year} PIXL Foundation</span>
+      <span>Made with PIXL Engine</span>
+    </div>
+  </div>
+</footer>

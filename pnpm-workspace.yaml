@@ -1,0 +1,6 @@
+# pnpm settings (pnpm ≥ 11 reads these from here, not package.json).
+# Dependencies allowed to run install scripts. Nothing else may.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true

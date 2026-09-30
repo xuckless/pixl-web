@@ -1,0 +1,60 @@
+---
+import { href } from '../lib/links'
+import type { SiteId } from '../lib/sites'
+import Mark from './Mark.astro'
+import Wordmark from './Wordmark.astro'
+
+export interface NavLink {
+  label: string
+  /** A path on this site ('/pricing', '#tools'), or a full link from href(). */
+  to: string
+}
+
+interface Props {
+  site: SiteId
+  links: NavLink[]
+  cta?: NavLink
+}
+
+const { site, links, cta } = Astro.props
+const local = (to: string) => (/^(https?:)?\/\//.test(to) ? to : href(site, to, site))
+---
+
+<header class="wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href={local('/')} aria-label="Home">
+      <Mark site={site} />
+      <Wordmark site={site} />
+    </a>
+    <span class="grow"></span>
+    <ul class="nav-links" id="nav-links">
+      {links.map((l) => <li><a class="b-body" href={local(l.to)}>{l.label}</a></li>)}
+    </ul>
+    {cta && <a class="b-cta pri nav-cta" href={local(cta.to)}>{cta.label}</a>}
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+    </button>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle')
+  const list = document.getElementById('nav-links')
+  if (toggle && list) {
+    const set = (open: boolean) => {
+      list.classList.toggle('open', open)
+      toggle.setAttribute('aria-expanded', String(open))
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu')
+    }
+    toggle.addEventListener('click', () => set(!list.classList.contains('open')))
+    list.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) set(false)
+    })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && list.classList.contains('open')) {
+        set(false)
+        toggle.focus()
+      }
+    })
+  }
+</script>

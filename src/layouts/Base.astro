@@ -1,0 +1,82 @@
+---
+import '../styles/brand.css'
+import '../styles/base.css'
+import Footer from '../components/Footer.astro'
+import Nav, { type NavLink } from '../components/Nav.astro'
+import { canonical, href } from '../lib/links'
+import { SITES, type SiteId } from '../lib/sites'
+
+interface Props {
+  site: SiteId
+  title: string
+  description: string
+  /** This page's path on its site, for canonical and og:url. */
+  path?: string
+  nav?: NavLink[]
+  cta?: NavLink
+  /** An image under the site's own folder, e.g. '/og.png'. */
+  ogImage?: string
+  ogImageAlt?: string
+  backdrop?: boolean
+}
+
+const { site, title, description, path = '/', nav = [], cta, ogImage, ogImageAlt, backdrop = true } = Astro.props
+const url = canonical(site, path)
+const siteName = SITES[site].name
+const own = (p: string) => href(site, p, site)
+// Playroom ships its own icon set; the others use their product mark.
+const icon = site === 'playroom' ? own('/favicon.svg') : `/shared/brand/${site === 'space' ? 'spacepixl' : 'engine'}-mark-glass.svg`
+const image = ogImage ? canonical(site, ogImage) : undefined
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href={url} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:url" content={url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {image && <meta property="og:image" content={image} />}
+    {image && ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {image && <meta name="twitter:image" content={image} />}
+
+    {site === 'playroom' && <link rel="icon" href={own('/favicon.ico')} sizes="48x48" />}
+    <link rel="icon" href={icon} type="image/svg+xml" />
+    {site === 'playroom' && <link rel="apple-touch-icon" href={own('/apple-touch-icon.png')} />}
+
+    <link rel="preload" href="/shared/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/shared/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body data-site={site}>
+    <a class="skip" href="#main">Skip to content</a>
+    {
+      backdrop && (
+        <div class="backdrop" aria-hidden="true">
+          <div class="ambient">
+            <span class="blob a" style="opacity: .42" />
+            <span class="blob b" style="opacity: .3" />
+            <span class="blob d" />
+            <div class="fade" />
+          </div>
+        </div>
+      )
+    }
+    <Nav site={site} links={nav} cta={cta} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer site={site} />
+  </body>
+</html>

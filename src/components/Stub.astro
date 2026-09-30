@@ -1,0 +1,17 @@
+---
+// A placeholder hero for a site whose page hasn't been written yet.
+interface Props {
+  chip: string
+  title: string
+  lede: string
+}
+
+const { chip, title, lede } = Astro.props
+---
+
+<section class="wrap stub">
+  <span class="b-chip">{chip}</span>
+  <h1 class="b-disp" set:html={title} />
+  <p class="b-body">{lede}</p>
+  <slot />
+</section>

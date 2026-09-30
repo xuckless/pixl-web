@@ -1,0 +1,21 @@
+---
+import type { SiteId } from '../lib/sites'
+
+interface Props {
+  site: SiteId
+  size?: number
+  class?: string
+}
+
+// The company has no mark of its own yet; it wears the engine's, the foundation every app is built on.
+const FILES: Record<SiteId, string> = {
+  home: 'engine-mark-glass.svg',
+  playroom: 'playroom-mark-glass.svg',
+  space: 'spacepixl-mark-glass.svg',
+  engine: 'engine-mark-glass.svg',
+}
+
+const { site, size = 36, class: cls } = Astro.props
+---
+
+<img src={`/shared/brand/${FILES[site]}`} width={size} height={size} alt="" class={cls} />

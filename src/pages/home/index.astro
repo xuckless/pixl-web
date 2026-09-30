@@ -1,0 +1,23 @@
+---
+import Stub from '../../components/Stub.astro'
+import Base from '../../layouts/Base.astro'
+import { href } from '../../lib/links'
+---
+
+<Base
+  site="home"
+  title="PIXL Foundation · Photo software you own"
+  description="PIXL Foundation makes Pixl Playroom, Space Pixl and PIXL Engine: photo software you pay for once, built on a colour-true imaging core."
+  nav={[
+    { label: 'Playroom', to: href('playroom', '/', 'home') },
+    { label: 'Space Pixl', to: href('space', '/', 'home') },
+    { label: 'Engine', to: href('engine', '/', 'home') },
+  ]}
+>
+  <Stub chip="PIXL Foundation" title={'Photo software<br><span class="accent">you own.</span>'} lede="Three products on one imaging engine. The full site is on its way.">
+    <div class="ctas">
+      <a class="b-cta pri" href={href('playroom', '/', 'home')}>Meet Playroom</a>
+      <a class="b-cta sec" href={href('engine', '/', 'home')}>The engine</a>
+    </div>
+  </Stub>
+</Base>
