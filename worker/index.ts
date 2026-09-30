@@ -1,8 +1,10 @@
 // One Worker serves all four sites. The hostname picks the site's folder in the
 // static build, e.g. playroom.pixlfoundation.com/pricing → /playroom/pricing.
-// Build output (/_astro/) and shared assets (/shared/) are served as-is on every host.
+// Build output (/_astro/) and shared assets (/shared/) are served as-is on every host,
+// and /api/* (worker/api.ts) answers on every host.
 
 import { ROOT_DOMAIN, SHARED_PREFIXES, siteForSub } from '../src/lib/sites'
+import { handleApi } from './api'
 
 interface Env {
   ASSETS: Fetcher
@@ -32,9 +34,7 @@ export default {
       return Response.redirect(url.toString(), 301)
     }
 
-    if (url.pathname.startsWith('/api/')) {
-      return Response.json({ error: 'not_implemented' }, { status: 501 })
-    }
+    if (url.pathname.startsWith('/api/')) return handleApi(request, url)
 
     if (SHARED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
       return env.ASSETS.fetch(request)

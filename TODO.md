@@ -31,16 +31,28 @@ Grouped by area; roughly in priority order within each.
 
 ## Legal
 
-- [ ] Licence agreement, privacy policy and third-party notices at
-      `pixlfoundation.com/legal/{eula,privacy,third-party}/`. The footer already
-      links there (Phase 4 of the web and release plan).
+- [x] Licence agreement, privacy policy and third-party notices at
+      `pixlfoundation.com/legal/{eula,privacy,third-party}/` (`src/legal/*.md`,
+      `src/layouts/Legal.astro`). The notices file comes from pixl-playroom:
+      `node scripts/third-party-notices.mjs --web ../pixl-web`.
+- [ ] The licence agreement and privacy policy are drafts: fill in the
+      [bracketed] parts and have a lawyer review them, then pass
+      `draft={false}` from those pages (`src/pages/home/legal/`).
+- [ ] Space Pixl's third-party notices, with its first public release.
+
+## Crash reports
+
+- [ ] `/api/crash` (`worker/api.ts`) only logs a summary of each report. Keep
+      them (an R2 bucket with a retention period, stated in the privacy
+      policy) or hand them to Sentry, and add rate limiting before the app ships
+      widely.
 
 ## Accounts and licensing (not built)
 
 - [ ] Accounts, checkout and licence keys through Lemon Squeezy: buy, get a
       key, up to 3 devices at a time, remove one to add one.
 - [ ] Device management on the website.
-- [ ] The Worker's `/api/*` is a 501 stub until then (`worker/index.ts`).
+- [ ] Everything under `/api/*` but `/api/crash` is a 501 stub until then (`worker/api.ts`).
 
 ## Site
 

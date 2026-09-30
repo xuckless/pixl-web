@@ -1,0 +1,37 @@
+---
+// A legal page on pixlfoundation.com: a draft notice, the title and date, and the text.
+import '../styles/legal.css'
+import { href } from '../lib/links'
+import Base from './Base.astro'
+
+interface Props {
+  title: string
+  summary: string
+  updated?: string
+  path: string
+  /** Until a lawyer has reviewed it, a page says it isn't in effect. */
+  draft?: boolean
+}
+
+const { title, summary, updated, path, draft = true } = Astro.props
+const nav = [
+  { label: 'Licence agreement', to: href('home', '/legal/eula/', 'home') },
+  { label: 'Privacy', to: href('home', '/legal/privacy/', 'home') },
+  { label: 'Third-party notices', to: href('home', '/legal/third-party/', 'home') },
+]
+---
+
+<Base site="home" title={`${title} · PIXL Foundation`} description={summary} path={path} nav={nav} backdrop={false}>
+  <article class="wrap legal">
+    <header>
+      <span class="b-micro">Legal</span>
+      <h1 class="b-disp">{title}</h1>
+      <p class="b-body lede">{summary}</p>
+      {updated && <p class="b-body updated">Last updated {new Date(updated).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })}</p>}
+      {draft && <p class="b-body draft" role="note"><strong>Draft.</strong> This page is being prepared for launch and is not yet in effect. Words in [brackets] are still to be filled in.</p>}
+    </header>
+    <div class="prose b-body">
+      <slot />
+    </div>
+  </article>
+</Base>
