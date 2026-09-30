@@ -22,7 +22,7 @@ export const SITES: Record<SiteId, Site> = {
 export const ROOT_DOMAIN = 'pixlfoundation.com'
 
 /** Sites that carry the legal pages (/legal/…); the others link to the company site's. */
-export const LEGAL_SITES: SiteId[] = ['home', 'playroom']
+export const LEGAL_SITES: SiteId[] = ['home', 'playroom', 'space']
 
 /** The pixl-media R2 bucket (video, anything that needs Range requests). See scripts/push-media.sh. */
 export const MEDIA_ORIGIN = 'https://media.pixlfoundation.com'

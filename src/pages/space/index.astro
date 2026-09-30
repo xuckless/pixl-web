@@ -1,14 +1,16 @@
 ---
-// space.pixlfoundation.com, after the Family Kit's SpWebsite board. The app is
-// being restyled to Playroom's standards, so its screenshots are placeholders
-// until then (TODO.md). Figures are the engine's measurements (pixl-engine
-// README), which Space Pixl's recommender uses.
+// space.pixlfoundation.com, after the Family Kit's SpWebsite board. The
+// screenshots come from the app itself (space-pixl's scripts/shots.mjs, with
+// the real engine on the engine's own test images). Figures are the engine's
+// measurements (pixl-engine README), which Space Pixl's recommender uses.
 import Base from '../../layouts/Base.astro'
 import '../../styles/space.css'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { href } from '../../lib/links'
 import { softwareApp } from '../../lib/seo'
+
+const own = (p: string) => href('space', p, 'space')
 
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Space%20Pixl%20launches'
 const icon = { mail: 'M4 6h16v12H4zM4 7l8 6 8-6' }
@@ -53,10 +55,9 @@ const WAYS = [
       <a class="b-cta sec" href="#how">See how it works</a>
     </div>
     <p class="b-body fine-hero">Coming soon · your originals are never touched</p>
-    <div class="b-win sp shot-ph big" role="img" aria-label="Space Pixl's Optimise view: screenshot coming with the app's new look">
-      <Mark kind="space" size={120} glow label="" />
-      <span class="b-micro">App screenshot coming with the new look</span>
-    </div>
+    <figure class="b-win sp shot hero-shot">
+      <img src={own('/shots/optimise.webp')} width="1600" height="1000" decoding="async" fetchpriority="high" alt="Space Pixl's Optimise view: a 34 MB camera RAW recommended for lossless DNG, with a split before-and-after preview showing 29.35 MB, 13.7% smaller and a bit-exact copy." />
+    </figure>
   </section>
 
   <section class="wrap" id="formats" aria-label="Formats">
@@ -75,10 +76,9 @@ const WAYS = [
         <p class="b-body">Open a photo or a folder and Space Pixl measures it first: what it is, how it was made, and what each target would save. It recommends one, and says plainly when a conversion isn't worth it.</p>
         <div class="b-rule sp"></div>
       </div>
-      <div class="b-win sp shot-ph" role="img" aria-label="Space Pixl's analysis: screenshot coming with the app's new look">
-        <Mark kind="space" size={72} label="" />
-        <span class="b-micro">Screenshot coming</span>
-      </div>
+      <figure class="b-win sp shot">
+        <img src={own('/shots/analysis.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The analysis of a camera RAW: its format, size and samples, how it was made (an undemosaiced sensor mosaic), and a luminance histogram with percentiles." />
+      </figure>
     </section>
 
     <section class="wrap feature flip" aria-labelledby="s2">
@@ -115,10 +115,9 @@ const WAYS = [
         <p class="b-body">Every finished conversion counts towards the space you've reclaimed, so you can see what the library gave back.</p>
         <div class="b-rule sp"></div>
       </div>
-      <div class="b-win sp shot-ph" role="img" aria-label="Space Pixl's Stats view: screenshot coming with the app's new look">
-        <Mark kind="space" size={72} label="" />
-        <span class="b-micro">Screenshot coming</span>
-      </div>
+      <figure class="b-win sp shot">
+        <img src={own('/shots/stats.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="Space Pixl's Stats: storage reclaimed across two conversions, the average reduction, what was saved without loss, and a 30-day chart." />
+      </figure>
     </section>
   </div>
 

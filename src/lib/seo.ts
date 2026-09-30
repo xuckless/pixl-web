@@ -6,11 +6,12 @@ import { canonical, origin } from './links'
 import { SITES, type SiteId } from './sites'
 
 /** The pages each site lists in its sitemap. Playroom's copies of the legal
-    pages point their canonical at the company site's, so only those are listed. */
+    pages point their canonical at the company site's, so only those are listed;
+    Space Pixl's are its own documents, so it lists them. */
 export const SITEMAP: Record<SiteId, string[]> = {
   home: ['/', '/account/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   playroom: ['/'],
-  space: ['/'],
+  space: ['/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   engine: ['/']
 }
 

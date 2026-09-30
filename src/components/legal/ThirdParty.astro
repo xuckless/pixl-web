@@ -1,18 +1,20 @@
 ---
 // The third-party notices page, on every site that carries the legal pages.
-// The full notices are generated in pixl-playroom (scripts/third-party-notices.mjs
-// --web ../pixl-web): the same file the app ships and opens from Settings.
+// The full notices are generated in each app's repo (scripts/third-party-notices.mjs
+// --web ../pixl-web): the same notices the app ships and shows in Settings.
 const playroom = '/shared/legal/playroom-third-party-notices.txt'
+const space = '/shared/legal/space-third-party-notices.txt'
 ---
 
 <p>
   Our apps are built on open-source libraries, and we're grateful to their authors. Each one is used under its own
   licence; the notices below list every component with its copyright and full licence text. The same notices ship
-  inside each app (in Pixl Playroom: <strong>Settings → Third-party notices</strong>, or <strong>Help → Third-Party Notices</strong>).
+  inside each app (in Pixl Playroom: <strong>Settings → Third-party notices</strong>; in Space Pixl: <strong>Settings → About &amp; legal</strong>; in both,
+  <strong>Help → Third-Party Notices</strong>).
 </p>
 <ul class="notice-list">
   <li><a href={playroom}>Pixl Playroom</a><span class="lic">includes PIXL Engine, ONNX Runtime, ExifTool, Electron</span></li>
-  <li><span>Space Pixl</span><span class="lic">coming with its first public release</span></li>
+  <li><a href={space}>Space Pixl</a><span class="lic">includes PIXL Engine, Electron</span></li>
 </ul>
 <h2>Source code for LGPL libraries</h2>
 <p>

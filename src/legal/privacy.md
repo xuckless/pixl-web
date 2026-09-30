@@ -4,7 +4,7 @@ summary: What PIXL Foundation's apps and websites collect, and why. Your photos 
 updated: 2026-09-29
 ---
 
-This policy covers [Company legal name] ("PIXL Foundation", "we", "us"), our apps (Pixl Playroom and Space Pixl) and our websites under pixlfoundation.com.
+This policy covers [Company legal name] ("PIXL Foundation", "we", "us"), our apps (Pixl Playroom and Space Pixl) and our websites under pixlfoundation.com. Space Pixl, which sends nothing but update checks, also has its own shorter policy at [space.pixlfoundation.com/legal/privacy](https://space.pixlfoundation.com/legal/privacy/).
 
 ## The short version
 

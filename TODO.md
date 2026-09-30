@@ -7,20 +7,16 @@ Grouped by area; roughly in priority order within each.
 - [ ] **Migrate Space Pixl onto the company site.** space.pixlfoundation.com is
       the product page now; everything else Space Pixl has in public still lives
       on its own:
-  - [ ] Its update feed and installers are served from the `shipment` R2
-        bucket's `r2.dev` URL, which is rate-limited and meant for development
-        (space-pixl `README.md`, `electron-builder.yml`, `dev-app-update.yml`).
-        Attach a pixlfoundation.com subdomain to the bucket (e.g.
-        `downloads.pixlfoundation.com`, as `media.` is attached to `pixl-media`)
-        and swap it into both files before a wide release.
+  - [x] Its update feed and installers moved from the R2 bucket to the
+        repository's GitHub Releases (space-pixl `electron-builder.yml`,
+        `dev-app-update.yml`), like Playroom's.
   - [ ] Download buttons on space.pixlfoundation.com pointing at those
         installers once a release is public.
-  - [ ] Restyle the Space Pixl app to Playroom's standards, then replace the
-        three screenshot placeholders on space.pixlfoundation.com (hero,
-        01 Analyse, 03 Stats: `.shot-ph` in `src/pages/space/index.astro`) with
-        real screenshots (Optimise, Stats). A shot script like pixl-playroom's
-        `scripts/site-tools.mjs` would keep them current.
-  - [ ] Its price and licensing, once decided.
+  - [x] Restyle the Space Pixl app to Playroom's standards and replace the
+        screenshot placeholders on space.pixlfoundation.com with real
+        screenshots (`public/space/shots/`, from space-pixl's `scripts/shots.mjs`).
+  - [ ] Its price and licensing, once decided (free for now; the EULA,
+        `src/legal/space-eula.md`, is a draft that says so).
 
 ## Content to check before launch
 
@@ -36,11 +32,15 @@ Grouped by area; roughly in priority order within each.
 - [x] Licence agreement, privacy policy and third-party notices at
       `pixlfoundation.com/legal/{eula,privacy,third-party}/` (`src/legal/*.md`,
       `src/layouts/Legal.astro`). The notices file comes from pixl-playroom:
-      `node scripts/third-party-notices.mjs --web ../pixl-web`.
+      `node scripts/third-party-notices.mjs --web ../pixl-web`. Space Pixl
+      has its own at `space.pixlfoundation.com/legal/…` (`src/legal/space-*.md`,
+      the same text the app ships in its `legal/`).
 - [ ] The licence agreement and privacy policy are drafts: fill in the
       [bracketed] parts and have a lawyer review them, then pass
-      `draft={false}` from those pages (`src/pages/home/legal/`).
-- [ ] Space Pixl's third-party notices, with its first public release.
+      `draft={false}` from those pages (`src/pages/home/legal/`, and
+      `src/pages/space/legal/` for Space Pixl's).
+- [x] Space Pixl's third-party notices: `public/shared/legal/space-third-party-notices.txt`,
+      from space-pixl's `node scripts/third-party-notices.mjs --web ../pixl-web`.
 
 ## Crash reports
 
