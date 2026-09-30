@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro'
 import { href } from '../../lib/links'
 ---
 
-<Base site="space" title="Not found" description="This page doesn't exist.">
+<Base site="space" title="Not found" description="This page doesn't exist." noindex>
   <Stub chip="404" title="Nothing here." lede="The page you asked for isn't on this site.">
     <div class="ctas"><a class="b-cta sp" href={href('space', '/', 'space')}>Back to the start</a></div>
   </Stub>

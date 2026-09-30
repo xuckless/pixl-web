@@ -14,6 +14,7 @@
     "@astrojs/check": "^0.9.10",
     "@cloudflare/workers-types": "^5.20260929.1",
     "astro": "^7.3.5",
+    "playwright-core": "1.63.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.144.0"
   }

@@ -55,6 +55,7 @@ const SHARED = [
   nav={[
     { label: 'Products', to: '#products' },
     { label: 'About', to: '#about' },
+    { label: 'Press', to: '#press' },
   ]}
   cta={{ label: 'Contact', to: '#contact' }}
 >
@@ -148,6 +149,20 @@ const SHARED = [
         <div><Mark kind="space" size={64} /><span class="b-micro">Space Pixl</span></div>
       </div>
     </div>
+  </section>
+
+  <!-- ── press ────────────────────────────────────────────────── -->
+  <section class="wrap band" id="press" aria-labelledby="press-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="press-title">Press</h2>
+      <p class="b-body">Logos in every tone as SVG and PNG, the colours, and how to use them. Built from the brand's own masters.</p>
+    </div>
+    <ul class="press">
+      <li><a href="/shared/press/foundation.zip" download><Bitmap cell={2} label="" /><span class="name">PIXL Foundation</span><span class="b-micro">Press kit ↓</span></a></li>
+      <li><a href="/shared/press/engine.zip" download><Mark kind="engine" size={40} detail="small" /><span class="name">PIXL Engine</span><span class="b-micro">Press kit ↓</span></a></li>
+      <li><a href="/shared/press/playroom.zip" download><Mark kind="playroom" size={40} detail="small" /><span class="name">Pixl Playroom</span><span class="b-micro">Press kit ↓</span></a></li>
+      <li><a href="/shared/press/space.zip" download><Mark kind="space" size={40} detail="small" /><span class="name">Space Pixl</span><span class="b-micro">Press kit ↓</span></a></li>
+    </ul>
   </section>
 
   <!-- ── contact ──────────────────────────────────────────────── -->

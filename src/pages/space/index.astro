@@ -8,6 +8,7 @@ import '../../styles/space.css'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { href } from '../../lib/links'
+import { softwareApp } from '../../lib/seo'
 
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Space%20Pixl%20launches'
 const icon = { mail: 'M4 6h16v12H4zM4 7l8 6 8-6' }
@@ -31,6 +32,13 @@ const WAYS = [
     { label: 'Engine', to: '#engine' },
   ]}
   cta={{ label: 'Get notified', to: '#get' }}
+  jsonLd={[
+    softwareApp('space', {
+      category: 'UtilitiesApplication',
+      os: 'macOS, Windows',
+      description: 'Space Pixl makes a photo library smaller: it measures every photo, recommends only conversions that save space, and writes the new file beside the original.'
+    })
+  ]}
 >
   <!-- ── hero ─────────────────────────────────────────────────── -->
   <section class="wrap hero" aria-labelledby="hero-title">

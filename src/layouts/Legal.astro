@@ -2,7 +2,8 @@
 // A legal page (pixlfoundation.com and playroom.pixlfoundation.com): a draft
 // notice, the title and date, and the text.
 import '../styles/legal.css'
-import { href } from '../lib/links'
+import { canonical, href } from '../lib/links'
+import { breadcrumbs } from '../lib/seo'
 import type { SiteId } from '../lib/sites'
 import Base from './Base.astro'
 
@@ -24,7 +25,16 @@ const nav = [
 ]
 ---
 
-<Base site={site} title={`${title} · ${site === 'playroom' ? 'Pixl Playroom' : 'PIXL Foundation'}`} description={summary} path={path} nav={nav} backdrop={false}>
+<Base
+  site={site}
+  title={`${title} · ${site === 'playroom' ? 'Pixl Playroom' : 'PIXL Foundation'}`}
+  description={summary}
+  path={path}
+  nav={nav}
+  backdrop={false}
+  canonicalUrl={canonical('home', path)}
+  jsonLd={[breadcrumbs('home', [{ name: 'PIXL Foundation', path: '/' }, { name: title, path }])]}
+>
   <article class="wrap legal">
     <header>
       <span class="b-micro">Legal</span>

@@ -5,8 +5,16 @@ import '../styles/sections.css'
 import Footer from '../components/Footer.astro'
 import Nav, { type NavLink } from '../components/Nav.astro'
 import { canonical, href } from '../lib/links'
-import { bitmapSvg, markSvg } from '../lib/marks'
+import { ldJson, organization, website } from '../lib/seo'
 import { SITES, type SiteId } from '../lib/sites'
+
+/** What each site is, for its WebSite entry. */
+const SITE_DESCRIPTION: Record<SiteId, string> = {
+  home: 'PIXL Foundation makes PIXL Engine and the photo apps that run on it.',
+  playroom: 'Pixl Playroom, a professional RAW photo editor you pay for once.',
+  space: 'Space Pixl, which makes a photo library smaller without touching the originals.',
+  engine: 'PIXL Engine, the Rust imaging core behind every PIXL app.'
+}
 
 interface Props {
   site: SiteId
@@ -16,24 +24,48 @@ interface Props {
   path?: string
   nav?: NavLink[]
   cta?: NavLink
-  /** An image under the site's own folder, e.g. '/og.png'. */
+  /** The link card: an image under the site's own folder. Every site has an /og.png. */
   ogImage?: string
   ogImageAlt?: string
   backdrop?: boolean
+  /** Keep the page out of search results (404s). */
+  noindex?: boolean
+  /** Point search engines at another copy of this page (Playroom's copies of the legal pages). */
+  canonicalUrl?: string
+  /** The largest image above the fold, fetched first. */
+  preload?: { href: string; as: 'image'; type?: string }[]
+  /** This page's own structured data, beside the site's WebSite (and, on the company site, Organization). */
+  jsonLd?: Record<string, unknown>[]
 }
 
-const { site, title, description, path = '/', nav = [], cta, ogImage, ogImageAlt, backdrop = true } = Astro.props
-const url = canonical(site, path)
+const OG_ALT: Record<SiteId, string> = {
+  home: 'PIXL Foundation: imaging software, from the pixel up. The PIXL word drawn in pixels, with the Playroom, Engine and Space Pixl marks.',
+  playroom: 'Pixl Playroom: Develop everything. Rent nothing. The Develop view editing a photo of rowan berries.',
+  engine: 'PIXL Engine: One engine. Every pixel. The engine mark, a sphere with its render ring.',
+  space: 'Space Pixl: More space. Same pixels. The Space Pixl mark, a sphere in orbit.'
+}
+
+const {
+  site,
+  title,
+  description,
+  path = '/',
+  nav = [],
+  cta,
+  ogImage = '/og.png',
+  ogImageAlt = OG_ALT[site],
+  backdrop = true,
+  noindex = false,
+  canonicalUrl,
+  preload = [],
+  jsonLd = []
+} = Astro.props
+const url = canonicalUrl ?? canonical(site, path)
 const siteName = SITES[site].name
 const own = (p: string) => href(site, p, site)
-// Playroom ships its own icon set. The others, until their icon files exist
-// (scripts/brand-assets.mts), draw theirs inline: the pixel P, or the small mark.
-const inlineIcon =
-  site === 'home'
-    ? bitmapSvg({ text: 'P', pad: 1, label: '' })
-    : markSvg({ kind: site === 'space' ? 'space' : 'engine', detail: 'small', id: 'fav', label: '' })
-const icon = site === 'playroom' ? own('/favicon.svg') : `data:image/svg+xml,${encodeURIComponent(inlineIcon)}`
-const image = ogImage ? canonical(site, ogImage) : undefined
+const image = canonical(site, ogImage)
+// Every page: the site itself; the company site also says who makes it all.
+const ld = [...(site === 'home' ? [organization()] : []), website(site, SITE_DESCRIPTION[site]), ...jsonLd]
 ---
 
 <!doctype html>
@@ -45,26 +77,37 @@ const image = ogImage ? canonical(site, ogImage) : undefined
     <meta name="description" content={description} />
     <meta name="theme-color" content="#000000" />
     <meta name="color-scheme" content="dark" />
-    <link rel="canonical" href={url} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
+    {!noindex && <link rel="canonical" href={url} />}
 
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:url" content={url} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {image && <meta property="og:image" content={image} />}
-    {image && ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
-    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    {image && <meta name="twitter:image" content={image} />}
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
-    {site === 'playroom' && <link rel="icon" href={own('/favicon.ico')} sizes="48x48" />}
-    <link rel="icon" href={icon} type="image/svg+xml" />
-    {site === 'playroom' && <link rel="apple-touch-icon" href={own('/apple-touch-icon.png')} />}
+    <link rel="icon" href={own('/favicon.ico')} sizes="48x48" />
+    <link rel="icon" href={own('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={own('/apple-touch-icon.png')} />
+    <link rel="manifest" href={own('/site.webmanifest')} />
+    <link rel="sitemap" type="application/xml" href={own('/sitemap.xml')} />
+
+    {preload.map((p) => <link rel="preload" href={p.href} as={p.as} type={p.type} fetchpriority="high" />)}
 
     <link rel="preload" href="/shared/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/shared/fonts/manrope.woff2" as="font" type="font/woff2" crossorigin />
+    {ld.map((d) => <script type="application/ld+json" set:html={ldJson(d)} />)}
   </head>
   <body data-site={site}>
     <a class="skip" href="#main">Skip to content</a>

@@ -7,6 +7,7 @@ import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { COST_3Y, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
 import { href, media } from '../../lib/links'
+import { faqPage, softwareApp } from '../../lib/seo'
 
 const own = (p: string) => href('playroom', p, 'playroom')
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
@@ -22,7 +23,16 @@ const icon = {
   site="playroom"
   title="Pixl Playroom · Develop everything. Rent nothing."
   description="A professional RAW photo editor for macOS and Windows. Masks, colour grading, AI super resolution and every tool you need, on your own folders. Pay once, keep it forever."
-  ogImage="/og.png"
+  preload={[{ href: own('/media/hero-poster.webp'), as: 'image', type: 'image/webp' }]}
+  jsonLd={[
+    softwareApp('playroom', {
+      category: 'MultimediaApplication',
+      os: 'macOS, Windows',
+      description: 'A professional RAW photo editor you pay for once: masks, colour grading, noise reduction and AI super resolution, on the folders you already have.',
+      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'Masks by brush, gradient, colour and luminance range', 'Layered colour grading', 'On-device AI Super Resolution', 'No import, no catalog: edits saved beside each photo', 'Metadata in standard XMP sidecars']
+    }),
+    faqPage(FAQ)
+  ]}
   ogImageAlt="Pixl Playroom: Develop everything. Rent nothing. The Develop view editing a photo of rowan berries."
   nav={[
     { label: 'Features', to: '#features' },

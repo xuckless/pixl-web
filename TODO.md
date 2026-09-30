@@ -76,7 +76,24 @@ Squeezy's licence API, not enforced). The website side is stubbed:
 - [ ] `CLOUDFLARE_API_TOKEN` repository secret, so pushes to `main` deploy
       (`.github/workflows/deploy.yml`).
 - [ ] An email sign-up to replace the `mailto:` "notify me" links.
-- [ ] Open Graph images for the company, Space Pixl and engine sites (only
-      Playroom has one).
+- [x] Brand files from the PIXL Family Kit: favicons, touch and PWA icons,
+      manifests, link cards and press kits (`node scripts/brand-assets.mts`,
+      from `src/lib/marks.ts`). Rerun after any change to the marks.
+
+## Search
+
+- [x] Per-host `robots.txt` and `sitemap.xml`, canonical links (Playroom's
+      legal copies point at the company site's), JSON-LD (Organization,
+      WebSite, SoftwareApplication, FAQPage, BreadcrumbList), `noindex` on
+      404s and on workers.dev/localhost, cache lifetimes in the Worker.
+- [ ] Verify all four hosts in Google Search Console and Bing Webmaster Tools
+      (DNS TXT records in Cloudflare, or one Domain property for
+      pixlfoundation.com in Search Console), then submit each
+      `https://<host>/sitemap.xml`.
+- [ ] Once Playroom is on sale, add `offers` (price US$69.99, availability
+      InStock) to its SoftwareApplication in `src/pages/playroom/index.astro`;
+      until then the page makes no offer claim.
+- [ ] Run Lighthouse (SEO and performance) on each live host after deploy;
+      local previews are `noindex` by design, so check the real domains.
 - [ ] Turn off `workers_dev` in `wrangler.jsonc` once nothing needs the
       workers.dev preview.
