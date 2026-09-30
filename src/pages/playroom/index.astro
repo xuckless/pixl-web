@@ -53,8 +53,9 @@ const icon = {
     </ul>
     <div class="b-win hero-win">
       <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
-        <source src={media('playroom/hero.webm')} type="video/webm" />
+        <!-- MP4 first: WebKit picks the WebM, reads its header and never plays a frame. -->
         <source src={media('playroom/hero.mp4')} type="video/mp4" />
+        <source src={media('playroom/hero.webm')} type="video/webm" />
       </video>
       <button class="vid-toggle" type="button" aria-pressed="false" hidden>
         <svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"></path></svg>
