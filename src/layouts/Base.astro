@@ -5,6 +5,7 @@ import '../styles/sections.css'
 import Footer from '../components/Footer.astro'
 import Nav, { type NavLink } from '../components/Nav.astro'
 import { canonical, href } from '../lib/links'
+import { bitmapSvg, markSvg } from '../lib/marks'
 import { SITES, type SiteId } from '../lib/sites'
 
 interface Props {
@@ -25,8 +26,13 @@ const { site, title, description, path = '/', nav = [], cta, ogImage, ogImageAlt
 const url = canonical(site, path)
 const siteName = SITES[site].name
 const own = (p: string) => href(site, p, site)
-// Playroom ships its own icon set; the others use their product mark.
-const icon = site === 'playroom' ? own('/favicon.svg') : `/shared/brand/${site === 'space' ? 'spacepixl' : 'engine'}-mark-glass.svg`
+// Playroom ships its own icon set. The others, until their icon files exist
+// (scripts/brand-assets.mts), draw theirs inline: the pixel P, or the small mark.
+const inlineIcon =
+  site === 'home'
+    ? bitmapSvg({ text: 'P', pad: 1, label: '' })
+    : markSvg({ kind: site === 'space' ? 'space' : 'engine', detail: 'small', id: 'fav', label: '' })
+const icon = site === 'playroom' ? own('/favicon.svg') : `data:image/svg+xml,${encodeURIComponent(inlineIcon)}`
 const image = ogImage ? canonical(site, ogImage) : undefined
 ---
 
@@ -66,9 +72,27 @@ const image = ogImage ? canonical(site, ogImage) : undefined
       backdrop && (
         <div class="backdrop" aria-hidden="true">
           <div class="ambient">
-            <span class="blob a" style="opacity: .42" />
-            <span class="blob b" style="opacity: .3" />
-            <span class="blob d" />
+            {site === 'home' && <div class="fo-grid" />}
+            {site === 'engine' && (
+              <>
+                <span class="b-glow" style="width: 1100px; height: 900px; left: 36%; top: -120px; background: radial-gradient(circle, rgba(106,77,255,.4), transparent 62%)" />
+                <span class="b-glow" style="width: 700px; height: 600px; left: 14%; top: 420px; background: radial-gradient(circle, rgba(168,139,255,.18), transparent 62%)" />
+              </>
+            )}
+            {site === 'space' && (
+              <>
+                <span class="b-glow" style="width: 900px; height: 700px; left: 8%; top: 40px; background: radial-gradient(circle, rgba(116,134,240,.4), transparent 62%)" />
+                <span class="b-glow" style="width: 760px; height: 640px; left: 48%; top: 260px; background: radial-gradient(circle, rgba(147,164,255,.24), transparent 62%)" />
+                <span class="b-glow" style="width: 520px; height: 460px; left: 30%; top: 700px; background: radial-gradient(circle, rgba(123,104,216,.18), transparent 62%)" />
+              </>
+            )}
+            {site === 'playroom' && (
+              <>
+                <span class="blob a" style="opacity: .42" />
+                <span class="blob b" style="opacity: .3" />
+                <span class="blob d" />
+              </>
+            )}
             <div class="fade" />
           </div>
         </div>

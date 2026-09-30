@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro'
 import '../../styles/space.css'
-import Mark from '../../components/Mark.astro'
+import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { href } from '../../lib/links'
 
@@ -32,7 +32,7 @@ const STEPS = [
   cta={{ label: 'Get notified', to: notify }}
 >
   <section class="wrap hero" aria-labelledby="hero-title">
-    <Mark site="space" size={120} class="hero-mark" />
+    <Mark kind="space" glow size={120} class="hero-mark" />
     <span class="b-chip">The photo storage optimiser · macOS &amp; Windows</span>
     <h1 class="b-disp" id="hero-title">Keep every photo.<br /><span class="accent">Lose the bulk.</span></h1>
     <p class="b-body lede">
@@ -40,7 +40,7 @@ const STEPS = [
       photo before recommending anything, shows you the real result first, and never touches an original.
     </p>
     <div class="ctas">
-      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
+      <a class="b-cta sp" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
       <a class="b-cta sec" href="#how">See how it works</a>
     </div>
     <ul class="proof b-body" aria-label="At a glance">
@@ -121,14 +121,14 @@ const STEPS = [
         <p class="b-body">Space Pixl's conversions run on PIXL Engine, which never guesses with your photos and reports exactly what it did to each one.</p>
         <span class="textlink b-body">Meet the engine</span>
       </div>
-      <Mark site="engine" size={220} class="engine-mark" />
+      <Mark kind="engine" glow size={220} class="engine-mark" />
     </a>
   </section>
 
   <section class="wrap closing" aria-labelledby="close-title">
     <h2 class="b-disp" id="close-title">Get your storage back.<br /><span class="accent">Keep every memory.</span></h2>
     <div class="ctas">
-      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
+      <a class="b-cta sp" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
       <a class="b-cta sec" href={href('playroom', '/', 'space')}>Meet Playroom</a>
     </div>
   </section>

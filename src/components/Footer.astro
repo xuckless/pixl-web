@@ -1,6 +1,9 @@
 ---
-import { href } from '../lib/links'
+// The footer every site shares, as the Family Kit draws it: the brand's rule,
+// its name and maker, then the links, then the site's own address.
+import { href, origin } from '../lib/links'
 import { LEGAL_SITES, type SiteId } from '../lib/sites'
+import Bitmap from './brand/Bitmap.astro'
 import Wordmark from './Wordmark.astro'
 
 interface Props {
@@ -11,14 +14,26 @@ const { site } = Astro.props
 const year = new Date().getFullYear()
 // This site's own legal pages, where it has them; else the company site's.
 const legal: SiteId = LEGAL_SITES.includes(site) ? site : 'home'
+const rule: Record<SiteId, string> = { home: 'fo', playroom: '', space: 'sp', engine: 'en' }
+const domain = origin(site).replace(/^https?:\/\//, '')
 ---
 
 <footer class="foot">
   <div class="wrap">
+    <div class:list={['b-rule', rule[site]]}></div>
     <div class="foot-grid">
       <div class="foot-about">
-        <a href={href('home', '/', site)}><Wordmark site="home" size={13} /></a>
-        <p class="b-body">Photo software you own, built on one colour-true imaging engine.</p>
+        <div class="foot-brand">
+          <a href={href(site, '/', site)} aria-label="Home"><Wordmark site={site} size={13} /></a>
+          {
+            site !== 'home' && (
+              <a class="maker b-body" href={href('home', '/', site)}>
+                A product of <Bitmap cell={2} label="PIXL Foundation" />
+              </a>
+            )
+          }
+        </div>
+        <p class="b-body">Imaging software, from the pixel up.</p>
       </div>
       <div>
         <h2 class="b-micro">Products</h2>
@@ -47,7 +62,7 @@ const legal: SiteId = LEGAL_SITES.includes(site) ? site : 'home'
     </div>
     <div class="foot-base b-body">
       <span>© {year} PIXL Foundation</span>
-      <span>Made with PIXL Engine</span>
+      <span class="b-mono">{domain}</span>
     </div>
   </div>
 </footer>

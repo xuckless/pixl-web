@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro'
 import '../../styles/engine.css'
-import Mark from '../../components/Mark.astro'
+import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { BINDINGS, FORMATS, FUNCTIONS, MEASURED, OPS, STATS } from '../../data/engine'
 import { href } from '../../lib/links'
@@ -23,7 +23,7 @@ const fig = (f: string) => `/shared/engine/${f}`
   cta={{ label: 'Get in touch', to: contact }}
 >
   <section class="wrap hero" aria-labelledby="hero-title">
-    <Mark site="engine" size={120} class="hero-mark" />
+    <Mark kind="engine" glow size={120} class="hero-mark" />
     <span class="b-chip">The imaging core behind every PIXL app</span>
     <h1 class="b-disp" id="hero-title">Rust underneath.<br /><span class="accent">Fast, and colour-true.</span></h1>
     <p class="b-body lede">
@@ -31,7 +31,7 @@ const fig = (f: string) => `/shared/engine/${f}`
       exactly as it is told. Then it hands you a receipt for what it did.
     </p>
     <div class="ctas">
-      <a class="b-cta pri" href="#does">See what it does</a>
+      <a class="b-cta en" href="#does">See what it does</a>
       <a class="b-cta sec" href={href('playroom', '/', 'engine')}>See it in Playroom</a>
     </div>
   </section>
@@ -206,13 +206,13 @@ const fig = (f: string) => `/shared/engine/${f}`
     </div>
     <div class="apps">
       <a class="app-card" href={href('playroom', '/', 'engine')}>
-        <Mark site="playroom" size={64} />
+        <Mark kind="playroom" glow size={64} />
         <Wordmark site="playroom" size={14} />
         <p class="b-body">A professional RAW editor you pay for once. Every pixel on screen is a real engine render.</p>
         <span class="textlink b-body">Visit Playroom</span>
       </a>
       <a class="app-card" href={href('space', '/', 'engine')}>
-        <Mark site="space" size={64} />
+        <Mark kind="space" glow size={64} />
         <Wordmark site="space" size={14} />
         <p class="b-body">Reclaims storage by re-encoding a photo library, with a real preview of every change.</p>
         <span class="textlink b-body">Visit Space Pixl</span>
@@ -224,7 +224,7 @@ const fig = (f: string) => `/shared/engine/${f}`
     <h2 class="b-disp" id="close-title">Building something<br /><span class="accent">that touches pixels?</span></h2>
     <p class="b-body closing-lede">PIXL Engine isn't publicly available yet. If you'd like to build on it, tell us what you're making.</p>
     <div class="ctas">
-      <a class="b-cta pri" href={contact}>Get in touch</a>
+      <a class="b-cta en" href={contact}>Get in touch</a>
       <a class="b-cta sec" href={href('home', '/', 'engine')}>About PIXL Foundation</a>
     </div>
   </section>

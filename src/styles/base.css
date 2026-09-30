@@ -38,8 +38,9 @@
   color-scheme: dark;
 }
 body[data-site='space'] { --accent: var(--sp); --accent-soft: #c3ccff; --blob-a: #4d63ff; --blob-b: #93a4ff; --blob-d: #7fd4ff; }
-body[data-site='engine'] { --accent: #b8b5c7; --accent-soft: #ebe9f3; --blob-a: #4a4466; --blob-b: #7b68d8; --blob-d: #93a4ff; }
-body[data-site='home'] { --accent: var(--pl); --blob-d: #93a4ff; }
+body[data-site='engine'] { --accent: #bba9ff; --accent-soft: #e6dfff; }
+/* Foundation is white, nothing else */
+body[data-site='home'] { --accent: #ebe9f3; --accent-soft: #ffffff; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--bg); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -80,7 +81,7 @@ h1, h2, h3, p { margin: 0; }
 /* ── nav ─────────────────────────────────────────────────────── */
 .nav { position: relative; z-index: 10; height: 88px; display: flex; align-items: center; gap: 40px; }
 .brand { display: flex; align-items: center; gap: 14px; }
-.brand img { width: 36px; height: 36px; flex: none; }
+.brand svg { flex: none; }
 .nav .grow { flex-grow: 1; }
 .nav-links { display: flex; align-items: center; gap: 36px; margin: 0; padding: 0; list-style: none; }
 .nav-links a { font-size: 15px; color: var(--ink-2); }
@@ -108,14 +109,18 @@ h1, h2, h3, p { margin: 0; }
 .stub p { font-size: clamp(17px, 1.4vw, 20px); color: var(--ink-2); max-width: 680px; }
 
 /* ── footer ─────────────────────────────────────────────────── */
-.foot { border-top: 1px solid var(--line); margin-top: 80px; padding: 56px 0 48px; }
-.foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 40px; }
+.foot { margin-top: 120px; padding: 0 0 48px; }
+.foot-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 40px; padding-top: 48px; }
+.foot-brand { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+.foot-brand .maker { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-4); }
+.foot-brand .maker:hover { color: var(--ink-2); }
 .foot-grid h2 { font-size: 12px; margin-bottom: 16px; }
 .foot-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .foot-grid a { font-size: 15px; color: var(--ink-2); }
 .foot-grid a:hover { color: #fff; }
 .foot-about p { font-size: 14px; color: var(--ink-3); margin-top: 16px; max-width: 320px; }
 .foot-base { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; font-size: 13px; color: var(--ink-4); }
+.foot-base .b-mono { color: #6d6985; }
 
 @media (max-width: 1100px) {
   :root { --gutter: 40px; }

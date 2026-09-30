@@ -1,0 +1,22 @@
+---
+// A PIXL product mark, drawn inline from the Family Kit's geometry (src/lib/marks.ts).
+import { markSvg, type MarkDetail, type MarkKind, type MarkTone } from '../../lib/marks'
+
+interface Props {
+  kind: MarkKind
+  size?: number
+  tone?: MarkTone
+  detail?: MarkDetail
+  glow?: boolean
+  pixels?: boolean
+  drift?: boolean
+  /** Accessible name; '' makes it decorative (the default beside a wordmark). */
+  label?: string
+  class?: string
+}
+
+const { class: cls, label = '', ...opts } = Astro.props
+const svg = markSvg({ ...opts, label, class: cls })
+---
+
+<Fragment set:html={svg} />

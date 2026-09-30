@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro'
 import '../../styles/home.css'
-import Mark from '../../components/Mark.astro'
+import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { PRICE } from '../../data/playroom'
 import { href } from '../../lib/links'
@@ -53,7 +53,7 @@ const PRODUCTS: { site: SiteId; status: string; tagline: string; text: string; c
       know what was done to a photo.
     </p>
     <div class="ctas">
-      <a class="b-cta pri" href="#products">See the products</a>
+      <a class="b-cta fo" href="#products">See the products</a>
       <a class="b-cta sec" href={href('playroom', '/', 'home')}>Meet Playroom</a>
     </div>
   </section>
@@ -66,7 +66,7 @@ const PRODUCTS: { site: SiteId; status: string; tagline: string; text: string; c
         PRODUCTS.map((p) => (
           <a class:list={['product', p.site]} href={href(p.site, '/', 'home')}>
             <div class="product-top">
-              <Mark site={p.site} size={72} />
+              <Mark kind={p.site as 'playroom' | 'engine' | 'space'} size={72} glow />
               <span class="b-chip">{p.status}</span>
             </div>
             <Wordmark site={p.site} size={14} />
@@ -93,11 +93,11 @@ const PRODUCTS: { site: SiteId; status: string; tagline: string; text: string; c
       </div>
       <div class="stack" aria-hidden="true">
         <div class="stack-apps">
-          <div class="stack-app"><Mark site="playroom" size={44} /><Wordmark site="playroom" size={11} /></div>
-          <div class="stack-app sp"><Mark site="space" size={44} /><Wordmark site="space" size={11} /></div>
+          <div class="stack-app"><Mark kind="playroom" glow size={44} /><Wordmark site="playroom" size={11} /></div>
+          <div class="stack-app sp"><Mark kind="space" glow size={44} /><Wordmark site="space" size={11} /></div>
           <div class="stack-app next"><span class="b-micro">Next</span></div>
         </div>
-        <div class="stack-engine"><Mark site="engine" size={56} /><Wordmark site="engine" size={12} /></div>
+        <div class="stack-engine"><Mark kind="engine" glow size={56} /><Wordmark site="engine" size={12} /></div>
       </div>
     </div>
   </section>
@@ -136,7 +136,7 @@ const PRODUCTS: { site: SiteId; status: string; tagline: string; text: string; c
     <h2 class="b-disp" id="close-title">Say hello.</h2>
     <p class="b-body closing-lede">Questions, partnerships, or just want to know when something launches? We read everything.</p>
     <div class="ctas">
-      <a class="b-cta pri" href={contact}>hello@pixlfoundation.com</a>
+      <a class="b-cta fo" href={contact}>hello@pixlfoundation.com</a>
       <a class="b-cta sec" href="https://github.com/xuckless">GitHub</a>
     </div>
   </section>
