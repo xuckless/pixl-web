@@ -120,7 +120,7 @@ h1, h2, h3, p { margin: 0; }
 .foot-grid a:hover { color: #fff; }
 .foot-about p { font-size: 14px; color: var(--ink-3); margin-top: 16px; max-width: 320px; }
 .foot-base { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; font-size: 13px; color: var(--ink-4); }
-.foot-base .b-mono { color: #6d6985; }
+.foot-base .b-mono { color: var(--ink-3); }
 
 @media (max-width: 1100px) {
   :root { --gutter: 40px; }
