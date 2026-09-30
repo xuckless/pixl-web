@@ -35,7 +35,7 @@ Your photos, edits and everything you make with the Software are yours. We claim
 
 ## 6. Third-party software
 
-The Software includes open-source components, each under its own licence. Those licences are listed, with their full texts, in the Third-party notices that come with the Software and at [pixlfoundation.com/legal/third-party](/legal/third-party/). Where a third-party licence gives you rights this Agreement would otherwise limit (for example, the GNU LGPL's rights to replace a library and to reverse engineer in order to debug such changes), that licence prevails for that component.
+The Software includes open-source components, each under its own licence. Those licences are listed, with their full texts, in the Third-party notices that come with the Software and on our [Third-party notices](/legal/third-party/) page. Where a third-party licence gives you rights this Agreement would otherwise limit (for example, the GNU LGPL's rights to replace a library and to reverse engineer in order to debug such changes), that licence prevails for that component.
 
 ## 7. Optional online services
 

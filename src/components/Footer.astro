@@ -1,6 +1,6 @@
 ---
 import { href } from '../lib/links'
-import type { SiteId } from '../lib/sites'
+import { LEGAL_SITES, type SiteId } from '../lib/sites'
 import Wordmark from './Wordmark.astro'
 
 interface Props {
@@ -9,6 +9,8 @@ interface Props {
 
 const { site } = Astro.props
 const year = new Date().getFullYear()
+// This site's own legal pages, where it has them; else the company site's.
+const legal: SiteId = LEGAL_SITES.includes(site) ? site : 'home'
 ---
 
 <footer class="foot">
@@ -37,9 +39,9 @@ const year = new Date().getFullYear()
       <div>
         <h2 class="b-micro">Legal</h2>
         <ul class="b-body">
-          <li><a href={href('home', '/legal/eula/', site)}>Licence agreement</a></li>
-          <li><a href={href('home', '/legal/privacy/', site)}>Privacy</a></li>
-          <li><a href={href('home', '/legal/third-party/', site)}>Third-party notices</a></li>
+          <li><a href={href(legal, '/legal/eula/', site)}>Licence agreement</a></li>
+          <li><a href={href(legal, '/legal/privacy/', site)}>Privacy</a></li>
+          <li><a href={href(legal, '/legal/third-party/', site)}>Third-party notices</a></li>
         </ul>
       </div>
     </div>

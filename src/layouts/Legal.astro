@@ -1,10 +1,13 @@
 ---
-// A legal page on pixlfoundation.com: a draft notice, the title and date, and the text.
+// A legal page (pixlfoundation.com and playroom.pixlfoundation.com): a draft
+// notice, the title and date, and the text.
 import '../styles/legal.css'
 import { href } from '../lib/links'
+import type { SiteId } from '../lib/sites'
 import Base from './Base.astro'
 
 interface Props {
+  site?: SiteId
   title: string
   summary: string
   updated?: string
@@ -13,15 +16,15 @@ interface Props {
   draft?: boolean
 }
 
-const { title, summary, updated, path, draft = true } = Astro.props
+const { site = 'home', title, summary, updated, path, draft = true } = Astro.props
 const nav = [
-  { label: 'Licence agreement', to: href('home', '/legal/eula/', 'home') },
-  { label: 'Privacy', to: href('home', '/legal/privacy/', 'home') },
-  { label: 'Third-party notices', to: href('home', '/legal/third-party/', 'home') },
+  { label: 'Licence agreement', to: href(site, '/legal/eula/', site) },
+  { label: 'Privacy', to: href(site, '/legal/privacy/', site) },
+  { label: 'Third-party notices', to: href(site, '/legal/third-party/', site) },
 ]
 ---
 
-<Base site="home" title={`${title} · PIXL Foundation`} description={summary} path={path} nav={nav} backdrop={false}>
+<Base site={site} title={`${title} · ${site === 'playroom' ? 'Pixl Playroom' : 'PIXL Foundation'}`} description={summary} path={path} nav={nav} backdrop={false}>
   <article class="wrap legal">
     <header>
       <span class="b-micro">Legal</span>

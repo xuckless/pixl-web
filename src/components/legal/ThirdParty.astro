@@ -1,0 +1,23 @@
+---
+// The third-party notices page, on every site that carries the legal pages.
+// The full notices are generated in pixl-playroom (scripts/third-party-notices.mjs
+// --web ../pixl-web): the same file the app ships and opens from Settings.
+const playroom = '/shared/legal/playroom-third-party-notices.txt'
+---
+
+<p>
+  Our apps are built on open-source libraries, and we're grateful to their authors. Each one is used under its own
+  licence; the notices below list every component with its copyright and full licence text. The same notices ship
+  inside each app (in Pixl Playroom: <strong>Settings → Third-party notices</strong>, or <strong>Help → Third-Party Notices</strong>).
+</p>
+<ul class="notice-list">
+  <li><a href={playroom}>Pixl Playroom</a><span class="lic">includes PIXL Engine, ONNX Runtime, ExifTool, Electron</span></li>
+  <li><span>Space Pixl</span><span class="lic">coming with its first public release</span></li>
+</ul>
+<h2>Source code for LGPL libraries</h2>
+<p>
+  Some components, such as libheif and libde265, are licensed under the GNU Lesser General Public License. They ship
+  as separate shared libraries inside the app, which you may replace with your own builds. Their source code is linked
+  from the notices, and we'll also send it on request, for three years after you receive the app, to anyone who writes
+  to <a href="mailto:hello@pixlfoundation.com">hello@pixlfoundation.com</a>.
+</p>
