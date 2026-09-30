@@ -1,4 +1,4 @@
-import { ROOT_DOMAIN, SITES, type SiteId } from './sites'
+import { MEDIA_ORIGIN, ROOT_DOMAIN, SITES, type SiteId } from './sites'
 
 // In `astro dev` there is no Worker, so every site is reached through its folder
 // (/playroom/…). A build is served by the Worker, which maps each subdomain to its
@@ -25,4 +25,9 @@ export function href(site: SiteId, path = '/', from?: SiteId): string {
 /** The public URL of a page, for canonical and Open Graph tags. */
 export function canonical(site: SiteId, path = '/'): string {
   return `${origin(site)}${path}`
+}
+
+/** A file in the media bucket, e.g. media('playroom/hero.mp4'). The same URL in dev and in a build. */
+export function media(path: string): string {
+  return `${MEDIA_ORIGIN}/${path.replace(/^\//, '')}`
 }

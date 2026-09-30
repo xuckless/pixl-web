@@ -6,7 +6,7 @@ import Mark from '../../components/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { COST_3Y, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
 import Base from '../../layouts/Base.astro'
-import { href } from '../../lib/links'
+import { href, media } from '../../lib/links'
 
 const own = (p: string) => href('playroom', p, 'playroom')
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
@@ -53,8 +53,8 @@ const icon = {
     </ul>
     <div class="b-win hero-win">
       <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
-        <source src={own('/media/hero.webm')} type="video/webm" />
-        <source src={own('/media/hero.mp4')} type="video/mp4" />
+        <source src={media('playroom/hero.webm')} type="video/webm" />
+        <source src={media('playroom/hero.mp4')} type="video/mp4" />
       </video>
       <button class="vid-toggle" type="button" aria-pressed="false" hidden>
         <svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"></path></svg>

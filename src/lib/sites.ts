@@ -21,6 +21,9 @@ export const SITES: Record<SiteId, Site> = {
 
 export const ROOT_DOMAIN = 'pixlfoundation.com'
 
+/** The pixl-media R2 bucket (video, anything that needs Range requests). See scripts/push-media.sh. */
+export const MEDIA_ORIGIN = 'https://media.pixlfoundation.com'
+
 /** Paths served as-is on every host: build output and assets the sites share. */
 export const SHARED_PREFIXES = ['/_astro/', '/shared/', '/robots.txt']
 

@@ -21,6 +21,8 @@ src/components/         Nav, Footer, Wordmark, Mark, Stub
 src/styles/             brand.css (the PIXL brand kit) and base.css (tokens, reset, nav, footer)
 public/shared/          fonts and brand marks, served on every host at /shared/
 public/<site>/          files for one site only, e.g. public/playroom/favicon.svg → playroom…/favicon.svg
+media/                  video, served from the pixl-media R2 bucket at media.pixlfoundation.com
+                        (scripts/push-media.sh uploads it; static assets can't serve Range requests)
 worker/index.ts         picks the site folder from the Host header; /api/* is stubbed (501)
 wrangler.jsonc          the Worker, its static assets and its custom domains
 ```
