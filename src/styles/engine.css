@@ -1,21 +1,38 @@
-/* engine.pixlfoundation.com: what only the engine page has. */
+/* engine.pixlfoundation.com, after the Family Kit's EnWebsite board. */
 
-.hero-mark { filter: drop-shadow(0 0 18px rgba(157, 139, 234, .5)); }
+.head-stack { display: flex; flex-direction: column; gap: 18px; }
+.head-stack .b-micro, .copy .b-micro { color: #bba9ff; }
+
+/* ── hero ───────────────────────────────────────────────────── */
+.en-hero { display: grid; grid-template-columns: minmax(0, 1fr) 560px; gap: 40px; align-items: center; padding-top: 70px; }
+.en-hero-copy { display: flex; flex-direction: column; gap: 30px; }
+.en-hero-copy .b-chip { align-self: flex-start; }
+.en-hero h1 { font-size: clamp(56px, 7.8vw, 112px); }
+.en-hero .lede { font-size: clamp(17px, 1.46vw, 21px); color: var(--ink-2); max-width: 640px; }
+.en-hero .ctas { justify-content: flex-start; }
+.en-hero-mark { display: grid; place-items: center; height: 620px; }
+.en-hero-mark svg { width: 100%; max-width: 540px; height: auto; }
+
+/* ── numbers ────────────────────────────────────────────────── */
+.en-stats { margin: 80px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.en-stats li { background: #050507; padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; }
+.en-stats .b-mono { font-size: clamp(30px, 2.6vw, 38px); color: #fff; }
+.en-stats .b-body { font-size: 14px; color: var(--ink-3); }
+
+/* ── pillars ────────────────────────────────────────────────── */
+.pillars { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; }
+.pillars li { display: flex; flex-direction: column; gap: 14px; }
+.pillars .b-rule { width: 120px; }
+.pillars h3 { font-size: 28px; }
+.pillars p { font-size: 17px; color: var(--ink-2); }
 
 /* ── principle + receipt ────────────────────────────────────── */
 .principle-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 72px; align-items: center; }
-.receipt {
-  margin: 0; padding: 28px 30px; display: flex; flex-direction: column; gap: 18px;
-  border: 1px solid var(--line); background: #07060c;
-  box-shadow: 0 30px 120px -50px rgba(157, 139, 234, .5);
-}
+.receipt { margin: 0; padding: 28px 30px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--line); background: #07060c; box-shadow: 0 30px 120px -50px rgba(157, 139, 234, .5); }
 .receipt pre { margin: 0; font-size: 14px; line-height: 1.7; color: var(--ink-2); white-space: pre-wrap; }
-.receipt .k { color: var(--pl); }
+.receipt .k { color: #bba9ff; }
 .refusal { margin: 0; padding-top: 16px; border-top: 1px dashed rgba(255, 255, 255, .12); font-size: 13px; line-height: 1.6; color: var(--ink-3); }
 .refusal .k { color: #e8a0a0; margin-right: 6px; }
-
-/* ── four functions ─────────────────────────────────────────── */
-.fn { font-size: 14px; color: var(--pl); }
 
 /* ── capabilities ───────────────────────────────────────────── */
 .caps { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 72px; }
@@ -36,32 +53,68 @@
 .measured tbody th { color: var(--ink); }
 .measured td { color: var(--ink-2); text-align: right; white-space: nowrap; }
 .measured thead th:not(:first-child) { text-align: right; }
-.measured td:last-child { color: var(--pl); }
+.measured td:last-child { color: #bba9ff; }
 
 /* ── apps ───────────────────────────────────────────────────── */
 .apps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .app-card {
-  display: flex; flex-direction: column; gap: 18px; padding: 40px;
-  border: 1px solid var(--line); background: radial-gradient(90% 90% at 0% 0%, rgba(157, 139, 234, .1), #050507 60%);
+  position: relative; overflow: hidden; padding: 40px; display: flex; align-items: center; gap: 36px;
+  border: 1px solid rgba(157, 139, 234, .35); background: radial-gradient(90% 120% at 90% 10%, #1a1433, #050507 60%);
   transition: border-color .2s var(--b-ease), transform .2s var(--b-ease);
 }
-.app-card:hover { border-color: rgba(157, 139, 234, .45); transform: translateY(-2px); }
+.app-card.sp { border-color: rgba(147, 164, 255, .35); background: radial-gradient(90% 120% at 90% 10%, #121935, #050507 60%); }
+.app-card:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, .35); }
+.app-card svg { flex: none; }
+.app-card > div { display: flex; flex-direction: column; gap: 14px; }
 .app-card p { font-size: 16px; color: var(--ink-2); }
-.app-card .textlink { align-self: flex-start; }
+.app-card .b-mono { font-size: 13px; color: var(--ink-3); }
 
-.closing-lede { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+/* ── badge ──────────────────────────────────────────────────── */
+.badge-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+.badges { height: 320px; border: 1px solid var(--line); background: #050507; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; }
+.badge { display: inline-flex; align-items: center; border: 1px solid rgba(255, 255, 255, .18); border-radius: 2px; }
+.badge.big { gap: 18px; padding: 16px 26px 16px 18px; background: linear-gradient(160deg, rgba(157, 139, 234, .12), rgba(0, 0, 0, .2)); }
+.badge.big > div { display: flex; flex-direction: column; gap: 8px; }
+.badge.big .b-micro { font-size: 10px; color: var(--ink-3); }
+.badge.big .b-wm { font-size: 18px; }
+.badge.small { gap: 10px; padding: 8px 14px 8px 10px; border-color: rgba(255, 255, 255, .16); }
+.badge.small .b-wm { font-size: 11px; }
+
+/* ── who it's for ───────────────────────────────────────────── */
+.cards > li { min-height: 240px; }
+.cards .go { color: #e6dfff; margin-top: auto; }
+.cards .go:hover { color: #fff; }
+
+/* ── licensing ──────────────────────────────────────────────── */
+.licensing {
+  margin-top: 150px; padding: 72px; display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  border: 1px solid rgba(255, 255, 255, .1); background: radial-gradient(80% 140% at 85% 50%, #17122b, #050507 60%);
+}
+.licensing h2 { font-size: clamp(36px, 3.6vw, 52px); }
+.licensing p { margin-top: 18px; font-size: 18px; color: var(--ink-2); }
+.licensing .b-cta { flex: none; }
 
 @media (max-width: 1100px) {
-  .principle-grid, .caps { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .en-hero { grid-template-columns: minmax(0, 1fr); padding-top: 40px; }
+  .en-hero-mark { order: -1; height: auto; justify-items: start; }
+  .en-hero-mark svg { max-width: 320px; }
+  .en-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pillars, .principle-grid, .caps, .badge-sec { grid-template-columns: minmax(0, 1fr); gap: 40px; }
   .apps { grid-template-columns: minmax(0, 1fr); }
+  .licensing { margin-top: 120px; }
 }
 
 @media (max-width: 760px) {
+  .en-hero-mark svg { max-width: 220px; }
+  .en-stats { margin-top: 48px; }
+  .en-stats li { padding: 22px 18px; }
   .receipt { padding: 22px 18px; }
   .receipt pre { font-size: 12px; }
   .fmt-list li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .measured { font-size: 14px; }
   .measured th, .measured td { padding: 12px 6px; }
   .measured thead th:nth-child(2), .measured td:nth-of-type(1) { display: none; }
-  .app-card { padding: 28px 22px; }
+  .app-card { padding: 28px 22px; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .app-card svg { width: 96px; height: 96px; }
+  .licensing { margin-top: 96px; padding: 36px 22px; flex-direction: column; align-items: flex-start; }
 }

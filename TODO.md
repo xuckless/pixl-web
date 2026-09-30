@@ -15,9 +15,11 @@ Grouped by area; roughly in priority order within each.
         and swap it into both files before a wide release.
   - [ ] Download buttons on space.pixlfoundation.com pointing at those
         installers once a release is public.
-  - [ ] Real screenshots of the app (Optimise, the preview, Stats). The page
-        uses the engine's size chart until then; a shot script like
-        pixl-playroom's `scripts/site-tools.mjs` would keep them current.
+  - [ ] Restyle the Space Pixl app to Playroom's standards, then replace the
+        three screenshot placeholders on space.pixlfoundation.com (hero,
+        01 Analyse, 03 Stats: `.shot-ph` in `src/pages/space/index.astro`) with
+        real screenshots (Optimise, Stats). A shot script like pixl-playroom's
+        `scripts/site-tools.mjs` would keep them current.
   - [ ] Its price and licensing, once decided.
 
 ## Content to check before launch

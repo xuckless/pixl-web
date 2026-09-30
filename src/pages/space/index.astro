@@ -1,132 +1,161 @@
 ---
+// space.pixlfoundation.com, after the Family Kit's SpWebsite board. The app is
+// being restyled to Playroom's standards, so its screenshots are placeholders
+// until then (TODO.md). Figures are the engine's measurements (pixl-engine
+// README), which Space Pixl's recommender uses.
 import Base from '../../layouts/Base.astro'
 import '../../styles/space.css'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { href } from '../../lib/links'
 
-// Savings are the engine's measurements, as Space Pixl's recommender uses them
-// (space-pixl README, "How a conversion happens").
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Space%20Pixl%20launches'
-const icon = {
-  check: 'M5 12.5l4.5 4.5L19 7.5',
-  mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
-}
-const STEPS = [
-  { n: '01', title: 'Analyse', text: 'Space Pixl reads each photo: its format, how it was encoded and what its pixels look like.' },
-  { n: '02', title: 'Recommend', text: 'It ranks the conversions worth making for that photo, with the saving you can expect, and says when one isn\'t worth it.' },
-  { n: '03', title: 'Preview', text: 'Every setting you change runs the real encode. The size you see is the real file\'s size, and the picture is its real pixels.' },
-  { n: '04', title: 'Convert', text: 'The new file is written beside the original. Nothing is overwritten, and you decide when the originals go.' },
+const icon = { mail: 'M4 6h16v12H4zM4 7l8 6 8-6' }
+const READS = ['Camera RAW', 'DNG', 'JPEG', 'HEIC', 'PNG', 'WebP', 'JPEG XL']
+const WRITES = ['JPEG XL', 'AVIF', 'WebP', 'DNG', 'JPEG']
+const WAYS = [
+  { name: 'JPEG → JPEG XL', tag: 'Lossless', ok: true, figure: 'saves 19%', text: 'Repacked without decoding a pixel, and reversible: the original JPEG can be rebuilt byte for byte.' },
+  { name: 'RAW → DNG', tag: 'Lossless', ok: true, figure: 'saves 14%', text: 'Every sensor value kept bit for bit, with the camera’s own metadata written across.' },
+  { name: 'JPEG → AVIF', tag: 'Compact', ok: false, figure: 'saves 68%', text: 'The biggest saving when a close visual match is enough. You see the result before you commit.' },
+  { name: 'JPEG → HEIC', tag: 'The trap', ok: false, warn: true, figure: '20% bigger', text: 'Newer isn’t always smaller. Space Pixl measures first, so it never recommends a conversion that grows your library.' }
 ]
 ---
 
 <Base
   site="space"
-  title="Space Pixl · Keep every photo. Lose the bulk."
-  description="Space Pixl reclaims storage by re-encoding your photo library into modern formats. It previews every change for real and never overwrites an original."
+  title="Space Pixl · More space. Same pixels."
+  description="Space Pixl makes a photo library smaller. It measures every photo, recommends only conversions that save space, previews the real result, and writes the new file beside the original, never over it."
   nav={[
-    { label: 'Why', to: '#why' },
     { label: 'How it works', to: '#how' },
-    { label: 'Features', to: '#features' },
+    { label: 'Formats', to: '#formats' },
+    { label: 'Engine', to: '#engine' },
   ]}
-  cta={{ label: 'Get notified', to: notify }}
+  cta={{ label: 'Get notified', to: '#get' }}
 >
+  <!-- ── hero ─────────────────────────────────────────────────── -->
   <section class="wrap hero" aria-labelledby="hero-title">
-    <Mark kind="space" glow size={120} class="hero-mark" />
-    <span class="b-chip">The photo storage optimiser · macOS &amp; Windows</span>
-    <h1 class="b-disp" id="hero-title">Keep every photo.<br /><span class="accent">Lose the bulk.</span></h1>
+    <span class="b-chip sp">Photo library optimiser for macOS and Windows</span>
+    <h1 class="b-disp" id="hero-title">More space.<br /><span class="accent">Same pixels.</span></h1>
     <p class="b-body lede">
-      Space Pixl re-encodes your photo library into modern formats that take a fraction of the space. It measures every
-      photo before recommending anything, shows you the real result first, and never touches an original.
+      Space Pixl looks at every photo in a folder, tells you whether converting it is worth it, and writes the smaller
+      file beside the original. Lossless when you want every bit back, compact when you don't.
     </p>
     <div class="ctas">
       <a class="b-cta sp" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
       <a class="b-cta sec" href="#how">See how it works</a>
     </div>
-    <ul class="proof b-body" aria-label="At a glance">
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Originals never overwritten</li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Real previews, real file sizes</li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Runs on your own computer</li>
-    </ul>
-  </section>
-
-  <section class="wrap" aria-label="Typical savings">
-    <ul class="stats three">
-      <li><span class="b-disp">−68%</span><span class="b-body">a JPEG re-encoded as AVIF</span></li>
-      <li><span class="b-disp">−19%</span><span class="b-body">a JPEG repacked as JPEG XL, reversible to the original byte</span></li>
-      <li><span class="b-disp">−14%</span><span class="b-body">a camera RAW archived as lossless DNG</span></li>
-    </ul>
-  </section>
-
-  <!-- ── why ──────────────────────────────────────────────────── -->
-  <section class="wrap feature" id="why" aria-labelledby="why-title">
-    <div class="copy">
-      <span class="b-micro">Why it measures</span>
-      <h2 class="b-disp h2" id="why-title">Newer isn't always smaller.</h2>
-      <p class="b-body">
-        The same 8 MB photo is 68% smaller as AVIF and 20% bigger as HEIC. An optimiser that assumes the newest format
-        wins will grow your library. Space Pixl checks each photo and only recommends what actually saves space.
-      </p>
-      <div class="b-rule sp"></div>
+    <p class="b-body fine-hero">Coming soon · your originals are never touched</p>
+    <div class="b-win sp shot-ph big" role="img" aria-label="Space Pixl's Optimise view: screenshot coming with the app's new look">
+      <Mark kind="space" size={120} glow label="" />
+      <span class="b-micro">App screenshot coming with the new look</span>
     </div>
-    <figure class="figure chart"><img src="/shared/engine/sizes.svg" width="900" height="452" loading="lazy" decoding="async" alt="One 8.04 MB JPEG re-encoded eight ways: AVIF 2.58 MB, WebP 3.26 MB, JPEG XL 5.53 MB, JPEG XL repack 6.55 MB, HEIC 9.66 MB, JPEG XL lossless 22.93 MB, PNG 38.70 MB, TIFF 56.06 MB." /></figure>
   </section>
 
-  <!-- ── how ──────────────────────────────────────────────────── -->
-  <section class="wrap band" id="how" aria-labelledby="how-title">
+  <section class="wrap" id="formats" aria-label="Formats">
+    <div class="formats">
+      <div><span class="b-micro">Reads</span><ul>{READS.map((f) => <li>{f}</li>)}</ul></div>
+      <div class="writes"><span class="b-micro">Writes</span><ul>{WRITES.map((f) => <li>{f}</li>)}</ul></div>
+    </div>
+  </section>
+
+  <!-- ── how it works ─────────────────────────────────────────── -->
+  <div id="how">
+    <section class="wrap feature" aria-labelledby="s1">
+      <div class="copy">
+        <span class="b-micro">01 · Analyse</span>
+        <h2 class="b-disp h2" id="s1">Every file gets a verdict.</h2>
+        <p class="b-body">Open a photo or a folder and Space Pixl measures it first: what it is, how it was made, and what each target would save. It recommends one, and says plainly when a conversion isn't worth it.</p>
+        <div class="b-rule sp"></div>
+      </div>
+      <div class="b-win sp shot-ph" role="img" aria-label="Space Pixl's analysis: screenshot coming with the app's new look">
+        <Mark kind="space" size={72} label="" />
+        <span class="b-micro">Screenshot coming</span>
+      </div>
+    </section>
+
+    <section class="wrap feature flip" aria-labelledby="s2">
+      <div class="copy">
+        <span class="b-micro">02 · Convert</span>
+        <h2 class="b-disp h2" id="s2">Beside the original, never over it.</h2>
+        <p class="b-body">The new file lands next to the old one with the same name. Nothing is moved, replaced or deleted for you. Every setting you change runs the real encode first, so the size you see is the size you get.</p>
+        <div class="b-rule sp"></div>
+      </div>
+      <div class="files" role="img" aria-label="A folder showing IMG_0042.CR2 at 35.67 MB, untouched, and beside it the new IMG_0042.dng at 30.77 MB, lossless.">
+        <div class="files-path b-mono">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"></path></svg>
+          ~/Pictures/Lakeshore
+        </div>
+        <div class="file">
+          <span class="b-mono">IMG_0042.CR2</span><span class="b-mono size">35.67 MB</span><span class="pill">original · untouched</span>
+        </div>
+        <div class="file new">
+          <span class="b-mono">IMG_0042.dng</span><span class="b-mono size ok">30.77 MB</span><span class="pill ok">new · lossless</span>
+        </div>
+        <div class="tags">
+          <span class="tag ok b-mono">sensor data bit for bit</span>
+          <span class="tag sp b-mono">−14%</span>
+          <span class="tag b-mono">camera metadata kept</span>
+        </div>
+        <p class="b-body">Same name, new extension, written next to the original. Delete the original yourself once you're happy.</p>
+      </div>
+    </section>
+
+    <section class="wrap feature" aria-labelledby="s3">
+      <div class="copy">
+        <span class="b-micro">03 · Stats</span>
+        <h2 class="b-disp h2" id="s3">Watch the space come back.</h2>
+        <p class="b-body">Every finished conversion counts towards the space you've reclaimed, so you can see what the library gave back.</p>
+        <div class="b-rule sp"></div>
+      </div>
+      <div class="b-win sp shot-ph" role="img" aria-label="Space Pixl's Stats view: screenshot coming with the app's new look">
+        <Mark kind="space" size={72} label="" />
+        <span class="b-micro">Screenshot coming</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── ways ─────────────────────────────────────────────────── -->
+  <section class="wrap band" aria-labelledby="ways-title">
     <div class="sec-head">
-      <h2 class="b-disp h2" id="how-title">Four steps.<br /><span class="accent">No surprises.</span></h2>
-      <p class="b-body">You see the exact file you'll get, at its exact size, before anything is written.</p>
+      <h2 class="b-disp h2" id="ways-title">Four conversions, measured.</h2>
+      <p class="b-body">From one 8 MB JPEG and one 35.6 MB Canon CR2 in the engine's test set. Your files will differ, and Space Pixl tells you by how much before you convert.</p>
     </div>
-    <ol class="steps">
+    <ul class="ways">
       {
-        STEPS.map((s) => (
-          <li>
-            <span class="b-mono step-n">{s.n}</span>
-            <h3 class="b-disp">{s.title}</h3>
-            <p class="b-body">{s.text}</p>
+        WAYS.map((w, i) => (
+          <li class:list={{ first: i === 0, warn: w.warn }}>
+            <div class="way-head"><h3 class="b-disp">{w.name}</h3><span class:list={['pill', { ok: w.ok, warn: w.warn }]}>{w.tag}</span></div>
+            <span class:list={['b-mono way-fig', { ok: w.ok, warn: w.warn }]}>{w.figure}</span>
+            <p class="b-body">{w.text}</p>
           </li>
         ))
       }
-    </ol>
-  </section>
-
-  <!-- ── features ─────────────────────────────────────────────── -->
-  <section class="wrap band" id="features" aria-labelledby="feat-title">
-    <h2 class="sr-only" id="feat-title">Features</h2>
-    <ul class="cards">
-      <li>
-        <span class="b-micro">The free lunch</span>
-        <h3 class="b-disp">Smaller, and undoable.</h3>
-        <p class="b-body">JPEG to JPEG XL repacking saves about a fifth of every JPEG without decoding a pixel, and the original can be rebuilt bit for bit.</p>
-      </li>
-      <li>
-        <span class="b-micro">Your call</span>
-        <h3 class="b-disp">Every dial, if you want it.</h3>
-        <p class="b-body">Take the recommendation, or set the format, quality, size, bit depth, colour handling and metadata yourself.</p>
-      </li>
-      <li>
-        <span class="b-micro">Nothing lost</span>
-        <h3 class="b-disp">Colour and metadata intact.</h3>
-        <p class="b-body">Colours are converted properly, never just re-labelled, and camera metadata is carried across as it was.</p>
-      </li>
     </ul>
+    <figure class="figure chart ways-chart"><img src="/shared/engine/sizes.svg" width="900" height="452" loading="lazy" decoding="async" alt="One 8.04 MB JPEG re-encoded eight ways: AVIF 2.58 MB, WebP 3.26 MB, JPEG XL 5.53 MB, JPEG XL repack 6.55 MB, HEIC 9.66 MB, JPEG XL lossless 22.93 MB, PNG 38.70 MB, TIFF 56.06 MB." /></figure>
   </section>
 
-  <section class="wrap">
-    <a class="engine-card" href={href('engine', '/', 'space')}>
+  <!-- ── engine ───────────────────────────────────────────────── -->
+  <section class="wrap" id="engine" aria-labelledby="engine-title">
+    <a class="engine-card sp-engine" href={href('engine', '/', 'space')}>
       <div class="copy">
-        <Wordmark site="engine" size={14} />
-        <h2 class="b-disp h2">Built on PIXL Engine.</h2>
-        <p class="b-body">Space Pixl's conversions run on PIXL Engine, which never guesses with your photos and reports exactly what it did to each one.</p>
-        <span class="textlink b-body">Meet the engine</span>
+        <Wordmark site="engine" size={16} />
+        <h2 class="b-disp h2" id="engine-title">Rust underneath.<br />It can crash; your app won't.</h2>
+        <p class="b-body">Space Pixl runs on PIXL Engine, the same imaging core as Pixl Playroom. The engine runs as its own process, so if it ever falls over it restarts without taking the app down with it.</p>
+        <div class="en-facts">
+          <div><span class="b-mono">separate</span><span class="b-body">process, auto-restart</span></div>
+          <div><span class="b-mono">1 rounding</span><span class="b-body">per conversion</span></div>
+          <div><span class="b-mono">0.51 s</span><span class="b-body">a CR2 to DNG</span></div>
+        </div>
       </div>
-      <Mark kind="engine" glow size={220} class="engine-mark" />
+      <Mark kind="engine" size={300} glow class="engine-mark" />
     </a>
   </section>
 
-  <section class="wrap closing" aria-labelledby="close-title">
-    <h2 class="b-disp" id="close-title">Get your storage back.<br /><span class="accent">Keep every memory.</span></h2>
+  <!-- ── get ──────────────────────────────────────────────────── -->
+  <section class="wrap closing" id="get" aria-labelledby="get-title">
+    <Mark kind="space" size={150} glow label="" />
+    <h2 class="b-disp" id="get-title">Get the space back.</h2>
+    <p class="b-body closing-lede">Coming soon for macOS and Windows. Updates install in the background, on the Stable or Beta channel.</p>
     <div class="ctas">
       <a class="b-cta sp" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
       <a class="b-cta sec" href={href('playroom', '/', 'space')}>Meet Playroom</a>
