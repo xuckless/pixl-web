@@ -1,0 +1,109 @@
+---
+// PIXL Engine's architecture, after the Family Kit's EnDiagram board: proven
+// decoders in, the engine's one pipeline in the middle, the apps out. Facts
+// from pixl-engine's README ("What it's built on", "The pipeline").
+import Mark from '../brand/Mark.astro'
+
+const INPUTS = [
+  { name: 'Camera RAW', lib: 'rawler' },
+  { name: 'JPEG XL', lib: 'libjxl' },
+  { name: 'HEIF / HEIC · AVIF', lib: 'libheif' }
+]
+const STAGES = [
+  { n: '1 · Decode', text: 'Formats in, into a working colour space' },
+  { n: '2 · Grade', text: 'Tone, colour, masks and layered grades' },
+  { n: '3 · Encode', text: 'DNG, TIFF, JPEG XL, AVIF, HEIC, WebP, PNG, JPEG' }
+]
+---
+
+<div class="arch" role="img" aria-label="Decoders for RAW, JPEG XL and HEIF feed PIXL Engine's decode, grade and encode pipeline, which Pixl Playroom and Space Pixl are built on.">
+  <div class="arch-col">
+    <span class="b-micro">In</span>
+    {INPUTS.map((i) => <div class="arch-in"><span class="name">{i.name}</span><span class="b-mono">{i.lib}</span></div>)}
+  </div>
+  <div class="arch-links in" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+  <div class="arch-core">
+    <div class="arch-head">
+      <Mark kind="engine" size={64} glow />
+      <div>
+        <span class="b-wm en">PIXL <em>ENGINE</em></span>
+        <span class="b-mono">Rust · Swift, Kotlin and Node bindings</span>
+      </div>
+    </div>
+    <div class="arch-stages">
+      {STAGES.map((s, i) => <div class:list={['stage', { hot: i === 1 }]}><span class="b-micro">{s.n}</span><span class="b-body">{s.text}</span></div>)}
+    </div>
+    <p class="b-body arch-note">One convert() call runs the whole pipeline, and rounds the pixels to integers once, at the end.</p>
+    <div class="arch-extras">
+      <div><span class="name">On-device AI</span><span class="b-mono">ONNX Runtime · CPU, CoreML, CUDA, DirectML</span></div>
+      <div><span class="name">Colour management</span><span class="b-mono">Little CMS · ICC and CICP</span></div>
+    </div>
+  </div>
+  <div class="arch-links out" aria-hidden="true"><i></i><i></i><i class="dash"></i></div>
+  <div class="arch-col">
+    <span class="b-micro">Apps</span>
+    <div class="arch-app pl"><Mark kind="playroom" size={52} pixels={false} /><div><span class="name">Pixl Playroom</span><span class="b-body">Develop, grade, upscale</span></div></div>
+    <div class="arch-app sp"><Mark kind="space" size={52} /><div><span class="name">Space Pixl</span><span class="b-body">Analyse and convert libraries</span></div></div>
+    <div class="arch-app next"><span class="name">Next app</span></div>
+  </div>
+</div>
+
+<style>
+  .arch { display: grid; grid-template-columns: minmax(0, 300px) 70px minmax(0, 1fr) 70px minmax(0, 300px); align-items: stretch; }
+  .arch-col { display: grid; grid-template-rows: 20px repeat(3, 100px); gap: 30px; align-content: center; }
+  .arch-in, .arch-app { box-sizing: border-box; padding: 18px 22px; border: 1px solid rgba(255, 255, 255, .12); background: #09090b; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .name { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 19px; font-weight: 600; color: var(--ink); }
+  .arch-in .b-mono { font-size: 13px; color: var(--ink-3); }
+  .arch-app { flex-direction: row; align-items: center; gap: 14px; padding: 0 18px; }
+  .arch-app > div { display: flex; flex-direction: column; gap: 4px; }
+  .arch-app .b-body { font-size: 13px; color: var(--ink-3); }
+  .arch-app.pl { border-color: rgba(157, 139, 234, .4); background: #0c0a16; }
+  .arch-app.sp { border-color: rgba(147, 164, 255, .4); background: #0b0d14; }
+  .arch-app.next { border: 1px dashed rgba(255, 255, 255, .2); background: none; }
+  .arch-app.next .name { color: #6d6985; }
+
+  /* the connectors: lines that brighten towards the engine, with a pixel where they land */
+  .arch-links { position: relative; }
+  .arch-links i { position: absolute; left: 6px; right: 6px; height: 1.5px; background: linear-gradient(90deg, rgba(255, 255, 255, .1), rgba(187, 169, 255, .6) 75%, #e6dfff); }
+  .arch-links.in i:nth-child(1) { top: calc(50% - 130px); transform: rotate(38deg); transform-origin: 0 50%; width: 80px; }
+  .arch-links.in i:nth-child(2) { top: 50%; }
+  .arch-links.in i:nth-child(3) { top: calc(50% + 130px); transform: rotate(-38deg); transform-origin: 0 50%; width: 80px; }
+  .arch-links.in b { position: absolute; right: 2px; top: calc(50% - 3.5px); width: 8px; height: 8px; background: #e6dfff; }
+  .arch-links.out i:nth-child(1) { top: 50%; transform: rotate(-38deg); transform-origin: 0 50%; width: 80px; }
+  .arch-links.out i:nth-child(2) { top: 50%; }
+  .arch-links.out i:nth-child(3) { top: 50%; transform: rotate(38deg); transform-origin: 0 50%; width: 80px; }
+  .arch-links.out i.dash { background: repeating-linear-gradient(90deg, rgba(230, 223, 255, .6) 0 4px, transparent 4px 9px); }
+
+  .arch-core {
+    box-sizing: border-box; padding: 32px 34px; display: flex; flex-direction: column; gap: 22px;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: linear-gradient(160deg, rgba(157, 139, 234, .12), rgba(23, 18, 43, .6) 50%, rgba(0, 0, 0, .4));
+    box-shadow: 0 30px 120px -50px rgba(157, 139, 234, .5);
+  }
+  .arch-head { display: flex; align-items: center; gap: 18px; }
+  .arch-head > div { display: flex; flex-direction: column; gap: 8px; }
+  .arch-head .b-wm { font-size: 19px; }
+  .arch-head .b-mono { font-size: 13px; color: var(--ink-3); }
+  .arch-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .stage { padding: 16px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 8px; }
+  .stage.hot { border-color: rgba(187, 169, 255, .45); background: rgba(23, 18, 43, .6); }
+  .stage .b-micro { color: #bba9ff; }
+  .stage .b-body { font-size: 14px; color: var(--ink-2); }
+  .arch-note { margin: -8px 0 0; font-size: 14px; color: var(--ink-3); }
+  .arch-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: auto; }
+  .arch-extras > div { padding: 14px 16px; border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 6px; }
+  .arch-extras .name { font-size: 16px; }
+  .arch-extras .b-mono { font-size: 12px; color: var(--ink-3); }
+
+  @media (max-width: 1100px) {
+    .arch { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .arch-links { display: none; }
+    .arch-col { grid-template-rows: none; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .arch-col > .b-micro { grid-column: 1 / -1; }
+    .arch-in, .arch-app { min-height: 84px; }
+  }
+  @media (max-width: 760px) {
+    .arch-col, .arch-stages, .arch-extras { grid-template-columns: minmax(0, 1fr); }
+    .arch-core { padding: 24px 20px; }
+  }
+</style>

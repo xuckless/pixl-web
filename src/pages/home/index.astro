@@ -1,143 +1,209 @@
 ---
+// pixlfoundation.com, after the Family Kit's FoWebsite board: the word in
+// pixels, the products, what they share, the engine under them, and a way to
+// say hello.
 import Base from '../../layouts/Base.astro'
 import '../../styles/home.css'
-import Mark from '../../components/Mark.astro'
+import Bitmap from '../../components/brand/Bitmap.astro'
+import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { PRICE } from '../../data/playroom'
-import { href } from '../../lib/links'
-import type { SiteId } from '../../lib/sites'
+import { href, origin } from '../../lib/links'
+import type { MarkKind } from '../../lib/marks'
 
 const contact = 'mailto:hello@pixlfoundation.com'
+const domain = (k: MarkKind): string => origin(k).replace(/^https?:\/\//, '')
 
-const PRODUCTS: { site: SiteId; status: string; tagline: string; text: string; cta: string }[] = [
+const PRODUCTS: { kind: MarkKind; status: string; text: string }[] = [
   {
-    site: 'playroom',
+    kind: 'playroom',
     status: `Coming soon · ${PRICE.amount} once`,
-    tagline: 'Develop everything. Rent nothing.',
-    text: 'A professional RAW photo editor for macOS and Windows. Masks, colour grading, noise reduction and AI upscaling, working straight on your folders.',
-    cta: 'Explore Playroom',
+    text: 'A professional RAW developer. No import, no catalog, and you pay once.'
   },
   {
-    site: 'space',
+    kind: 'space',
     status: 'Coming soon',
-    tagline: 'Keep every photo. Lose the bulk.',
-    text: 'Reclaims storage by re-encoding a photo library into modern formats, with a real preview of every change and every original left alone.',
-    cta: 'Explore Space Pixl',
+    text: 'Makes photo libraries smaller: it measures every file, and writes the new one beside the original.'
   },
   {
-    site: 'engine',
+    kind: 'engine',
     status: 'Inside every PIXL app',
-    tagline: 'Rust underneath. Fast, and colour-true.',
-    text: 'The imaging core our apps are built on. It opens, grades and writes images exactly as told, and reports what it did.',
-    cta: 'Meet the engine',
+    text: 'The Rust imaging core under both, for partners who want to build on it.'
+  }
+]
+
+const SHARED = [
+  {
+    title: 'One engine',
+    text: 'Every app runs on PIXL Engine, so a faster decoder or a better colour transform lands in all of them at once.'
   },
+  {
+    title: 'On your device',
+    text: 'Editing, conversion and AI upscaling run on your own computer. Your photos are not uploaded to be processed.'
+  },
+  {
+    title: 'Your files stay yours',
+    text: 'No import and no catalog in Playroom. Space Pixl writes beside your originals and never overwrites one.'
+  }
 ]
 ---
 
 <Base
   site="home"
-  title="PIXL Foundation · Photo software you own"
-  description="PIXL Foundation makes Pixl Playroom, Space Pixl and PIXL Engine: professional photo software you pay for once, built on one colour-true imaging core."
+  title="PIXL Foundation · Imaging software, from the pixel up"
+  description="PIXL Foundation makes PIXL Engine, a Rust imaging core, and the photo apps that run on it: Pixl Playroom and Space Pixl. Software you pay for once, that runs on your own computer."
   nav={[
     { label: 'Products', to: '#products' },
-    { label: 'Engine', to: '#foundation' },
     { label: 'About', to: '#about' },
   ]}
-  cta={{ label: 'Contact', to: contact }}
+  cta={{ label: 'Contact', to: '#contact' }}
 >
-  <section class="wrap hero" aria-labelledby="hero-title">
-    <span class="b-chip">PIXL Foundation</span>
-    <h1 class="b-disp" id="hero-title">Photo software<br /><span class="accent">you own.</span></h1>
-    <p class="b-body lede">
-      We make professional photo tools on one colour-true engine. Pay once, keep your files where they are, and always
-      know what was done to a photo.
-    </p>
-    <div class="ctas">
-      <a class="b-cta pri" href="#products">See the products</a>
-      <a class="b-cta sec" href={href('playroom', '/', 'home')}>Meet Playroom</a>
+  <!-- ── hero: the word, scanned in ─────────────────────────────── -->
+  <section class="wrap fo-hero" aria-labelledby="hero-title">
+    <div class="fo-word">
+      <Bitmap indexed class="reveal" label="PIXL" />
+      <script is:inline>
+        // Hide the cells before the first paint, so the scan starts from nothing.
+        // Reduced motion (and no script, and crawlers) see the word as it is.
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+          document.currentScript.previousElementSibling.classList.add('scanning')
+      </script>
+    </div>
+    <div class="fo-lede">
+      <h1 class="b-disp" id="hero-title">Imaging software,<br />from the pixel up.</h1>
+      <p class="b-body">
+        PIXL Foundation makes PIXL Engine, a Rust imaging core, and the apps that run on it: photo software you pay for
+        once, that works on your own computer.
+      </p>
     </div>
   </section>
 
   <!-- ── products ─────────────────────────────────────────────── -->
   <section class="wrap band" id="products" aria-labelledby="products-title">
-    <h2 class="sr-only" id="products-title">Products</h2>
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="products-title">Products</h2>
+      <p class="b-body">Two apps, and the engine under them.</p>
+    </div>
     <div class="products">
       {
         PRODUCTS.map((p) => (
-          <a class:list={['product', p.site]} href={href(p.site, '/', 'home')}>
-            <div class="product-top">
-              <Mark site={p.site} size={72} />
-              <span class="b-chip">{p.status}</span>
+          <a class:list={['product', p.kind]} href={href(p.kind, '/', 'home')}>
+            <div class="product-mark">
+              <Mark kind={p.kind} size={170} glow />
             </div>
-            <Wordmark site={p.site} size={14} />
-            <h3 class="b-disp">{p.tagline}</h3>
+            <Wordmark site={p.kind} size={18} />
             <p class="b-body">{p.text}</p>
-            <span class="textlink b-body">{p.cta}</span>
+            <span class="b-micro status">{p.status}</span>
+            <div class="product-foot">
+              <span class="b-mono">{domain(p.kind)}</span>
+              <span class="b-micro visit">Visit →</span>
+            </div>
           </a>
         ))
       }
     </div>
   </section>
 
-  <!-- ── the foundation ───────────────────────────────────────── -->
-  <section class="wrap band" id="foundation" aria-labelledby="found-title">
-    <div class="found-grid">
-      <div class="copy">
-        <span class="b-micro">One engine underneath</span>
-        <h2 class="b-disp h2" id="found-title">Every app stands<br />on the same core.</h2>
-        <p class="b-body">
-          Playroom and Space Pixl share PIXL Engine, written in Rust for speed and colour accuracy. A photo looks the
-          same in every PIXL app, and every improvement to the engine reaches all of them.
-        </p>
-        <a class="textlink b-body" href={href('engine', '/', 'home')}>How the engine works</a>
-      </div>
-      <div class="stack" aria-hidden="true">
-        <div class="stack-apps">
-          <div class="stack-app"><Mark site="playroom" size={44} /><Wordmark site="playroom" size={11} /></div>
-          <div class="stack-app sp"><Mark site="space" size={44} /><Wordmark site="space" size={11} /></div>
-          <div class="stack-app next"><span class="b-micro">Next</span></div>
-        </div>
-        <div class="stack-engine"><Mark site="engine" size={56} /><Wordmark site="engine" size={12} /></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── principles ───────────────────────────────────────────── -->
-  <section class="wrap band" id="about" aria-labelledby="about-title">
-    <div class="sec-head">
-      <h2 class="b-disp h2" id="about-title">How we build.</h2>
-      <p class="b-body">Independent, and making the photo tools we want to use ourselves.</p>
-    </div>
-    <ul class="cards four">
-      <li>
-        <span class="b-micro">01</span>
-        <h3 class="b-disp">A strong base first.</h3>
-        <p class="b-body">Every app is complete on its own. Nothing essential is held back to sell as an add-on.</p>
-      </li>
-      <li>
-        <span class="b-micro">02</span>
-        <h3 class="b-disp">Pay once.</h3>
-        <p class="b-body">You buy the app and keep it. Cloud extras, when they come, are optional, and the app never needs them.</p>
-      </li>
-      <li>
-        <span class="b-micro">03</span>
-        <h3 class="b-disp">Your files stay yours.</h3>
-        <p class="b-body">Your photos stay in your folders, on your machine, in formats other apps can read.</p>
-      </li>
-      <li>
-        <span class="b-micro">04</span>
-        <h3 class="b-disp">No guessing.</h3>
-        <p class="b-body">Our engine does exactly what it's asked and says what it did, so nothing happens to a photo in secret.</p>
-      </li>
+  <!-- ── what they share ──────────────────────────────────────── -->
+  <section class="wrap band" aria-labelledby="share-title">
+    <h2 class="b-disp h2" id="share-title">What they share</h2>
+    <ul class="shared">
+      {
+        SHARED.map((s) => (
+          <li>
+            <svg class="pix" width="21" height="21" viewBox="0 0 3 3" shape-rendering="crispEdges" aria-hidden="true">
+              <rect width="3" height="3" fill="currentColor" />
+            </svg>
+            <h3 class="b-disp">{s.title}</h3>
+            <p class="b-body">{s.text}</p>
+          </li>
+        ))
+      }
     </ul>
   </section>
 
-  <section class="wrap closing" aria-labelledby="close-title">
-    <h2 class="b-disp" id="close-title">Say hello.</h2>
-    <p class="b-body closing-lede">Questions, partnerships, or just want to know when something launches? We read everything.</p>
-    <div class="ctas">
-      <a class="b-cta pri" href={contact}>hello@pixlfoundation.com</a>
-      <a class="b-cta sec" href="https://github.com/xuckless">GitHub</a>
+  <!-- ── about: one core, every app wraps it ──────────────────── -->
+  <section class="wrap band about" id="about" aria-labelledby="about-title">
+    <div class="copy">
+      <span class="b-micro">About</span>
+      <h2 class="b-disp h2" id="about-title">One core,<br />every app wraps it.</h2>
+      <p class="b-body">
+        PIXL Foundation is independent, and makes the photo tools we want to use ourselves. The engine comes first: it
+        does exactly what it is asked and reports what it did. Each app is a different surface on it.
+      </p>
+      <ul class="principles b-body">
+        <li><strong>A strong base first.</strong> Every app is complete on its own; nothing essential is held back for an add-on.</li>
+        <li><strong>Pay once.</strong> Optional cloud extras, when they come, stay optional.</li>
+        <li><strong>No guessing.</strong> Nothing happens to a photo in secret.</li>
+      </ul>
+      <a class="textlink b-body" href={href('engine', '/', 'home')}>How the engine works</a>
+    </div>
+    <div class="tree" aria-label="PIXL Foundation makes PIXL Engine, which Pixl Playroom and Space Pixl are built on" role="img">
+      <Bitmap cell={4} label="" />
+      <span class="stem" />
+      <div class="tree-engine"><Mark kind="engine" size={72} /><span class="b-micro">Engine</span></div>
+      <span class="branch" />
+      <div class="tree-apps">
+        <div><Mark kind="playroom" size={64} pixels={false} /><span class="b-micro">Playroom</span></div>
+        <div><Mark kind="space" size={64} /><span class="b-micro">Space Pixl</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── contact ──────────────────────────────────────────────── -->
+  <section class="wrap" id="contact" aria-labelledby="contact-title">
+    <div class="contact">
+      <div class="contact-grid" aria-hidden="true"></div>
+      <div class="contact-copy">
+        <h2 class="b-disp" id="contact-title">Say hello.</h2>
+        <p class="b-body">Press, partnerships and everything else: <a class="textlink" href={contact}>hello@pixlfoundation.com</a></p>
+      </div>
+      <a class="b-cta fo" href={contact}>Email us</a>
     </div>
   </section>
 </Base>
+
+<script>
+  // The Family Kit's scanline reveal: the word drawn like a frame being scanned
+  // out, row by row, left to right, one cell at a time (0.4 s wait, 1.8 s scan).
+  const svg = document.querySelector<SVGSVGElement>('.fo-word svg.scanning')
+  if (svg) {
+    const cells = [...svg.querySelectorAll<SVGRectElement>('rect[data-i]')].sort(
+      (a, b) => Number(a.dataset.i) - Number(b.dataset.i)
+    )
+    const ns = 'http://www.w3.org/2000/svg'
+    const head = document.createElementNS(ns, 'rect')
+    head.setAttribute('width', '1')
+    head.setAttribute('height', '1')
+    head.setAttribute('fill', '#ffffff')
+    const row = document.createElementNS(ns, 'rect')
+    row.setAttribute('x', '0')
+    row.setAttribute('width', '20')
+    row.setAttribute('height', '1')
+    row.setAttribute('fill', '#ffffff')
+    row.setAttribute('opacity', '0.05')
+    svg.append(row, head)
+    const DELAY = 400
+    const DURATION = 1800
+    let shown = 0
+    let t0 = 0
+    const step = (t: number): void => {
+      if (!t0) t0 = t
+      const n = Math.min(cells.length, Math.max(0, ((t - t0 - DELAY) / DURATION) * cells.length))
+      for (; shown < Math.floor(n); shown++) cells[shown].classList.add('on')
+      const next = cells[Math.min(shown, cells.length - 1)]
+      if (n > 0 && n < cells.length) {
+        head.setAttribute('x', String(Number(next.getAttribute('x')) + 0.02))
+        head.setAttribute('y', String(Number(next.getAttribute('y')) + 0.02))
+        row.setAttribute('y', String(Number(next.getAttribute('y')) + 0.02))
+      }
+      if (shown < cells.length) requestAnimationFrame(step)
+      else {
+        head.remove()
+        row.remove()
+        svg.classList.remove('scanning')
+      }
+    }
+    requestAnimationFrame(step)
+  }
+</script>

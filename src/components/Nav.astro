@@ -1,7 +1,8 @@
 ---
 import { href } from '../lib/links'
-import type { SiteId } from '../lib/sites'
-import Mark from './Mark.astro'
+import { SITES, type SiteId } from '../lib/sites'
+import Bitmap from './brand/Bitmap.astro'
+import Mark from './brand/Mark.astro'
 import Wordmark from './Wordmark.astro'
 
 export interface NavLink {
@@ -17,21 +18,31 @@ interface Props {
 }
 
 const { site, links, cta } = Astro.props
+/** Each brand's primary button (brand.css). */
+const CTA: Record<SiteId, string> = { home: 'fo', playroom: 'pri', space: 'sp', engine: 'en' }
 // A path on this site, or anything with a scheme (https:, mailto:) as written.
 const local = (to: string) => (/^([a-z][a-z+.-]*:|\/\/)/i.test(to) ? to : href(site, to, site))
 ---
 
 <header class="wrap">
   <nav class="nav" aria-label="Main">
-    <a class="brand" href={local('/')} aria-label="Home">
-      <Mark site={site} />
-      <Wordmark site={site} />
+    <a class="brand" href={local('/')} aria-label={`${SITES[site].name}, home`}>
+      {
+        site === 'home' ? (
+          <Bitmap cell={3} label="" />
+        ) : (
+          <>
+            <Mark kind={site} size={36} detail="small" />
+            <Wordmark site={site} />
+          </>
+        )
+      }
     </a>
     <span class="grow"></span>
     <ul class="nav-links" id="nav-links">
       {links.map((l) => <li><a class="b-body" href={local(l.to)}>{l.label}</a></li>)}
     </ul>
-    {cta && <a class="b-cta pri nav-cta" href={local(cta.to)}>{cta.label}</a>}
+    {cta && <a class:list={['b-cta nav-cta', CTA[site]]} href={local(cta.to)}>{cta.label}</a>}
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
     </button>

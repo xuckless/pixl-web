@@ -1,0 +1,19 @@
+---
+// The PIXL Foundation word (or its P) in pixels, from the Family Kit (src/lib/marks.ts).
+import { bitmapSvg } from '../../lib/marks'
+
+interface Props {
+  text?: 'PIXL' | 'P'
+  /** Pixels per cell: a whole number keeps the edges crisp. */
+  cell?: number
+  ink?: string
+  label?: string
+  class?: string
+  /** Cells carry their scan order, for the scanline reveal. */
+  indexed?: boolean
+}
+
+const svg = bitmapSvg(Astro.props)
+---
+
+<Fragment set:html={svg} />

@@ -1,54 +1,86 @@
-/* pixlfoundation.com: what only the company page has. */
+/* pixlfoundation.com, after the Family Kit's FoWebsite board. */
 
-.hero { padding-top: 120px; }
+/* ── hero: the word in pixels ───────────────────────────────── */
+.fo-hero { padding-top: 96px; display: flex; flex-direction: column; gap: 64px; }
+.fo-word svg { width: min(960px, 100%); height: auto; }
+.fo-word svg.scanning rect { opacity: 0; }
+.fo-word svg.scanning rect.on { opacity: 1; }
+.fo-lede { display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: end; }
+.fo-lede h1 { font-size: clamp(44px, 5.3vw, 76px); }
+.fo-lede p { font-size: 19px; color: var(--ink-2); }
 
 /* ── products ───────────────────────────────────────────────── */
-.products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .product {
-  --tint: rgba(157, 139, 234, .14);
-  display: flex; flex-direction: column; gap: 18px; padding: 36px;
-  border: 1px solid var(--line); background: radial-gradient(110% 80% at 0% 0%, var(--tint), #050507 62%);
+  --edge: rgba(157, 139, 234, .3);
+  --tint: #1a1433;
+  display: flex; flex-direction: column; gap: 20px; padding: 36px; min-height: 440px;
+  border: 1px solid var(--edge); background: radial-gradient(90% 70% at 50% 0%, var(--tint), #050507 70%);
   transition: border-color .2s var(--b-ease), transform .2s var(--b-ease);
 }
-.product.space { --tint: rgba(147, 164, 255, .14); }
-.product.engine { --tint: rgba(235, 233, 243, .08); }
-.product:hover { border-color: rgba(157, 139, 234, .45); transform: translateY(-2px); }
-.product-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.product-top .b-chip { height: auto; min-height: 28px; padding: 5px 10px; font-size: 11px; color: var(--ink-3); }
-.product h3 { font-size: clamp(22px, 1.9vw, 28px); }
+.product.space { --edge: rgba(147, 164, 255, .3); --tint: #121935; }
+.product.engine { --edge: rgba(255, 255, 255, .14); --tint: #16131f; }
+.product:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, .35); }
+.product-mark { height: 180px; display: grid; place-items: center; }
 .product p { font-size: 16px; color: var(--ink-2); flex-grow: 1; }
-.product .textlink { align-self: flex-start; }
+.product .status { color: var(--ink-3); }
+.product-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.product-foot .b-mono { font-size: 13px; color: var(--ink-3); }
+.product-foot .visit { color: var(--ink); }
 
-/* ── the foundation stack ───────────────────────────────────── */
-.found-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px); gap: 72px; align-items: center; }
-.found-grid .textlink { align-self: flex-start; }
-.stack { display: flex; flex-direction: column; gap: 14px; }
-.stack-apps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.stack-app {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  min-height: 150px; padding: 18px 10px; border: 1px solid rgba(157, 139, 234, .35);
-  background: linear-gradient(180deg, rgba(157, 139, 234, .12), rgba(157, 139, 234, .02));
-}
-.stack-app.sp { border-color: rgba(147, 164, 255, .35); background: linear-gradient(180deg, rgba(147, 164, 255, .12), rgba(147, 164, 255, .02)); }
-.stack-app.next { border-style: dashed; border-color: rgba(255, 255, 255, .16); background: none; }
-.stack-app.next .b-micro { color: var(--ink-4); }
-.stack-engine {
-  display: flex; align-items: center; justify-content: center; gap: 16px; padding: 26px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: radial-gradient(80% 160% at 50% 0%, #1d1736, #07060c 70%);
-  box-shadow: 0 30px 100px -40px rgba(157, 139, 234, .6);
-}
+/* ── what they share ────────────────────────────────────────── */
+.shared { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px; margin: 0; padding: 0; list-style: none; }
+.shared li { display: flex; flex-direction: column; gap: 14px; }
+.shared .pix { color: var(--fo); }
+.shared h3 { font-size: 28px; }
+.shared p { font-size: 17px; color: var(--ink-2); }
 
-.closing-lede { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+/* ── about ──────────────────────────────────────────────────── */
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+.about .copy .b-micro { color: var(--fo); }
+.principles { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 16px; color: var(--ink-2); }
+.principles strong { color: var(--ink); font-weight: 600; }
+.about .textlink { align-self: flex-start; }
+.tree {
+  height: 420px; border: 1px solid var(--line); background: #050507;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.tree .stem { width: 1px; height: 36px; margin: 20px 0; background: rgba(255, 255, 255, .25); }
+.tree-engine { display: flex; align-items: center; gap: 16px; }
+.tree-engine .b-micro { color: var(--ink-2); }
+.tree .branch { width: 240px; height: 36px; margin-top: 20px; border: 1px solid rgba(255, 255, 255, .25); border-bottom: 0; }
+.tree-apps { display: flex; gap: 120px; margin-top: 8px; }
+.tree-apps > div { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* ── contact ────────────────────────────────────────────────── */
+.contact {
+  position: relative; overflow: hidden; margin-top: 150px; padding: 64px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  display: flex; align-items: center; justify-content: space-between; gap: 40px;
+}
+.contact-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.contact-copy { position: relative; display: flex; flex-direction: column; gap: 16px; }
+.contact h2 { font-size: clamp(36px, 3.4vw, 48px); }
+.contact p { font-size: 18px; color: var(--ink-2); }
+.contact .b-cta { position: relative; flex: none; }
 
 @media (max-width: 1100px) {
+  .fo-lede, .about { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .products { grid-template-columns: minmax(0, 1fr); }
-  .found-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .product { min-height: 0; }
+  .shared { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .contact { margin-top: 120px; }
 }
 
 @media (max-width: 760px) {
-  .hero { padding-top: 56px; }
+  .fo-hero { padding-top: 48px; gap: 40px; }
   .product { padding: 28px 22px; }
-  .stack-app { min-height: 120px; }
-  .stack-app .b-wm { font-size: 9px !important; letter-spacing: .18em; }
+  .tree { height: 360px; }
+  .tree-apps { gap: 56px; }
+  .tree .branch { width: 150px; }
+  .contact { margin-top: 96px; padding: 36px 22px; flex-direction: column; align-items: flex-start; }
 }

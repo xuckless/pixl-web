@@ -45,6 +45,23 @@
 @keyframes b-drift { 0%, 100% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(6px, -8px); opacity: .7; } }
 .b-drift { animation: b-drift 6s ease-in-out infinite; }
 
+/* ── the family: Space Pixl, PIXL Engine, PIXL Foundation (the Family Kit's family.css) ── */
+:root {
+  --sp-deep: #4a5bd6;
+  --fo: #ebe9f3;        /* Foundation: white, nothing else */
+}
+.b-rule.en { background: linear-gradient(90deg, #ebe9f3 0, rgba(235,233,243,.3) 48px, rgba(255,255,255,.09) 160px, rgba(255,255,255,.09) 100%); }
+.b-rule.fo { background: linear-gradient(90deg, #ffffff 0, rgba(255,255,255,.28) 16px, rgba(255,255,255,.28) 24px, rgba(255,255,255,.09) 24px, rgba(255,255,255,.09) 100%); }
+.b-cta.sp { background: linear-gradient(180deg, #b3bfff, #7486f0); color: #0b0d11; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 40px -10px rgba(147,164,255,.8); }
+.b-cta.fo { background: #ebe9f3; color: #000000; box-shadow: inset 0 -2px 0 rgba(0,0,0,.18); }
+.b-cta.en { background: linear-gradient(180deg, #f1ecff, #bba9ff); color: #0d0a1f; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 10px 40px -12px rgba(187,169,255,.7); }
+.b-chip.sp { border-color: rgba(147,164,255,.42); color: #c4cdff; }
+.b-chip.fo { border-color: rgba(255,255,255,.3); color: #ebe9f3; }
+/* Space Pixl's screenshot frame: the app has 12 px cards, so the window keeps a small radius and a blue under-glow */
+.b-win.sp { border-radius: 10px; box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 40px 120px -30px rgba(0,0,0,.95), 0 30px 160px -60px rgba(147,164,255,.6); }
+/* Foundation's pixel grid */
+.fo-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
 }

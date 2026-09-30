@@ -1,5 +1,9 @@
 ---
+// A product's name as the Family Kit sets it: PIXL always white capitals, the
+// product word in the product's colour (the engine's stays grey). The company
+// is its pixel word, with FOUNDATION in grey.
 import type { SiteId } from '../lib/sites'
+import Bitmap from './brand/Bitmap.astro'
 
 interface Props {
   site: SiteId
@@ -7,13 +11,33 @@ interface Props {
 }
 
 const { site, size = 15 } = Astro.props
-const words: Record<SiteId, [string, string, string]> = {
-  home: ['PIXL', 'FOUNDATION', ''],
-  playroom: ['PIXL', 'PLAYROOM', ''],
-  space: ['SPACE', 'PIXL', 'sp'],
-  engine: ['PIXL', 'ENGINE', 'en'],
-}
-const [first, second, variant] = words[site]
 ---
 
-<span class:list={['b-wm', variant]} style={`font-size: ${size}px`}>{first} <em>{second}</em></span>
+{
+  site === 'home' ? (
+    <span class="wm-fo" style={`--wm: ${size}px`}>
+      <Bitmap cell={Math.max(1, Math.round(size / 5))} />
+      <span class="b-wm">FOUNDATION</span>
+    </span>
+  ) : site === 'space' ? (
+    <span class="b-wm sp" style={`font-size: ${size}px`}>
+      <em>SPACE</em> PIXL
+    </span>
+  ) : (
+    <span class:list={['b-wm', { en: site === 'engine' }]} style={`font-size: ${size}px`}>
+      PIXL <em>{site === 'engine' ? 'ENGINE' : 'PLAYROOM'}</em>
+    </span>
+  )
+}
+
+<style>
+  .wm-fo {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--wm) * 0.8);
+  }
+  .wm-fo .b-wm {
+    font-size: calc(var(--wm) * 0.8);
+    color: #b8b5c7;
+  }
+</style>
