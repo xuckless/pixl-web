@@ -1,0 +1,26 @@
+/* space.pixlfoundation.com: what only the Space Pixl page has. */
+
+.hero-mark { filter: drop-shadow(0 0 18px rgba(147, 164, 255, .5)); }
+.b-cta.pri { background: linear-gradient(180deg, #aab6ff, #6f82f0); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 10px 40px -10px rgba(147, 164, 255, .8); }
+.stats .b-disp { color: var(--accent); }
+
+/* ── steps ──────────────────────────────────────────────────── */
+.steps { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; counter-reset: none; }
+.steps li { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 32px 28px; border: 1px solid var(--line); background: #050507; }
+.steps li:not(:last-child)::after {
+  content: ''; position: absolute; top: 44px; right: -25px; width: 25px; height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.step-n { font-size: 13px; color: var(--accent); }
+.steps h3 { font-size: 26px; }
+.steps p { font-size: 15px; color: var(--ink-2); }
+
+@media (max-width: 1100px) {
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps li::after { display: none; }
+}
+
+@media (max-width: 760px) {
+  .steps { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .steps li { padding: 24px 22px; }
+}

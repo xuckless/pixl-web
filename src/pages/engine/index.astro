@@ -1,0 +1,231 @@
+---
+import Base from '../../layouts/Base.astro'
+import '../../styles/engine.css'
+import Mark from '../../components/Mark.astro'
+import Wordmark from '../../components/Wordmark.astro'
+import { BINDINGS, FORMATS, FUNCTIONS, MEASURED, OPS, STATS } from '../../data/engine'
+import { href } from '../../lib/links'
+
+const contact = 'mailto:hello@pixlfoundation.com?subject=PIXL%20Engine'
+const fig = (f: string) => `/shared/engine/${f}`
+---
+
+<Base
+  site="engine"
+  title="PIXL Engine · Rust underneath. Fast, and colour-true."
+  description="PIXL Engine is the Rust imaging core behind every PIXL app. It opens, grades and writes images exactly as told, and reports what it did."
+  nav={[
+    { label: 'Principle', to: '#principle' },
+    { label: 'What it does', to: '#does' },
+    { label: 'Measured', to: '#measured' },
+    { label: 'Built on it', to: '#apps' },
+  ]}
+  cta={{ label: 'Get in touch', to: contact }}
+>
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <Mark site="engine" size={120} class="hero-mark" />
+    <span class="b-chip">The imaging core behind every PIXL app</span>
+    <h1 class="b-disp" id="hero-title">Rust underneath.<br /><span class="accent">Fast, and colour-true.</span></h1>
+    <p class="b-body lede">
+      PIXL Engine is the part of a photo app that touches pixels. It opens files, grades them and writes them back out,
+      exactly as it is told. Then it hands you a receipt for what it did.
+    </p>
+    <div class="ctas">
+      <a class="b-cta pri" href="#does">See what it does</a>
+      <a class="b-cta sec" href={href('playroom', '/', 'engine')}>See it in Playroom</a>
+    </div>
+  </section>
+
+  <section class="wrap" aria-label="In numbers">
+    <ul class="stats">
+      {STATS.map((s) => <li><span class="b-disp">{s.value}</span><span class="b-body">{s.label}</span></li>)}
+    </ul>
+  </section>
+
+  <!-- ── principle ────────────────────────────────────────────── -->
+  <section class="wrap band" id="principle" aria-labelledby="principle-title">
+    <div class="principle-grid">
+      <div class="copy">
+        <span class="b-micro">The one rule</span>
+        <h2 class="b-disp h2" id="principle-title">It makes no decisions.<br /><span class="accent">It keeps the receipts.</span></h2>
+        <p class="b-body">
+          Most image libraries guess. They pick a quality for you, fall back to another codec when one fails, or quietly
+          re-label colours they didn't convert. Every guess is a bug waiting in someone's photo library.
+        </p>
+        <p class="b-body">
+          PIXL has no guesses to go wrong. The app decides, the engine does exactly that, and anything impossible is
+          refused with the name of the setting to change. It will never write a file whose colour description
+          disagrees with its pixels.
+        </p>
+      </div>
+      <figure class="receipt">
+        <figcaption class="b-micro">convert() → report · abridged example</figcaption>
+        <pre class="b-mono"><span class="k">colour</span>  sRGB (source IccProfile, converted)
+        icc=true cicp=true
+<span class="k">loss</span>    16→8 bits, 1 rounding,
+        one float pass, dithered
+<span class="k">grade</span>   white balance 7000 K
+        exposure +0.18 · highlights −0.5
+<span class="k">meta</span>    EXIF · ICC · XMP copied verbatim</pre>
+        <p class="b-mono refusal"><span class="k">refused</span> hdr → sdr: the source uses PQ. Name a tone-mapping operator and both peaks, or choose an HDR-capable format.</p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ── four functions ───────────────────────────────────────── -->
+  <section class="wrap band" aria-labelledby="fn-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="fn-title">The whole thing is four functions.</h2>
+      <p class="b-body">Three read bytes; one does the work. All four are synchronous, and all four cross into Swift, Kotlin and Node unchanged.</p>
+    </div>
+    <ul class="cards four">
+      {
+        FUNCTIONS.map((f) => (
+          <li>
+            <span class="b-mono fn">{f.sig}</span>
+            <p class="b-body">{f.what}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- ── what it does ─────────────────────────────────────────── -->
+  <div id="does">
+    <section class="wrap feature" aria-labelledby="d1">
+      <div class="copy">
+        <span class="b-micro">01 · Grading</span>
+        <h2 class="b-disp h2" id="d1">A colourist's toolkit, rounded once.</h2>
+        <p class="b-body">
+          A look is a list of stages, each in the colour space it belongs in: white balance and exposure in linear light,
+          the tonal look on display values. Stack as many operations as you like; the pixels are rounded to integers once,
+          at the very end.
+        </p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="figure"><img src={fig('grade.webp')} width="900" height="496" loading="lazy" decoding="async" alt="Before and after a colour grade: the same forest road, ungraded and then warmed with lifted shadows, pulled highlights, more contrast and more vibrance." /></figure>
+    </section>
+
+    <section class="wrap feature flip" aria-labelledby="d2">
+      <div class="copy">
+        <span class="b-micro">02 · Colour</span>
+        <h2 class="b-disp h2" id="d2">Converting isn't re-labelling.</h2>
+        <p class="b-body">
+          A phone photo in Display P3 can be tagged as sRGB or actually converted to it. They look alike until skin
+          tones go grey. PIXL makes the caller say which, runs real conversions through Little CMS, and reports which
+          happened.
+        </p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="figure"><img src={fig('colour.webp')} width="900" height="366" loading="lazy" decoding="async" alt="A Display P3 photo written as sRGB two ways, re-tagged and properly converted, with the amplified difference between them." /></figure>
+    </section>
+
+    <section class="wrap feature" aria-labelledby="d3">
+      <div class="copy">
+        <span class="b-micro">03 · RAW</span>
+        <h2 class="b-disp h2" id="d3">A sensor mosaic is not an image.</h2>
+        <p class="b-body">
+          Turning a RAW into a picture is a series of choices, and PIXL leaves every one to the app: linear light, a
+          neutral render, or the camera's own preview. For archives, RAW to DNG is lossless and keeps the mosaic bit for bit.
+        </p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="figure"><img src={fig('raw.webp')} width="900" height="360" loading="lazy" decoding="async" alt="One Canon CR2 rendered three ways: developed in linear light, developed with the sRGB curve, and the camera's embedded preview." /></figure>
+    </section>
+
+    <section class="wrap feature flip" aria-labelledby="d4">
+      <div class="copy">
+        <span class="b-micro">04 · Formats</span>
+        <h2 class="b-disp h2" id="d4">Smaller isn't a guess.</h2>
+        <p class="b-body">
+          The same 8 MB JPEG is 68% smaller as AVIF and 20% bigger as HEIC. PIXL writes every modern format and tells you
+          the truth about each, including JPEG XL's repack: 19% smaller and reversible to the original byte.
+        </p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="figure chart"><img src={fig('sizes.svg')} width="900" height="452" loading="lazy" decoding="async" alt="One 8.04 MB JPEG re-encoded eight ways: AVIF 2.58 MB, WebP 3.26 MB, JPEG XL 5.53 MB, JPEG XL repack 6.55 MB, HEIC 9.66 MB, JPEG XL lossless 22.93 MB, PNG 38.70 MB, TIFF 56.06 MB." /></figure>
+    </section>
+
+    <section class="wrap feature" aria-labelledby="d5">
+      <div class="copy">
+        <span class="b-micro">05 · HDR</span>
+        <h2 class="b-disp h2" id="d5">HDR, handled on purpose.</h2>
+        <p class="b-body">
+          HDR stays HDR in formats that can hold it. Bringing it down to a normal screen means naming a tone-mapping
+          operator (Clip, BT.2390, Reinhard or Hable) and both peaks. Nothing here is a default, and nothing is invented.
+        </p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="figure chart"><img src={fig('tonemap.svg')} width="900" height="468" loading="lazy" decoding="async" alt="Measured transfer curves for four tone-mapping operators, Clip, BT.2390, Reinhard and Hable, plotting scene luminance against output code value." /></figure>
+    </section>
+  </div>
+
+  <!-- ── capabilities ─────────────────────────────────────────── -->
+  <section class="wrap band" aria-labelledby="cap-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="cap-title">Everything an editor needs.</h2>
+      <p class="b-body">Every modern format in and out, and a full grading toolkit, with metadata copied verbatim and never "fixed".</p>
+    </div>
+    <div class="caps">
+      <div>
+        <h3 class="b-micro">Formats</h3>
+        <ul class="fmt-list">
+          {FORMATS.map((f) => <li><span class="b-disp">{f.name}</span><span class="b-body">{f.note}</span></li>)}
+        </ul>
+      </div>
+      <div>
+        <h3 class="b-micro">Grading operations</h3>
+        <ul class="op-list b-body">{OPS.map((o) => <li>{o}</li>)}</ul>
+        <h3 class="b-micro bind-title">Use it from</h3>
+        <ul class="op-list b-body">{BINDINGS.map((b) => <li><strong>{b.name}</strong> · {b.note}</li>)}</ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── measured ─────────────────────────────────────────────── -->
+  <section class="wrap band" id="measured" aria-labelledby="m-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="m-title">Measured, not claimed.</h2>
+      <p class="b-body">Real files, real conversions, on an Apple M2 Pro. Nothing here is copied from a datasheet.</p>
+    </div>
+    <table class="measured">
+      <caption class="sr-only">Conversion times and sizes</caption>
+      <thead><tr><th scope="col">Conversion</th><th scope="col">In</th><th scope="col">Out</th><th scope="col">Time</th></tr></thead>
+      <tbody>
+        {MEASURED.map((m) => <tr><th scope="row">{m.what}</th><td class="b-mono">{m.from}</td><td class="b-mono">{m.to}</td><td class="b-mono">{m.time}</td></tr>)}
+      </tbody>
+    </table>
+    <p class="b-body fine">The test suite re-reads every output with the engine's own decoders, and a missing test file fails the run instead of skipping it.</p>
+  </section>
+
+  <!-- ── apps ─────────────────────────────────────────────────── -->
+  <section class="wrap band" id="apps" aria-labelledby="apps-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="apps-title">Built on PIXL Engine.</h2>
+      <p class="b-body">Every PIXL app shares the same core, so a photo looks the same wherever it goes.</p>
+    </div>
+    <div class="apps">
+      <a class="app-card" href={href('playroom', '/', 'engine')}>
+        <Mark site="playroom" size={64} />
+        <Wordmark site="playroom" size={14} />
+        <p class="b-body">A professional RAW editor you pay for once. Every pixel on screen is a real engine render.</p>
+        <span class="textlink b-body">Visit Playroom</span>
+      </a>
+      <a class="app-card" href={href('space', '/', 'engine')}>
+        <Mark site="space" size={64} />
+        <Wordmark site="space" size={14} />
+        <p class="b-body">Reclaims storage by re-encoding a photo library, with a real preview of every change.</p>
+        <span class="textlink b-body">Visit Space Pixl</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap closing" aria-labelledby="close-title">
+    <h2 class="b-disp" id="close-title">Building something<br /><span class="accent">that touches pixels?</span></h2>
+    <p class="b-body closing-lede">PIXL Engine isn't publicly available yet. If you'd like to build on it, tell us what you're making.</p>
+    <div class="ctas">
+      <a class="b-cta pri" href={contact}>Get in touch</a>
+      <a class="b-cta sec" href={href('home', '/', 'engine')}>About PIXL Foundation</a>
+    </div>
+  </section>
+</Base>

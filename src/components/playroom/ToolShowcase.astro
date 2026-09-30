@@ -1,0 +1,86 @@
+---
+// The Develop wheel as a tab list: pick a tool, see the real app with that
+// tool open. Arrow keys, Home and End move between tabs, as the WAI-ARIA tabs
+// pattern has it.
+import { href } from '../../lib/links'
+import type { Tool } from '../../data/playroom'
+
+interface Props {
+  tools: Tool[]
+}
+
+const { tools } = Astro.props
+const src = (id: string) => href('playroom', `/shots/tools/${id}.webp`, 'playroom')
+---
+
+<div class="tools-show">
+  <div class="tool-tabs" role="tablist" aria-label="Develop tools" aria-orientation="vertical">
+    {
+      tools.map((t, i) => (
+        <button type="button" role="tab" id={`tab-${t.id}`} aria-controls={`panel-${t.id}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+          <span class="tool-num b-mono">{String(i + 1).padStart(2, '0')}</span>
+          <span class="tool-name">{t.name}</span>
+        </button>
+      ))
+    }
+  </div>
+  <div class="tool-panels">
+    {
+      tools.map((t, i) => (
+        <section role="tabpanel" id={`panel-${t.id}`} aria-labelledby={`tab-${t.id}`} hidden={i !== 0}>
+          <figure class="b-win tool-shot">
+            <img src={src(t.id)} width="1600" height="1000" loading="lazy" decoding="async" alt={t.alt} />
+          </figure>
+          <div class="tool-copy">
+            <h3 class="b-disp">{t.pitch}</h3>
+            <p class="b-body">{t.detail}</p>
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  const list = document.querySelector<HTMLElement>('.tool-tabs')
+  if (list) {
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      for (const t of tabs) {
+        const on = t === tab
+        t.setAttribute('aria-selected', String(on))
+        t.tabIndex = on ? 0 : -1
+        document.getElementById(t.getAttribute('aria-controls')!)!.hidden = !on
+      }
+      if (focus) tab.focus()
+    }
+    tabs.forEach((t) => t.addEventListener('click', () => select(t)))
+    list.addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(document.activeElement as HTMLButtonElement)
+      if (i < 0) return
+      const next =
+        e.key === 'ArrowDown' || e.key === 'ArrowRight' ? tabs[(i + 1) % tabs.length]
+        : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? tabs[(i - 1 + tabs.length) % tabs.length]
+        : e.key === 'Home' ? tabs[0]
+        : e.key === 'End' ? tabs[tabs.length - 1]
+        : null
+      if (next) {
+        e.preventDefault()
+        select(next, true)
+      }
+    })
+    // Warm the other screenshots once the section is near, so switching is instant.
+    const warm = () => {
+      for (const img of document.querySelectorAll<HTMLImageElement>('.tool-panels img')) img.loading = 'eager'
+    }
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          warm()
+          io.disconnect()
+        }
+      }, { rootMargin: '600px' })
+      io.observe(list)
+    } else warm()
+  }
+</script>

@@ -1,0 +1,19 @@
+---
+import type { SiteId } from '../lib/sites'
+
+interface Props {
+  site: SiteId
+  size?: number
+}
+
+const { site, size = 15 } = Astro.props
+const words: Record<SiteId, [string, string, string]> = {
+  home: ['PIXL', 'FOUNDATION', ''],
+  playroom: ['PIXL', 'PLAYROOM', ''],
+  space: ['SPACE', 'PIXL', 'sp'],
+  engine: ['PIXL', 'ENGINE', 'en'],
+}
+const [first, second, variant] = words[site]
+---
+
+<span class:list={['b-wm', variant]} style={`font-size: ${size}px`}>{first} <em>{second}</em></span>

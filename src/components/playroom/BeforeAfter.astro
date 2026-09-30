@@ -1,0 +1,102 @@
+---
+// A draggable before/after comparison (also arrow keys, through a hidden range
+// input), with thumbnails to switch photos.
+import { href } from '../../lib/links'
+import type { Pair } from '../../data/playroom'
+
+interface Props {
+  pairs: Pair[]
+}
+
+const { pairs } = Astro.props
+const base = href('playroom', '/pairs/', 'playroom')
+const first = pairs[0]
+const set = (id: number, side: string, ext: string) =>
+  `${base}${id}-${side}-1200.${ext} 1200w, ${base}${id}-${side}-2400.${ext} 2400w`
+const sizes = '(min-width: 1200px) 1120px, calc(100vw - 32px)'
+---
+
+<figure class="ba-figure" data-base={base}>
+  <div class="ba b-win">
+    <picture class="ba-after">
+      <source type="image/webp" srcset={set(first.id, 'after', 'webp')} sizes={sizes} />
+      <img src={`${base}${first.id}-after-1200.jpg`} srcset={set(first.id, 'after', 'jpg')} sizes={sizes} width="2400" height="1600" loading="lazy" decoding="async" alt={`After: ${first.alt}`} draggable="false" />
+    </picture>
+    <picture class="ba-before">
+      <source type="image/webp" srcset={set(first.id, 'before', 'webp')} sizes={sizes} />
+      <img src={`${base}${first.id}-before-1200.jpg`} srcset={set(first.id, 'before', 'jpg')} sizes={sizes} width="2400" height="1600" loading="lazy" decoding="async" alt={`Before: ${first.alt}`} draggable="false" />
+    </picture>
+    <span class="ba-tag l" aria-hidden="true">Before</span>
+    <span class="ba-tag r" aria-hidden="true">After</span>
+    <div class="ba-line" aria-hidden="true"><span class="ba-knob"></span></div>
+    <input type="range" min="0" max="100" step="1" value="50" aria-label="Compare before and after: how much of the untouched RAW to show" />
+  </div>
+  <figcaption class="b-mono ba-cap" aria-live="polite">{first.cap}</figcaption>
+</figure>
+<ul class="ba-thumbs" aria-label="Choose a photo">
+  {
+    pairs.map((p, i) => (
+      <li>
+        <button type="button" data-id={p.id} data-alt={p.alt} data-cap={p.cap} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Show IMG_${p.id}`}>
+          <img src={`${base}${p.id}-thumb.webp`} width="240" height="160" loading="lazy" decoding="async" alt="" />
+        </button>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  const fig = document.querySelector<HTMLElement>('.ba-figure')
+  const ba = fig?.querySelector<HTMLElement>('.ba')
+  const range = ba?.querySelector<HTMLInputElement>('input[type="range"]')
+  const cap = fig?.querySelector('.ba-cap')
+  if (fig && ba && range && cap) {
+    const base = fig.dataset.base!
+    const setPos = (v: number) => {
+      v = Math.max(0, Math.min(100, v))
+      ba.style.setProperty('--pos', `${v}%`)
+      range.value = String(Math.round(v))
+      range.setAttribute('aria-valuetext', `${Math.round(v)}% before, ${100 - Math.round(v)}% after`)
+    }
+    const fromPointer = (e: PointerEvent) => {
+      const r = ba.getBoundingClientRect()
+      setPos(((e.clientX - r.left) / r.width) * 100)
+    }
+    let dragging = false
+    ba.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return
+      dragging = true
+      ba.setPointerCapture(e.pointerId)
+      fromPointer(e)
+      range.focus({ preventScroll: true })
+    })
+    ba.addEventListener('pointermove', (e) => {
+      if (dragging) fromPointer(e)
+    })
+    const stop = () => (dragging = false)
+    ba.addEventListener('pointerup', stop)
+    ba.addEventListener('pointercancel', stop)
+    range.addEventListener('input', () => setPos(Number(range.value)))
+    setPos(Number(range.value))
+
+    // Switching pairs: swap both pictures' sources.
+    const srcs = (id: string, side: string, ext: string) =>
+      `${base}${id}-${side}-1200.${ext} 1200w, ${base}${id}-${side}-2400.${ext} 2400w`
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.ba-thumbs button')
+    buttons.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id!
+        for (const side of ['before', 'after']) {
+          const pic = ba.querySelector(`.ba-${side}`)!
+          pic.querySelector('source')!.srcset = srcs(id, side, 'webp')
+          const img = pic.querySelector('img')!
+          img.srcset = srcs(id, side, 'jpg')
+          img.src = `${base}${id}-${side}-1200.jpg`
+          img.alt = `${side === 'before' ? 'Before' : 'After'}: ${btn.dataset.alt}`
+        }
+        cap.textContent = btn.dataset.cap ?? ''
+        buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)))
+      })
+    )
+  }
+</script>

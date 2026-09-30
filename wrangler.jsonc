@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pixl-web",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-29",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // The Worker maps each hostname to its site's folder, so it runs before any asset.
+    "run_worker_first": true,
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "none"
+  },
+  "routes": [
+    { "pattern": "pixlfoundation.com", "custom_domain": true },
+    { "pattern": "www.pixlfoundation.com", "custom_domain": true },
+    { "pattern": "playroom.pixlfoundation.com", "custom_domain": true },
+    { "pattern": "space.pixlfoundation.com", "custom_domain": true },
+    { "pattern": "engine.pixlfoundation.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "env": {
+    // `pnpm preview`: no routes, so wrangler dev keeps each request's own host
+    // (playroom.localhost:8787) instead of rewriting it to the first route.
+    "local": { "routes": [], "workers_dev": false }
+  }
+}

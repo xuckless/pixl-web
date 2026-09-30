@@ -1,0 +1,305 @@
+---
+import Base from '../../layouts/Base.astro'
+import '../../styles/playroom.css'
+import BeforeAfter from '../../components/playroom/BeforeAfter.astro'
+import ToolShowcase from '../../components/playroom/ToolShowcase.astro'
+import Mark from '../../components/Mark.astro'
+import Wordmark from '../../components/Wordmark.astro'
+import { COST_3Y, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
+import { href, media } from '../../lib/links'
+
+const own = (p: string) => href('playroom', p, 'playroom')
+const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
+const icon = {
+  check: 'M5 12.5l4.5 4.5L19 7.5',
+  download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
+  mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
+  play: 'M8 5v14l11-7z',
+}
+---
+
+<Base
+  site="playroom"
+  title="Pixl Playroom · Develop everything. Rent nothing."
+  description="A professional RAW photo editor for macOS and Windows. Masks, colour grading, AI super resolution and every tool you need, on your own folders. Pay once, keep it forever."
+  ogImage="/og.png"
+  ogImageAlt="Pixl Playroom: Develop everything. Rent nothing. The Develop view editing a photo of rowan berries."
+  nav={[
+    { label: 'Features', to: '#features' },
+    { label: 'Examples', to: '#developed' },
+    { label: 'Tools', to: '#tools' },
+    { label: 'Pricing', to: '#pricing' },
+    { label: 'FAQ', to: '#faq' },
+  ]}
+  cta={{ label: 'Get notified', to: '#pricing' }}
+>
+  <!-- ── hero ─────────────────────────────────────────────────── -->
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <span class="b-chip">The RAW editor you own · macOS &amp; Windows</span>
+    <h1 class="b-disp" id="hero-title">Develop everything.<br /><span class="accent">Rent nothing.</span></h1>
+    <p class="b-body lede">
+      Professional photo editing without the monthly bill. Masks, colour grading, noise reduction and AI upscaling,
+      working straight on the folders you already have. Pay once, and it's yours.
+    </p>
+    <div class="ctas">
+      <a class="b-cta pri" href="#pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>{PRICE.amount} · Pay once</a>
+      <a class="b-cta sec" href="#developed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.play}></path></svg>See the results</a>
+    </div>
+    <ul class="proof b-body" aria-label="At a glance">
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>No subscription</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.devices} computers per licence</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Edits never leave your machine</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free {PRICE.trialDays}-day trial</li>
+    </ul>
+    <div class="b-win hero-win">
+      <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
+        <!-- MP4 first: WebKit picks the WebM, reads its header and never plays a frame. -->
+        <source src={media('playroom/hero.mp4')} type="video/mp4" />
+        <source src={media('playroom/hero.webm')} type="video/webm" />
+      </video>
+      <button class="vid-toggle" type="button" aria-pressed="false" hidden>
+        <svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"></path></svg>
+        <svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"></path></svg>
+        <span class="label">Pause</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="wrap" aria-label="File formats">
+    <div class="formats">
+      <span class="b-micro">Opens</span>
+      <ul>
+        {FORMATS.map((f) => <li><img class="fmt-icon" src={own(`/formats/${f.id}.png`)} width="48" height="48" alt="" loading="lazy" />{f.label}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── why ──────────────────────────────────────────────────── -->
+  <section class="wrap why" aria-labelledby="why-title">
+    <h2 class="sr-only" id="why-title">Why Playroom</h2>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Own it</span>
+        <h3 class="b-disp">One price. No renewals.</h3>
+        <p class="b-body">Buy Playroom once and keep it. Every 1.x update is included, and it never stops working because a card expired.</p>
+      </li>
+      <li>
+        <span class="b-micro">Keep your workflow</span>
+        <h3 class="b-disp">No import. No catalog.</h3>
+        <p class="b-body">Point it at a folder and start. Edits live in a small recipe beside each photo, and keywords go to standard XMP that other apps read.</p>
+      </li>
+      <li>
+        <span class="b-micro">Private by design</span>
+        <h3 class="b-disp">Your photos stay yours.</h3>
+        <p class="b-body">Every edit, preview and AI upscale runs on your own computer. Nothing is uploaded, and editing works offline.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── features ─────────────────────────────────────────────── -->
+  <div id="features">
+    <section class="wrap feature" aria-labelledby="f1">
+      <div class="copy">
+        <span class="b-micro">01 · Library</span>
+        <h2 class="b-disp h2" id="f1">Find the keepers fast.</h2>
+        <p class="b-body">Rate, flag and colour-label as you cull. Smart collections, keyword trees, stacks and a duplicate finder keep a whole shoot in order, across every folder, without moving a file.</p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="b-win shot">
+        <img src={own('/shots/library.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The Library: folders, collections and a keyword tree in the sidebar, beside a grid of rated, labelled photos from one folder." />
+      </figure>
+    </section>
+
+    <section class="wrap feature flip" aria-labelledby="f2">
+      <div class="copy">
+        <span class="b-micro">02 · Masks &amp; grading</span>
+        <h2 class="b-disp h2" id="f2">Edit exactly what you meant to.</h2>
+        <p class="b-body">Select a subject by colour, tone, brush or gradient, then grade it on its own layer. Stack as many as you like, reorder them, and change your mind later. Nothing is baked in until you export.</p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="b-win shot">
+        <img src={own('/shots/develop-masks.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="Develop with the Masks tool: a colour-range mask picks out a cluster of red berries, shown as a violet overlay, with its own sliders." />
+      </figure>
+    </section>
+
+    <section class="wrap feature" aria-labelledby="f3">
+      <div class="copy">
+        <span class="b-micro">03 · Super Resolution</span>
+        <h2 class="b-disp h2" id="f3">Crop harder. Print bigger.</h2>
+        <p class="b-body">A bundled AI model doubles a photo's resolution on your own GPU, with your edits already applied. The result is a 16-bit TIFF beside the original, ready for a large print.</p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="b-win shot">
+        <img src={own('/shots/enhance.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The Enhance dialog, which doubles a photo's resolution into a 16-bit TIFF beside the original." />
+      </figure>
+    </section>
+  </div>
+
+  <!-- ── before / after ───────────────────────────────────────── -->
+  <section class="wrap band developed" id="developed" aria-labelledby="dev-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="dev-title">Straight off the card.<br /><span class="accent">Finished in Playroom.</span></h2>
+      <p class="b-body">Real RAW files from an entry-level camera. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
+    </div>
+    <BeforeAfter pairs={PAIRS} />
+  </section>
+
+  <!-- ── tools ────────────────────────────────────────────────── -->
+  <section class="wrap band tools" id="tools" aria-labelledby="tools-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="tools-title">Every tool you reach for.<br /><span class="accent">On one thumb-wheel.</span></h2>
+      <p class="b-body">Ten tools, one at a time, so the photo keeps the screen. Every slider updates the picture and the histogram as you drag. Pick one to see it in the app.</p>
+    </div>
+    <ToolShowcase tools={TOOLS} />
+  </section>
+
+  <!-- ── cost ─────────────────────────────────────────────────── -->
+  <section class="wrap band cost" aria-labelledby="cost-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="cost-title">What three years of editing costs.</h2>
+      <p class="b-body">A subscription is never finished being paid for. Playroom is paid for once.</p>
+    </div>
+    <table class="cost-table">
+      <caption class="sr-only">Three-year cost of each app</caption>
+      <thead>
+        <tr><th scope="col">App</th><th scope="col">How you pay</th><th scope="col">3 years</th></tr>
+      </thead>
+      <tbody>
+        {
+          COST_3Y.map((c) => (
+            <tr class:list={{ ours: c.ours }}>
+              <th scope="row">{c.name}</th>
+              <td>{c.model}</td>
+              <td class="b-mono">{c.total}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="b-body fine">Prices as listed by each vendor in September 2026, in USD, before tax. Plans change, so check before you buy.</p>
+  </section>
+
+  <!-- ── pricing ──────────────────────────────────────────────── -->
+  <section class="wrap band pricing" id="pricing" aria-labelledby="price-title">
+    <div class="price-head">
+      <Mark site="playroom" size={96} class="price-mark" />
+      <h2 class="b-disp" id="price-title">Yours to keep.</h2>
+      <p class="b-body">One licence, every tool, no subscription.</p>
+    </div>
+    <div class="plans">
+      <article class="plan main" aria-labelledby="plan-app">
+        <header>
+          <Wordmark site="playroom" size={13} />
+          <h3 class="sr-only" id="plan-app">Pixl Playroom</h3>
+          <p class="price"><span class="b-disp">{PRICE.amount}</span><span class="b-body once">one-time</span></p>
+        </header>
+        <ul class="b-body ticks">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Every Develop and Library tool, nothing held back</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Use it on {PRICE.devices} computers at a time, and swap them whenever you like</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>All 1.x updates included, delivered in the app</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>On-device AI Super Resolution</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free {PRICE.trialDays}-day trial with everything unlocked</li>
+        </ul>
+        <div class="plan-ctas">
+          <button type="button" class="b-cta pri" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>macOS <span class="soon">· Soon</span></button>
+          <button type="button" class="b-cta sec" aria-disabled="true">Windows <span class="soon">· Soon</span></button>
+        </div>
+        <a class="notify textlink b-body" href={notify}>Get an email the day it launches</a>
+      </article>
+
+      <article class="plan later" aria-labelledby="plan-agent">
+        <header>
+          <span class="b-chip">Coming later · Optional</span>
+          <h3 class="b-disp" id="plan-agent">Playroom Agent &amp; Cloud</h3>
+        </header>
+        <p class="b-body">Describe the edit and let an AI agent do it, across one photo or a whole folder. Every change it makes is a normal history step you can undo.</p>
+        <ul class="b-body ticks">
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Bring your own AI agent, included with the app</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Or use ours, with cloud masking and generative tools on credits</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>See the cost before any batch runs</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── faq ──────────────────────────────────────────────────── -->
+  <section class="wrap band faq" id="faq" aria-labelledby="faq-title">
+    <h2 class="b-disp h2" id="faq-title">Questions</h2>
+    <div class="faq-list">
+      {
+        FAQ.map((f) => (
+          <details>
+            <summary class="b-disp">{f.q}</summary>
+            <p class="b-body">{f.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ── engine + closing ─────────────────────────────────────── -->
+  <section class="wrap">
+    <a class="engine-card" href={href('engine', '/', 'playroom')}>
+      <div class="copy">
+        <Wordmark site="engine" size={14} />
+        <h2 class="b-disp h2">Built on PIXL Engine.</h2>
+        <p class="b-body">Playroom's pictures come from PIXL Engine, a Rust imaging core made for speed and colour accuracy. What you see on screen is exactly what you export.</p>
+        <span class="textlink b-body">Meet the engine</span>
+      </div>
+      <Mark site="engine" size={220} class="engine-mark" />
+    </a>
+  </section>
+
+  <section class="wrap closing" aria-labelledby="close-title">
+    <h2 class="b-disp" id="close-title">Your photos deserve better<br /><span class="accent">than a rental.</span></h2>
+    <div class="ctas">
+      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
+      <a class="b-cta sec" href="#tools">Explore the tools</a>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // Disabled buttons do nothing.
+  document.querySelectorAll('.b-cta[aria-disabled="true"]').forEach((b) =>
+    b.addEventListener('click', (e) => e.preventDefault())
+  )
+
+  // The hero video plays only while on screen, and not under reduced motion unless asked.
+  const video = document.querySelector<HTMLVideoElement>('.hero-win video')
+  const btn = document.querySelector<HTMLButtonElement>('.vid-toggle')
+  if (video) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    video.muted = true
+    let visible = false
+    let userPaused = reduced.matches
+    const sync = () => {
+      const want = visible && !userPaused && !document.hidden
+      if (want && video.paused) video.play().catch(() => {})
+      else if (!want && !video.paused) video.pause()
+      if (btn) {
+        btn.setAttribute('aria-pressed', String(userPaused))
+        btn.querySelector('.label')!.textContent = userPaused ? 'Play' : 'Pause'
+      }
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        visible = entries[0].isIntersecting
+        sync()
+      }, { threshold: 0.05 }).observe(video)
+    } else visible = true
+    document.addEventListener('visibilitychange', sync)
+    reduced.addEventListener('change', () => {
+      userPaused = reduced.matches
+      sync()
+    })
+    if (btn) {
+      btn.hidden = false
+      btn.addEventListener('click', () => {
+        userPaused = !userPaused
+        sync()
+      })
+    }
+    sync()
+  }
+</script>

@@ -1,0 +1,8 @@
+---
+import Legal from '../../../../layouts/Legal.astro'
+import { Content, frontmatter } from '../../../../legal/privacy.md'
+---
+
+<Legal site="home" title={frontmatter.title} summary={frontmatter.summary} updated={frontmatter.updated} path="/legal/privacy/">
+  <Content />
+</Legal>

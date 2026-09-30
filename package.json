@@ -1,0 +1,20 @@
+{
+  "name": "pixl-web",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.5.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "astro check && tsc -p worker",
+    "preview": "PUBLIC_ROOT_DOMAIN=localhost:8787 astro build && wrangler dev --env local --port 8787",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20260929.1",
+    "astro": "^7.3.5",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.144.0"
+  }
+}
