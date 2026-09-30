@@ -65,7 +65,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .skip:focus { top: 16px; }
 
-.wrap { position: relative; max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+.wrap { position: relative; max-width: var(--max); margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
