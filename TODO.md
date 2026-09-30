@@ -47,12 +47,27 @@ Grouped by area; roughly in priority order within each.
       policy) or hand them to Sentry, and add rate limiting before the app ships
       widely.
 
-## Accounts and licensing (not built)
+## Accounts and licensing
 
-- [ ] Accounts, checkout and licence keys through Lemon Squeezy: buy, get a
-      key, up to 3 devices at a time, remove one to add one.
-- [ ] Device management on the website.
-- [ ] Everything under `/api/*` but `/api/crash` is a 501 stub until then (`worker/api.ts`).
+The app side is built (pixl-playroom: Settings → Licence, against Lemon
+Squeezy's licence API, not enforced). The website side is stubbed:
+
+- [x] `/api/webhooks/lemonsqueezy` checks the `X-Signature` HMAC and logs the
+      event (`worker/api.ts`). Set the secret with
+      `wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET` and point the store's
+      webhook at `https://pixlfoundation.com/api/webhooks/lemonsqueezy`.
+- [x] `/account/` explains licences until accounts exist; the app's "Manage
+      devices" link goes there.
+- [x] Draft D1 schema: `migrations/0001_accounts.sql` (users, licences,
+      devices, webhook events). Not applied, and no database bound.
+- [ ] Sign-in (email magic link, or Clerk/Supabase Auth), then:
+  - [ ] the webhook storing orders and licence keys against accounts
+        (idempotently: Lemon Squeezy retries);
+  - [ ] `/api/account`, `/api/licences`, `/api/devices` (list, deactivate
+        one, via Lemon Squeezy's API with the store key as a Worker secret);
+  - [ ] `/api/checkout` and the buy buttons on playroom.pixlfoundation.com
+        (Lemon Squeezy checkout overlay or hosted page).
+- [ ] The account page: licences, devices, "deactivate", receipts.
 
 ## Site
 

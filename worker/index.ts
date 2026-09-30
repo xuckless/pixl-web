@@ -4,9 +4,9 @@
 // and /api/* (worker/api.ts) answers on every host.
 
 import { ROOT_DOMAIN, SHARED_PREFIXES, siteForSub } from '../src/lib/sites'
-import { handleApi } from './api'
+import { handleApi, type ApiEnv } from './api'
 
-interface Env {
+interface Env extends ApiEnv {
   ASSETS: Fetcher
 }
 
@@ -34,7 +34,7 @@ export default {
       return Response.redirect(url.toString(), 301)
     }
 
-    if (url.pathname.startsWith('/api/')) return handleApi(request, url)
+    if (url.pathname.startsWith('/api/')) return handleApi(request, url, env)
 
     if (SHARED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
       return env.ASSETS.fetch(request)

@@ -1,0 +1,61 @@
+---
+// Where licences and devices will be managed. Until the account system exists
+// (TODO.md), it says how licences work and where to ask. The apps' "Manage
+// devices" link points here.
+import Base from '../../../layouts/Base.astro'
+import { href } from '../../../lib/links'
+---
+
+<Base
+  site="home"
+  title="Your account · PIXL Foundation"
+  description="Manage your PIXL licences and the devices they're active on."
+  path="/account/"
+  nav={[
+    { label: 'Products', to: href('home', '/#products', 'home') },
+    { label: 'About', to: href('home', '/#about', 'home') },
+  ]}
+>
+  <section class="wrap hero" aria-labelledby="acct-title">
+    <span class="b-chip">Accounts · Coming soon</span>
+    <h1 class="b-disp" id="acct-title">Your licences,<br /><span class="accent">in one place.</span></h1>
+    <p class="b-body lede">
+      Soon you'll sign in here to see your licences and the devices they're active on, and free up a device you no
+      longer use. Until then, everything you need is inside the app.
+    </p>
+  </section>
+
+  <section class="wrap band" aria-labelledby="how-title">
+    <h2 class="sr-only" id="how-title">How licences work</h2>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Buy once</span>
+        <h3 class="b-disp">One key, three devices.</h3>
+        <p class="b-body">Your licence key arrives by email. It works on up to three computers at a time.</p>
+      </li>
+      <li>
+        <span class="b-micro">Activate</span>
+        <h3 class="b-disp">Settings → Licence.</h3>
+        <p class="b-body">Paste your key in the app's Settings (⌘, or Ctrl+,) and choose Activate.</p>
+      </li>
+      <li>
+        <span class="b-micro">Move it</span>
+        <h3 class="b-disp">Free a device any time.</h3>
+        <p class="b-body">Choose "Deactivate this device" in Settings on the old computer, then activate on the new one.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="wrap closing" aria-labelledby="help-title">
+    <h2 class="b-disp" id="help-title">Lost a device?</h2>
+    <p class="b-body closing-lede">If a computer is gone and still holds a place, email us with your licence key and we'll free it.</p>
+    <div class="ctas">
+      <a class="b-cta pri" href="mailto:hello@pixlfoundation.com?subject=Licence%20devices">Email us</a>
+      <a class="b-cta sec" href={href('playroom', '/#pricing', 'home')}>Get Playroom</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .closing-lede { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+</style>
