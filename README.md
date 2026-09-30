@@ -17,9 +17,11 @@ The PIXL Foundation websites: four static Astro sites served by one Cloudflare W
 src/lib/sites.ts        the four sites: subdomain → folder. Shared by the Worker and the pages
 src/lib/links.ts        href(site, path, from): links between sites, right in dev and in a build
 src/layouts/Base.astro  head, SEO tags, backdrop, nav and footer for every page
-src/components/         Nav, Footer, Wordmark, Mark, Stub
+src/lib/marks.ts        the PIXL Family Kit's marks and pixel wordmark, as SVG (pages and scripts share it)
+src/lib/seo.ts          sitemaps, robots.txt and the JSON-LD each page carries
+src/components/         Nav, Footer, Wordmark, Stub; brand/ (Mark, Bitmap); engine/Architecture
 src/styles/             brand.css (the PIXL brand kit) and base.css (tokens, reset, nav, footer)
-public/shared/          fonts and brand marks, served on every host at /shared/
+public/shared/          fonts, press kits, legal notices and engine figures, served on every host at /shared/
 public/<site>/          files for one site only, e.g. public/playroom/favicon.svg → playroom…/favicon.svg
 media/                  video, served from the pixl-media R2 bucket at media.pixlfoundation.com
                         (scripts/push-media.sh uploads it; static assets can't serve Range requests)
@@ -39,6 +41,7 @@ pnpm dev        # astro dev: every site under its folder, e.g. localhost:4321/pl
 pnpm preview    # a real build through the Worker: localhost:8787, playroom.localhost:8787, …
 pnpm check      # astro check + the Worker's types
 pnpm run deploy # build and wrangler deploy (needs `wrangler login`; plain `pnpm deploy` is a pnpm built-in)
+node scripts/brand-assets.mts   # favicons, touch icons, manifests, link cards, press kits (Chrome, ImageMagick, zip)
 ```
 
 `pnpm preview` builds with `PUBLIC_ROOT_DOMAIN=localhost:8787`, so links between

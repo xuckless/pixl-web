@@ -28,7 +28,7 @@ export const LEGAL_SITES: SiteId[] = ['home', 'playroom']
 export const MEDIA_ORIGIN = 'https://media.pixlfoundation.com'
 
 /** Paths served as-is on every host: build output and assets the sites share. */
-export const SHARED_PREFIXES = ['/_astro/', '/shared/', '/robots.txt']
+export const SHARED_PREFIXES = ['/_astro/', '/shared/']
 
 /** Which site a subdomain label belongs to ('' or 'www' is the apex). */
 export function siteForSub(sub: string): Site | undefined {

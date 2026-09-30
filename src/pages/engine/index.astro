@@ -8,6 +8,7 @@ import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { BINDINGS, FORMATS, MEASURED, OPS, STATS } from '../../data/engine'
 import { href, origin } from '../../lib/links'
+import { softwareApp } from '../../lib/seo'
 
 const contact = 'mailto:hello@pixlfoundation.com?subject=PIXL%20Engine'
 const fig = (f: string) => `/shared/engine/${f}`
@@ -24,6 +25,13 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
     { label: 'Badge', to: '#badge' },
   ]}
   cta={{ label: 'Licensing', to: '#licensing' }}
+  jsonLd={[
+    softwareApp('engine', {
+      category: 'DeveloperApplication',
+      os: 'macOS, Windows, Linux, iOS, Android',
+      description: 'PIXL Engine is a Rust imaging core that decodes, grades and re-encodes photographs, with Swift, Kotlin and Node bindings.'
+    })
+  ]}
 >
   <!-- ── hero ─────────────────────────────────────────────────── -->
   <section class="wrap en-hero" aria-labelledby="hero-title">
