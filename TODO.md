@@ -16,8 +16,8 @@ account for every PIXL app, as JetBrains does:
   Each desktop app is a public client (authorization code with PKCE). The
   sites sign in with supabase-js.
 - **Supabase Postgres** holds accounts, entitlements (beta, trial, licence,
-  add-on subscriptions), devices and trials. It replaces the D1 draft
-  (`migrations/0001_accounts.sql`).
+  add-on subscriptions), devices and trials (`supabase/migrations/`,
+  `supabase/README.md`).
 - **The Worker** (`worker/api.ts`) is the API: it checks Supabase JWTs,
   takes Lemon Squeezy's webhooks and signs entitlement tokens for the apps.
 - **Lemon Squeezy** handles checkout, billing, tax and refunds only. Pay
@@ -37,8 +37,6 @@ Done so far:
       webhook at `https://pixlfoundation.com/api/webhooks/lemonsqueezy`.
 - [x] `/account/` explains licences until accounts exist; the app's "Manage
       devices" link goes there.
-- [x] Draft D1 schema: `migrations/0001_accounts.sql`. Superseded by the
-      Supabase schema below; delete it when that lands.
 
 Next:
 
@@ -100,16 +98,26 @@ Next:
       client secret expires 2027-03-30; renew it with
       `node scripts/apple-client-secret.mts --apply`.
 - [ ] Still to set: DMARC at `p=quarantine` once mail flows cleanly.
-- [ ] Schema, as Supabase migrations, with row-level security (users read
-      only their own rows; only the Worker writes, with the secret key):
-  - `profiles`
-  - `programs`: the beta per product (open or closed, `ended_at`, a cap)
-  - `entitlements`: user, product, kind (beta, trial, licence, add-on),
-    status, starts and ends, device limit, and the Lemon Squeezy order or
-    subscription id behind it
-  - `devices`: user, product, hashed device id, name, first and last seen
-  - `trials`: unique on product + device hash, and on product + user
-  - `webhook_events` (idempotency) and `discount_codes`
+- [x] Schema, in `supabase/migrations/` and pushed to pixl-core 2026-10-01
+      (`supabase/README.md` covers changing it and the admin SQL):
+  - `profiles`: made by a trigger for every new account, named from
+    Google or Apple. Users may change `display_name` and `marketing_opt_in`
+    from the site only, not with an app's token.
+  - `programs`: seeded with `playroom-beta`, open, no cap, terms `2026-10`.
+  - `entitlements`, `devices`, `trial_devices`, `agreements`,
+    `webhook_events` and `discount_codes`.
+  - RLS on every table. Users read their own rows, but not device hashes.
+    `trial_devices` and `webhook_events` are the Worker's alone. No default
+    grants.
+  - `supabase/tests/rls.sql` checks all of this inside a rolled-back
+    transaction.
+  - Admin views and functions are in schema `admin` (beta testers,
+    product-news contacts, shared devices, set and end a program).
+- [x] Disposable email domains are refused at sign-up: the "Before User
+      Created" hook checks 9,189 domains
+      (`node scripts/disposable-domains.mts` refreshes them).
+- [ ] Try a sign-up with a mailinator address once the sign-in page exists:
+      the admin API skips the hook, so it's untested end to end.
 - [ ] Pages (Astro, with supabase-js on the page):
   - `/account/sign-in`
   - `/account/`: products and what each includes, devices with "Free this
@@ -127,7 +135,7 @@ Next:
   - `DELETE /api/devices/:id` frees a device.
 - [ ] Trial abuse:
   - a verified email and Turnstile to sign up
-  - disposable-email domains refused
+  - disposable-email domains refused (done: the sign-up hook)
   - sign-ups rate-limited per IP (a Workers rate limit binding, plus
     Supabase's own auth limits)
   - one trial per account _and_ per device per product

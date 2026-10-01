@@ -1,3 +1,8 @@
+# LOCAL DEVELOPMENT ONLY (`supabase start`, which needs Docker). The real
+# project's settings live in pixl-core and are changed through the Management
+# API (TODO.md, "PIXL account"). Never run `supabase config push`: it would
+# overwrite them with these defaults.
+
 # For detailed configuration reference documentation, visit:
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the

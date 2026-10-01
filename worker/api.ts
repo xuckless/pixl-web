@@ -1,6 +1,6 @@
 // The API behind /api/* on every host: crash and problem reports, the Lemon
-// Squeezy webhook, and stubs for the account and licence endpoints still to
-// come (TODO.md, "Accounts and licensing"; the draft schema is migrations/0001_accounts.sql).
+// Squeezy webhook, and stubs for the account endpoints still to come (TODO.md,
+// "PIXL account"; the schema is in supabase/migrations/).
 
 export interface ApiEnv {
   /** Lemon Squeezy's webhook signing secret (`wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET`). */
