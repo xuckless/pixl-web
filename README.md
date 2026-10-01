@@ -25,7 +25,9 @@ public/shared/          fonts, press kits, legal notices and engine figures, ser
 public/<site>/          files for one site only, e.g. public/playroom/favicon.svg → playroom…/favicon.svg
 media/                  video, served from the pixl-media R2 bucket at media.pixlfoundation.com
                         (scripts/push-media.sh uploads it; static assets can't serve Range requests)
-worker/index.ts         picks the site folder from the Host header; /api/* is stubbed (501)
+worker/index.ts         picks the site folder from the Host header; /api/* goes to worker/api.ts
+worker/account.ts       the PIXL account's API for the apps (entitlements, trials, devices)
+supabase/               the PIXL account's database: migrations, tests, admin notes
 wrangler.jsonc          the Worker, its static assets and its custom domains
 ```
 
@@ -47,6 +49,13 @@ node scripts/brand-assets.mts   # favicons, touch icons, manifests, link cards, 
 `pnpm preview` builds with `PUBLIC_ROOT_DOMAIN=localhost:8787`, so links between
 sites stay local, and runs `wrangler dev --env local`, which has no routes and so
 keeps each request's own host.
+
+The PIXL account (sign-in, `/account/`, `/oauth/consent/`, `/api/entitlements`…)
+runs on Supabase project pixl-core; its schema and admin notes are in
+`supabase/README.md`. For the account API under `pnpm preview`, run
+`node scripts/entitlement-key.mts dev-2026-10 --dev-vars` once (it writes
+`.dev.vars`), then `node scripts/account-smoke.mts` checks it end to end. The
+consent page only works on https://pixlfoundation.com (Supabase checks the origin).
 
 Pushes to `main` deploy through `.github/workflows/deploy.yml` (needs a
 `CLOUDFLARE_API_TOKEN` repository secret).

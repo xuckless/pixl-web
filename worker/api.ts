@@ -1,8 +1,10 @@
 // The API behind /api/* on every host: crash and problem reports, the Lemon
-// Squeezy webhook, and stubs for the account endpoints still to come (TODO.md,
-// "PIXL account"; the schema is in supabase/migrations/).
+// Squeezy webhook, and the PIXL account's endpoints for the apps
+// (worker/account.ts; the schema is in supabase/migrations/).
 
-export interface ApiEnv {
+import { handleAccount, type AccountEnv } from './account'
+
+export interface ApiEnv extends AccountEnv {
   /** Lemon Squeezy's webhook signing secret (`wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET`). */
   LEMON_SQUEEZY_WEBHOOK_SECRET?: string
   /**
@@ -155,18 +157,18 @@ async function lemonSqueezyWebhook(request: Request, env: ApiEnv): Promise<Respo
   return new Response('ok', { status: 200 })
 }
 
-/** Endpoints the account system will answer; named here so the apps and the site can be written against them. */
+/** Endpoints still to come; named here so the apps and the site can be written against them. */
 const PLANNED: Record<string, string> = {
-  '/api/account': 'the signed-in account: email, licences',
-  '/api/checkout': 'a Lemon Squeezy checkout link for a product',
-  '/api/licences': "the account's licence keys",
-  '/api/devices': "a licence's active devices, and deactivating one"
+  '/api/account': 'deleting the account',
+  '/api/checkout': 'a Lemon Squeezy checkout link for a product'
 }
 
 export async function handleApi(request: Request, url: URL, env: ApiEnv): Promise<Response> {
   if (url.pathname === '/api/crash') return crash(request, env)
   if (url.pathname === '/api/report') return problem(request, env)
   if (url.pathname === '/api/webhooks/lemonsqueezy') return lemonSqueezyWebhook(request, env)
+  const account = await handleAccount(request, url, env)
+  if (account) return account
   const planned = Object.entries(PLANNED).find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`))
   return Response.json(
     { error: 'not_implemented', ...(planned ? { planned: planned[1] } : {}) },

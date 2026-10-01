@@ -25,11 +25,35 @@
   "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "pixl-reports" }],
   // Reports per client (IP) per minute, across /api/crash and /api/report.
   "ratelimits": [
-    { "name": "REPORT_LIMIT", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } }
+    { "name": "REPORT_LIMIT", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } },
+    // PIXL account calls per user (and trial starts per IP), worker/account.ts.
+    { "name": "ACCOUNT_LIMIT", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } }
   ],
+  // The PIXL account (worker/account.ts). Secrets, set with `wrangler secret put`:
+  //   SUPABASE_SECRET_KEY      pixl-core's secret key
+  //   ENTITLEMENT_SIGNING_KEY  the Ed25519 private JWK (scripts/entitlement-key.mts)
+  //   ENTITLEMENT_KEYSET       the key set the root signed (pixl-playroom scripts/entitlement-keys.mjs)
+  //   DEVICE_PEPPER            32+ random bytes; never change it (every device would count anew)
+  "vars": {
+    "SUPABASE_URL": "https://lskosagqyekwklxyuczi.supabase.co",
+    "ENTITLEMENT_KID": "ent-2026-10",
+    // OAuth client id → product (TODO.md, "OAuth clients").
+    "APP_CLIENTS": { "83eab600-baf2-4f5e-aac4-252010db94b2": "playroom" }
+  },
   "env": {
     // `pnpm preview`: no routes, so wrangler dev keeps each request's own host
     // (playroom.localhost:8787) instead of rewriting it to the first route.
-    "local": { "routes": [], "workers_dev": false }
+    // Environments don't inherit vars or bindings, so the account's are repeated
+    // here; secrets come from .dev.vars (scripts/entitlement-key.mts --dev-vars).
+    "local": {
+      "routes": [],
+      "workers_dev": false,
+      "ratelimits": [{ "name": "ACCOUNT_LIMIT", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } }],
+      "vars": {
+        "SUPABASE_URL": "https://lskosagqyekwklxyuczi.supabase.co",
+        "ENTITLEMENT_KID": "ent-2026-10",
+        "APP_CLIENTS": { "83eab600-baf2-4f5e-aac4-252010db94b2": "playroom" }
+      }
+    }
   }
 }

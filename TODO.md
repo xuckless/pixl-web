@@ -150,14 +150,34 @@ Next:
   - `/account/`: products and what each includes, devices with "Free this
     device", signed-in apps with "Revoke", receipts through Lemon Squeezy's
     customer portal
-- [ ] Worker API. The Worker checks access tokens against Supabase's JWKS
-      (issuer, audience and `client_id`).
-  - `POST /api/entitlements` (product, device hash, device name): registers
-    the device within the limit and returns an Ed25519-signed token (what
-    the account holds, until when, when to refresh). The signing key is a
-    Worker secret with a key id; the apps carry the public keys.
-  - `POST /api/trials` starts a trial.
-  - `DELETE /api/devices/:id` frees a device.
+- [x] Worker API (`worker/account.ts`, `auth.ts`, `entitlements.ts`,
+      `supabase.ts`), as in "Contract with the apps":
+  - It checks Supabase access tokens against the JWKS (`jose`). An app's
+    `client_id` must map to the product it asks for (`APP_CLIENTS` in
+    `wrangler.jsonc`).
+  - `POST /api/entitlements` and `POST /api/trials` sign the entitlement
+    token with Ed25519 and send the root-signed key set beside it.
+  - `DELETE /api/devices/:id`.
+  - The decisions are database functions, one transaction each
+    (`check_in`, `start_trial`, `release_device`, `account_holdings`;
+    `supabase/tests/devices.sql`).
+  - Device hashes are peppered again before they're stored.
+  - Rate limit `ACCOUNT_LIMIT`: 30 a minute per user, plus per IP for
+    trials.
+  - `node scripts/account-smoke.mts [base URL]` runs the contract end to
+    end with a throwaway user; all checks pass against `pnpm preview`.
+  - Locally: `node scripts/entitlement-key.mts dev-2026-10 --dev-vars`
+    writes `.dev.vars`, with a key set signed by Playroom's development
+    root.
+- [ ] Production secrets, before the deploy that hands (c) to the Playroom
+      session:
+  - `SUPABASE_SECRET_KEY` and `DEVICE_PEPPER` (32 random bytes; never
+    change it, or every device counts as new).
+  - `node scripts/entitlement-key.mts ent-2026-10 --put`, which stores
+    the signing key and prints `ent-2026-10=<public>`.
+  - The owner signs the key set with the offline root:
+    `node scripts/entitlement-keys.mjs sign-keyset root-1 ent-2026-10=<public>`
+    in pixl-playroom. Its output goes in `ENTITLEMENT_KEYSET`.
 - [ ] Trial abuse:
   - a verified email and Turnstile to sign up
   - disposable-email domains refused (done: the sign-up hook)
@@ -189,7 +209,7 @@ the app.
     `client_id` belongs to the product asked for.
   - `POST /api/entitlements`
     `{ product, deviceHash, deviceName, os: "macos"|"windows", appVersion }`
-    → 200 `{ token }`. It registers the device, or updates its name, os,
+    → 200 `{ token, keyset }`. It registers the device, or updates its name, os,
     version and last seen. It never counts the same device twice, and a
     freed device registers again if there's room.
   - `POST /api/trials`, same body → the same answer. It's idempotent: an
@@ -209,8 +229,21 @@ the app.
     ent: { beta?: { until? }, trial?: { until }, licence?: { since },
     addons: [] }, discount?: { code, expires } }`.
   - `exp` is the offline grace and `rfa` is "refresh after".
-  - The app gets the public keys as `{ kid: base64url raw 32 bytes }`, the
-    current key and the next.
+  - Keys rotate without an app release (agreed later on 2026-10-01):
+    - The app has only a root public key built in (kid `root-1`, with a
+      spare `root-2`). The owner keeps the root private keys offline
+      (pixl-playroom `scripts/entitlement-keys.mjs`).
+    - The Worker holds its signing key (`ENTITLEMENT_SIGNING_KEY`, kid in
+      `ENTITLEMENT_KID`, like `ent-2026-10`). It also holds a key set that
+      the root signed (`ENTITLEMENT_KEYSET`): a JWS with header `{ alg:
+      "EdDSA", kid: "root-1", typ: "pixl-keyset" }` and payload `{ iss,
+      keys: { <kid>: <base64url raw key> }, iat }`.
+    - Every 200 from `/api/entitlements` and `/api/trials` is
+      `{ token, keyset }`.
+    - The app keeps the newest key set it has seen (by `iat`) and replaces
+      it whole. To rotate: sign a key set with the old and new keys, switch
+      the Worker's signing key, then drop the old key from a later set. To
+      revoke a key: publish a set without it.
 - **Errors**, JSON `{ error, … }`:
 
   | Status | `error` | Meaning |
