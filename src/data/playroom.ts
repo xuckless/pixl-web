@@ -8,9 +8,16 @@ export interface Tool {
   pitch: string
   detail: string
   alt: string
+  /** The screenshot, when it isn't shots/tools/<id>.webp. */
+  shot?: string
 }
 
-/** The Develop wheel, in the order the app turns through it. Screenshots: shots/tools/<id>.webp. */
+/**
+ * The Develop tools, in the order the app's wheel turns through them, plus the
+ * Masks window and the Engine report. Screenshots: shots/tools/<id>.webp.
+ * Lens Corrections and Heal are on the wheel too but have no screenshot yet
+ * (pixl-playroom scripts/site-tools.mjs), so the page names them in text.
+ */
 export const TOOLS: Tool[] = [
   {
     id: 'basic',
@@ -44,7 +51,7 @@ export const TOOLS: Tool[] = [
     id: 'detail',
     name: 'Detail',
     pitch: 'Clean up high-ISO shots without the plastic look.',
-    detail: 'Sharpening with edge masking, and noise reduction tuned to the noise it measures in your photo.',
+    detail: 'Sharpening with edge masking, and noise reduction tuned to the noise it measures in your photo, or AI noise reduction that runs on your own computer.',
     alt: 'The Detail panel on an ISO 3200 photo of rowan berries, with sharpening and noise reduction applied.'
   },
   {
@@ -57,15 +64,15 @@ export const TOOLS: Tool[] = [
   {
     id: 'masks',
     name: 'Masks',
-    pitch: 'Edit just the subject, just the sky, just the berries.',
-    detail: 'Brush, linear and radial gradients, lasso, colour range and luminance range, combined by adding, subtracting and intersecting. Each mask has its own sliders.',
+    pitch: 'Edit just the subject, just the background, just the berries.',
+    detail: 'AI Select Subject and Background, brush, linear and radial gradients, lasso, colour range and luminance range, combined by adding, subtracting and intersecting, in their own window. Each mask has its own sliders.',
     alt: 'The Masks tool: a colour-range mask picks out red berries, shown as a violet overlay, with its own sliders.'
   },
   {
     id: 'crop',
     name: 'Crop & Rotate',
     pitch: 'Straighten the horizon, frame the moment.',
-    detail: 'Aspect presets, straighten by dragging, quarter turns and flips, with thirds, golden and diagonal guides.',
+    detail: 'Aspect presets, straighten by dragging, quarter turns and flips, with thirds, golden and diagonal guides, and Upright to fix converging verticals.',
     alt: 'The crop tool on two people pointing across a lake, with a 3:2 frame and rule-of-thirds guides.'
   },
   {
@@ -76,10 +83,18 @@ export const TOOLS: Tool[] = [
     alt: 'The Calibration panel on wildflowers, with the red and blue primaries adjusted.'
   },
   {
+    id: 'enhance',
+    name: 'Enhance',
+    pitch: 'Two or four times the pixels, on your machine.',
+    detail: 'AI Super Resolution at ×2 or ×4, with JPEG clean-up and motion deblur on the way, written as a new 16-bit TIFF beside the original. The models download once, when you first use them.',
+    alt: 'The Enhance dialog, which doubles a photo\'s resolution into a 16-bit TIFF beside the original.',
+    shot: 'shots/enhance.webp'
+  },
+  {
     id: 'advanced',
-    name: 'Engine',
+    name: 'Engine report',
     pitch: 'See exactly what was done to every pixel.',
-    detail: 'The engine report for the last render: every step of the compiled grade, its timings and its numbers, plus custom layers for advanced users.',
+    detail: 'A window with the engine report for the last render: every step of the compiled grade, its timings and its numbers, plus custom layers for advanced users.',
     alt: 'The Engine panel listing each step of the compiled grade for a portrait: denoise, white balance, exposure, dehaze and curves.'
   }
 ]
@@ -137,15 +152,15 @@ export const FAQ = [
   },
   {
     q: 'Do my photos get uploaded anywhere?',
-    a: 'No. Editing, previews and Super Resolution all run on your own machine, and nothing is uploaded unless you choose a cloud feature.'
+    a: 'No. Editing, previews and every AI feature run on your own machine. The AI models download once, when you first use them, and nothing of yours is uploaded.'
   },
   {
     q: 'Will it mess with my folders or my Lightroom catalog?',
-    a: 'Never. Playroom works on the folders you already have. It saves each edit as a small recipe file beside the photo, and writes titles, captions and keywords to standard XMP sidecars that other apps can read. Your originals are never modified.'
+    a: 'Never. Playroom works on the folders you already have and never modifies your originals. Each edited photo gets a project file beside it (or in a folder you choose) holding its edits and history, with a copy of the original inside by default. Titles, captions and keywords go to standard XMP sidecars that other apps can read. It doesn\'t read or change a Lightroom catalog.'
   },
   {
     q: 'What can it open and export?',
-    a: 'It opens camera RAW, DNG, JPEG, JPEG XL, HEIC, TIFF, PNG, WebP and AVIF. It exports JPEG, PNG, TIFF, WebP, AVIF, JPEG XL and HEIC, one photo at a time or in batches.'
+    a: 'It opens camera RAW, DNG, JPEG, JPEG XL, HEIC, TIFF, PNG, WebP and AVIF. It exports JPEG, PNG, TIFF, WebP, AVIF and JPEG XL, one photo at a time or in batches. HEIC export is coming.'
   },
   {
     q: 'Can I try it first?',

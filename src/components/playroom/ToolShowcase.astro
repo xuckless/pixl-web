@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { tools } = Astro.props
-const src = (id: string) => href('playroom', `/shots/tools/${id}.webp`, 'playroom')
+const src = (t: Tool) => href('playroom', `/${t.shot ?? `shots/tools/${t.id}.webp`}`, 'playroom')
 ---
 
 <div class="tools-show">
@@ -29,7 +29,7 @@ const src = (id: string) => href('playroom', `/shots/tools/${id}.webp`, 'playroo
       tools.map((t, i) => (
         <section role="tabpanel" id={`panel-${t.id}`} aria-labelledby={`tab-${t.id}`} hidden={i !== 0}>
           <figure class="b-win tool-shot">
-            <img src={src(t.id)} width="1600" height="1000" loading="lazy" decoding="async" alt={t.alt} />
+            <img src={src(t)} width="1600" height="1000" loading="lazy" decoding="async" alt={t.alt} />
           </figure>
           <div class="tool-copy">
             <h3 class="b-disp">{t.pitch}</h3>

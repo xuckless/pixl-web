@@ -16,7 +16,7 @@ This policy covers Syed Ali, trading as PIXL Foundation ("PIXL Foundation", "we"
 
 ### Update checks
 
-The apps check for updates at launch and every few hours by downloading a small file from GitHub, where our releases are published. As with any web request, GitHub sees your IP address and the app version asking. See [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement).
+Pixl Playroom checks for updates at launch and every few hours by downloading small files from updates.pixlfoundation.com, served by Cloudflare: the update feed, and a release policy that can require an update (for example, to fix a bug that could lose edits). It also checks for lens-correction data updates on models.pixlfoundation.com, and downloads an AI model from there only when you ask for it. Space Pixl's update checks go to GitHub, where its releases are published (see [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement)). As with any web request, these servers see your IP address and the app version asking.
 
 ### Crash reports (only if you opt in)
 

@@ -10,11 +10,11 @@ This End User Licence Agreement ("Agreement") is between you and Syed Ali, tradi
 
 When you buy a licence, we grant you a non-exclusive, non-transferable, perpetual licence to install and use the Software, for personal or commercial work, on **up to three (3) devices at a time**, all used by you.
 
-A licence is activated on a device with your licence key. You can deactivate a device from the Software or from your account and activate another at any time, as long as no more than three are active at once.
+Your licence belongs to your PIXL account; there is no licence key. Sign in to the Software with that account on each device. You can free a device from the Software or from your [account page](https://pixlfoundation.com/account/) and use another at any time, as long as no more than three are in use at once. The Software checks your account when it starts and about once a day, and works offline for up to 30 days between checks.
 
 ## 2. Free trial
 
-You may use the Software free of charge for **14 days** from its first launch on a device, with every feature available, to decide whether to buy it. The trial is for evaluation. [What the Software does when a trial ends is still to be decided.]
+You may use the Software free of charge for **14 days** from the day you start a trial, with every feature available, to decide whether to buy it. A trial needs a PIXL account (no payment details) and is available once per account and once per device. The trial is for evaluation. When it ends, exporting is locked until you buy a licence; browsing and editing your photos keep working.
 
 ## 3. Updates
 
@@ -24,7 +24,7 @@ Your licence includes every update to the major version you bought (for example,
 
 You may not:
 
-- share, sell, rent, lend or sublicense your licence key, or use it on more devices than your licence allows;
+- share, sell, rent, lend or sublicense your licence or your account, or use it on more devices than your licence allows;
 - remove or change any copyright, trademark or licence notice in the Software;
 - work around the Software's licence checks;
 - reverse engineer, decompile or disassemble the Software, **except** where the law allows it despite this restriction, or where a third-party licence that applies to part of the Software allows it (see section 6).

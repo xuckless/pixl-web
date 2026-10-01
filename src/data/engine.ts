@@ -1,13 +1,7 @@
 // Content for engine.pixlfoundation.com. Every figure is from pixl-engine's
 // README ("Measured": Apple M2 Pro, release build; the live-preview row on a
-// 28-core x86-64 box). Re-check them against the README when the engine changes.
-
-export const FUNCTIONS = [
-  { name: 'probe', sig: 'probe(source) → SourceInfo', what: 'What is this file? Format, size, depth, colour and where that colour description came from.' },
-  { name: 'analyze', sig: 'analyze(request) → ImageStats', what: 'What do its pixels look like? Histograms, clipping and white-balance gains.' },
-  { name: 'suggest_encode', sig: 'suggest_encode(info) → Encode', what: 'How was it made? The settings that produced this file, as advice you can edit or ignore.' },
-  { name: 'convert', sig: 'convert(request) → ConvertReport', what: 'Do the work, exactly as asked, and report what actually happened.' },
-]
+// 28-core x86-64 box). Re-check them against the README when the engine changes,
+// and keep public/engine/llms-full.txt in step.
 
 export const STATS = [
   { value: '75 ms', label: 'a full live-preview render, grade included, on 28 cores' },
@@ -28,9 +22,9 @@ export const MEASURED = [
 export const FORMATS = [
   { name: 'JPEG', note: 'libjpeg-turbo, SIMD' },
   { name: 'PNG', note: '8 and 16-bit, native colour type kept' },
-  { name: 'HEIC & AVIF', note: '8, 10 and 12-bit, HDR kept' },
+  { name: 'HEIC & AVIF', note: '8, 10 and 12-bit, HDR kept (HEIC writing needs an HEVC-enabled build)' },
   { name: 'JPEG XL', note: 'lossy, lossless and bit-exact JPEG repack' },
-  { name: 'TIFF', note: 'up to 16-bit' },
+  { name: 'TIFF', note: '8 and 16-bit, and 32-bit float' },
   { name: 'WebP', note: 'lossy and lossless' },
   { name: 'RAW', note: 'CR2, CR3, ARW, NEF, RAF, RW2, ORF and more, in' },
   { name: 'DNG', note: 'RAW in, lossless DNG out, mosaic preserved' },
@@ -40,7 +34,7 @@ export const OPS = [
   'White balance',
   'Exposure, lift, gamma, gain',
   'Highlights, shadows, whites, blacks',
-  'Curves',
+  'Point and parametric curves',
   'HSL bands',
   'Vibrance with skin protection',
   'Colour qualifiers',
@@ -54,13 +48,23 @@ export const OPS = [
   'Seeded grain',
   'Colour-grading wheels',
   'Channel mixer',
+  'Defringe',
+  'Add colour',
   'Masks and layers',
+]
+
+/** What the engine does beyond the grade itself. */
+export const BEYOND = [
+  'Lens corrections: distortion, lateral CA, vignetting',
+  'Upright perspective, with automatic suggestions',
+  'Heal, clone and content-aware fill; red eye',
+  'On-device AI: super resolution ×2 and ×4, denoise, JPEG restore, deblur, subject masks',
+  'HDR: PQ and HLG, tone mapping, gain maps in and out',
+  'RAW develop in linear Rec.2020, with highlight handling',
 ]
 
 export const BINDINGS = [
   { name: 'Rust', note: 'the engine itself' },
-  { name: 'Swift', note: 'iOS and macOS' },
-  { name: 'Kotlin', note: 'Android' },
-  { name: 'Node & Electron', note: 'macOS and Windows' },
-  { name: 'Command line', note: 'pixl convert, probe, suggest' },
+  { name: 'Node & Electron', note: 'macOS (Apple silicon and Intel) and Windows x64, what the apps use' },
+  { name: 'Swift', note: 'through UniFFI, tested on macOS' },
 ]

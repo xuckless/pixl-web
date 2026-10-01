@@ -6,7 +6,7 @@ import '../../styles/engine.css'
 import Architecture from '../../components/engine/Architecture.astro'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
-import { BINDINGS, FORMATS, MEASURED, OPS, STATS } from '../../data/engine'
+import { BEYOND, BINDINGS, FORMATS, MEASURED, OPS, STATS } from '../../data/engine'
 import { href, origin } from '../../lib/links'
 import { softwareApp } from '../../lib/seo'
 
@@ -28,8 +28,8 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
   jsonLd={[
     softwareApp('engine', {
       category: 'DeveloperApplication',
-      os: 'macOS, Windows, Linux, iOS, Android',
-      description: 'PIXL Engine is a Rust imaging core that decodes, grades and re-encodes photographs, with Swift, Kotlin and Node bindings.'
+      os: 'macOS, Windows',
+      description: 'PIXL Engine is a Rust imaging core that decodes, grades, corrects and re-encodes photographs, with on-device AI, and Node and Swift bindings.'
     })
   ]}
 >
@@ -86,7 +86,7 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       <li>
         <div class="b-rule en"></div>
         <h3 class="b-disp">AI that stays local</h3>
-        <p class="b-body">Super resolution runs through ONNX Runtime on the device's own hardware, and a provider that can't run is an error, never a silent fallback.</p>
+        <p class="b-body">Super resolution, denoise, JPEG restore, deblur and subject masks run through ONNX Runtime on the device's own hardware, and a provider that can't run is an error, never a silent fallback.</p>
       </li>
     </ul>
   </section>
@@ -183,6 +183,8 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       <div>
         <h3 class="b-micro">Grading operations</h3>
         <ul class="op-list b-body">{OPS.map((o) => <li>{o}</li>)}</ul>
+        <h3 class="b-micro bind-title">Beyond the grade</h3>
+        <ul class="op-list b-body">{BEYOND.map((o) => <li>{o}</li>)}</ul>
         <h3 class="b-micro bind-title">Use it from</h3>
         <ul class="op-list b-body">{BINDINGS.map((b) => <li><strong>{b.name}</strong> · {b.note}</li>)}</ul>
       </div>
@@ -262,7 +264,7 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       </li>
       <li>
         <h3 class="b-disp">Engineers</h3>
-        <p class="b-body">Four functions, one rounding, and a report for every conversion: how the pieces fit together.</p>
+        <p class="b-body">Thirteen calls, one rounding, and a report for every conversion: how the pieces fit together.</p>
         <a class="b-micro go" href="#architecture">Read the architecture →</a>
       </li>
     </ul>
