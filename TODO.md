@@ -144,8 +144,12 @@ Next:
     (`https://pixlfoundation.com`), so the page works only there. Tested
     locally by proxying those calls (approve, then the code exchanges;
     deny gives `access_denied`; an unknown id is explained).
-- [ ] Deploy, then sign in once from a real app build (handoff (b) to the
-      Playroom session).
+- [x] Deployed 2026-10-01 (Worker version `72acf74c`). Checked on
+      production: the app's authorize URL → consent → "Continue" → the
+      loopback with a code that exchanges, and the cookie shared with
+      playroom.pixlfoundation.com. Handoffs (b) and (c) were sent to the
+      Playroom session.
+- [ ] Sign in once from a real Playroom build (Pass 25).
 - [x] `/account/`, which signs out visitors through sign-in and back:
   - Products: beta, trial and licence, ended ones too, plus a tester's
     discount code.
@@ -186,15 +190,19 @@ Next:
   - Locally: `node scripts/entitlement-key.mts dev-2026-10 --dev-vars`
     writes `.dev.vars`, with a key set signed by Playroom's development
     root.
-- [ ] Production secrets, before the deploy that hands (c) to the Playroom
-      session:
-  - `SUPABASE_SECRET_KEY` and `DEVICE_PEPPER` (32 random bytes; never
-    change it, or every device counts as new).
-  - `node scripts/entitlement-key.mts ent-2026-10 --put`, which stores
-    the signing key and prints `ent-2026-10=<public>`.
-  - The owner signs the key set with the offline root:
-    `node scripts/entitlement-keys.mjs sign-keyset root-1 ent-2026-10=<public>`
-    in pixl-playroom. Its output goes in `ENTITLEMENT_KEYSET`.
+- [x] Production secrets set 2026-10-01:
+  - `SUPABASE_SECRET_KEY`.
+  - `DEVICE_PEPPER`; a copy is in `~/.pixl-secrets/device-pepper` on the
+    owner's Mac. Never change it, or every device counts as new.
+  - `ENTITLEMENT_SIGNING_KEY`, kid `ent-2026-10`, public key
+    `Q_fcib8lV0ofvxA4bOCsVbNX9xUvLgB1MU-1End6GYA`.
+  - `ENTITLEMENT_KEYSET`, signed by root-1 (iat 1790856772).
+  - `node scripts/account-smoke.mts https://pixlfoundation.com` passes.
+  - To rotate the signing key:
+    - `node scripts/entitlement-key.mts ent-YYYY-MM --put`;
+    - sign a key set listing both the old and the new key;
+    - set `ENTITLEMENT_KID` and deploy;
+    - later, sign a key set without the old key.
 - [ ] Trial abuse:
   - a verified email and Turnstile to sign up
   - disposable-email domains refused (done: the sign-up hook)
@@ -387,9 +395,10 @@ the app.
       the `pixl-reports` R2 bucket (crash/, minidump/, report/ by day), rate
       limited per client (`REPORT_LIMIT`, 20 a minute). Problem reports are
       what users send from Playroom's Settings → Report a problem.
-- [ ] Create the bucket and its retention rules before the next deploy:
-      `scripts/reports-bucket.sh` (90 days for crashes, a year for problem
-      reports; the privacy policy says the same, in brackets until confirmed).
+- [x] The `pixl-reports` bucket and its retention rules exist
+      (`scripts/reports-bucket.sh`, run 2026-10-01): 90 days for crashes, a
+      year for problem reports. The privacy policy says the same, in
+      brackets until confirmed.
 - [ ] Reading reports: list with `wrangler r2 object get`/the dashboard;
       minidumps are kept as Crashpad sent them (multipart, gzipped). Symbols
       from Playroom's release build are under `symbols/` in Breakpad's layout
