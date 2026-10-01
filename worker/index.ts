@@ -93,6 +93,8 @@ const UNFRAMED = ['/account/', '/oauth/']
 function finish(res: Response, pathname: string, noindex: boolean): Response {
   const headers = new Headers(res.headers)
   if (res.ok) headers.set('Cache-Control', cacheFor(pathname, headers.get('Content-Type') ?? ''))
+  // Text files (llms.txt…) are UTF-8; without the charset some readers garble × and →.
+  if (headers.get('Content-Type') === 'text/plain') headers.set('Content-Type', 'text/plain; charset=utf-8')
   if (noindex) headers.set('X-Robots-Tag', 'noindex')
   if (UNFRAMED.some((p) => pathname.startsWith(p))) {
     headers.set('X-Frame-Options', 'DENY')
