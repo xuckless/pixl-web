@@ -5,49 +5,92 @@ updated: 2026-10-01
 version: 2026-10
 ---
 
-These terms are between you and [Company legal name] ("PIXL Foundation", "we", "us"), and cover the Pixl Playroom beta: the test versions of Pixl Playroom we offer before version 1.0 (the "Beta"). You accept them when you join the Beta on [playroom.pixlfoundation.com/beta](https://playroom.pixlfoundation.com/beta/). Our [Licence agreement](/legal/eula/) also applies to the Beta, except where these terms say otherwise.
+These terms are between you and Syed Ali, trading as PIXL Foundation ("PIXL Foundation", "we", "us"; see section 12), and cover the Pixl Playroom beta: the test versions of Pixl Playroom we offer before version 1.0 (the "Beta"). You accept them when you join the Beta on [playroom.pixlfoundation.com/beta](https://playroom.pixlfoundation.com/beta/). Our [Licence agreement](/legal/eula/) also applies to the Beta, except where these terms say otherwise, and our [Privacy policy](/legal/privacy/) says how we handle your data.
 
-## 1. What the Beta is
+## 1. Who may join
 
-The Beta is free. Joining it gives your PIXL account beta access: you may use the Beta, with every feature, on **up to three (3) devices at a time**, signed in with that account. You can free a device on your [account page](https://pixlfoundation.com/account/) and use another.
+You may join the Beta if you are **18 or older** and can enter into a contract where you live. Join with your own PIXL account, under your own email address. One person, one account: don't create extra accounts to get more devices, trials or discounts. You are responsible for what happens under your account, so keep access to your email address to yourself.
 
-The Beta is pre-release software. It may have bugs, change or remove features, or behave differently from version 1.0. **Keep backups of your photos.** The Beta never changes your original files, but it may lose edits it hasn't saved.
+## 2. What the Beta is
 
-## 2. How long it lasts
+The Beta is free. Joining it gives your PIXL account beta access: you may use the Beta, with every feature, on **up to three (3) devices at a time**, signed in with that account. You can free a device on your [account page](https://pixlfoundation.com/account/), or in the app, and use another.
+
+The Beta is pre-release software. It may have bugs, change or remove features, or behave differently from version 1.0. **Keep backups of your photos.** The Beta never changes your original files, but it may lose edits it hasn't saved, and projects made with a beta version may need converting, or may not open, in a later version.
+
+## 3. Updates and checks
+
+The Beta updates itself: it downloads new beta versions in the background and installs them when you quit, or when you choose Restart to update. We may require an update before a version can go on being used (for example, to fix a bug that could lose edits); the app then says so and offers it.
+
+The app checks your beta access with our server when it starts and about once a day. It works offline in between, for up to **30 days** at a time; after that it asks you to connect so it can check again.
+
+## 4. When the Beta ends
 
 The Beta ends when version 1.0 is released, or earlier if we end it. We may also close it to new testers or limit how many can join. When it ends:
 
 - beta versions stop working, and the app offers the update to 1.0;
 - your account gets the normal 14-day trial of version 1.0, like anyone's;
-- your account gets a one-time discount code for Pixl Playroom, shown on your account page and sent by email, which you must use within **90 days** of the 1.0 release. [The discount amount is still to be decided.]
+- your account gets a one-time code for **30% off** a Pixl Playroom licence, shown on your account page and sent by email, which you must use within **90 days** of the 1.0 release.
 
-Beta access doesn't include a licence for version 1.0.
+Beta access doesn't include a licence for version 1.0, and the discount code can't be exchanged for money or moved to another account.
 
-## 3. Your feedback
+## 5. What you may not do
+
+On top of what section 4 of the Licence agreement already rules out, you may not:
+
+- share your account or your beta access, or sign other people's devices in with it;
+- pass beta installers around: send people to the beta page instead, so they get the current version from us;
+- get around the beta gate, the account checks or the device limit, or use the Beta after your access has ended;
+- use the Beta to break the law or anyone's rights.
+
+## 6. Your feedback
 
 You don't have to send feedback. If you do, by email or through Help → Report a Problem in the app, we may use it to improve our products, without owing you anything for it. Don't send us anything you don't want us to use.
 
-The Beta is open: there's nothing confidential about it, and you may talk about it and share screenshots.
+The Beta is open: there's nothing confidential about it, and you may talk about it and share screenshots and photos you made with it.
 
-## 4. What we collect
+## 7. What we collect
 
 Joining the Beta and using it signed in means your PIXL account holds:
 
 - your email address, and your name if you give one;
-- that you accepted these terms, and when;
+- that you accepted these terms, which version, and when;
 - the devices you use the Beta on: a name for each (such as "Studio (macOS)"), the operating system, the app version, when it was last seen, and a one-way hash of the computer's identifier (we never receive the identifier itself);
 - if you agree to product news, that you did.
 
-The app checks your beta access with our server when it starts and about once a day. Crash and problem reports are sent only as our [Privacy policy](/legal/privacy/) describes. You can delete your account, and with it this data, on your account page.
+Accounts are stored with Supabase in Canada; our servers and update downloads run on Cloudflare; sign-in codes are emailed through Resend. Crash and problem reports are sent only as our [Privacy policy](/legal/privacy/) describes. You can delete your account, and with it this data, on your account page.
 
-## 5. No warranty
+## 8. Leaving, and ending your access
 
-The Beta is provided "as is" and "as available", without any warranty, to the fullest extent the law allows. Section 9 and section 10 of the Licence agreement apply to the Beta, except that, the Beta being free, our total liability for it is limited to [the amount the law allows us to limit it to].
+You can leave the Beta at any time: stop using it, or delete your PIXL account. We may suspend or end your beta access, with or without notice, if you break these terms (for example, by sharing your account or making extra accounts), or if we have to for legal or security reasons. The Beta then stops working for that account.
 
-## 6. Changes
+## 9. No warranty and no liability
 
-We may change these terms for later beta versions. If we do, the app or the beta page will ask you to accept the new terms before you can go on using the Beta.
+**The Beta is free, and you use it entirely at your own risk.** By joining, you expressly accept this section, which you confirm separately on the beta page.
+
+**THE BETA IS PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND,** express or implied, including any warranty that it is fit for a particular purpose, of merchantable quality, accurate, secure, uninterrupted or free of errors, or that it won't lose or damage data.
+
+**TO THE FULLEST EXTENT THE LAW ALLOWS, WE ACCEPT NO LIABILITY** to you or anyone else for any loss or damage arising from the Beta or these terms, however caused (including by negligence), whether direct or indirect, and including loss of photos, edits, projects or other data, loss of work, time, income or business opportunity, and damage to devices or files. Where the law doesn't allow liability to be excluded, our total liability is limited to the lowest amount the law allows.
+
+You are responsible for backing up your photos and your work before and while you use the Beta. Sections 9 and 10 of the Licence agreement also apply, but where they differ, this section prevails for the Beta. Nothing in these terms takes away rights you have under consumer law where you live that can't be waived or limited by contract; if such a law limits part of this section, the rest still applies.
+
+## 10. Changes to these terms
+
+We may change these terms for later beta versions. If we do, we will tell you by email or in the app, and your beta access pauses until you accept the new terms on the beta page; the app then shows "Join the beta" until you have. If you don't accept them, you can stop using the Beta.
+
+## 11. The law that applies
+
+These terms are governed by the laws of the Province of Ontario and the federal laws of Canada that apply there, and the courts of Ontario have jurisdiction over any dispute about them, unless the law where you live gives you the right to bring it in your local courts.
+
+## 12. Who we are
+
+"PIXL Foundation" is the trading name of **Syed Ali** ([xuckless](https://github.com/xuckless) on GitHub), an independent developer in Ontario, Canada, who designed and built the PIXL engine, Pixl Playroom and our websites.
+
+Despite the word "Foundation", PIXL Foundation is a **for-profit business**: not a charity, a non-profit or a registered foundation. It is not yet registered as a company; Syed intends to register one soon. When that happens, these terms, your PIXL account and any beta access, trial or licence carry over to the company, and our legal name may change, as may the names PIXL, PIXL Foundation and Pixl Playroom (a rebrand). We will tell you about any such change.
+
+## 13. Names and trademarks
+
+Names of cameras, lenses, file formats, software and companies that appear in the app or on our websites belong to their owners. We use them only to say what Pixl Playroom works with, and their use doesn't mean their owners endorse us. If you believe a name, mark or anything else we use infringes your trademark or other rights, email [support@pixlfoundation.com](mailto:support@pixlfoundation.com) and we will look into it promptly.
 
 ## Contact
 
-Questions about the Beta: [hello@pixlfoundation.com](mailto:hello@pixlfoundation.com).
+Questions about the Beta: [hello@pixlfoundation.com](mailto:hello@pixlfoundation.com). Trademark or other rights concerns: [support@pixlfoundation.com](mailto:support@pixlfoundation.com).

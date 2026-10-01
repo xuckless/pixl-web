@@ -153,6 +153,6 @@ export const FAQ = [
   },
   {
     q: 'When can I buy it?',
-    a: 'When 1.0 ships, soon. Until then the beta is free, and everyone who tests it gets a discount code for the full version.'
+    a: 'When 1.0 ships, soon. Until then the beta is free, and everyone who tests it gets a code for 30% off the full version.'
   }
 ]

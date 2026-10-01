@@ -1,11 +1,11 @@
 ---
 title: Licence agreement
 summary: The terms you accept when you install or use Space Pixl.
-updated: 2026-09-30
+updated: 2026-10-01
 draft: true
 ---
 
-This End User Licence Agreement ("Agreement") is between you and [Company legal name] ("PIXL Foundation", "we", "us"), and covers Space Pixl, including its updates and documentation (the "Software"). By installing or using the Software, you agree to this Agreement. If you don't agree, don't install or use it.
+This End User Licence Agreement ("Agreement") is between you and Syed Ali, trading as PIXL Foundation ("PIXL Foundation", "we", "us"; see "Who we are" below), and covers Space Pixl, including its updates and documentation (the "Software"). By installing or using the Software, you agree to this Agreement. If you don't agree, don't install or use it.
 
 ## 1. Your licence
 
@@ -49,7 +49,15 @@ This Agreement ends automatically if you break it. When it ends, you must stop u
 
 ## 9. General
 
-This Agreement is governed by the laws of [jurisdiction]. If a part of it can't be enforced, the rest still applies. It is the whole agreement between us about the Software. We may update it for future versions; the version that came with your copy applies to that copy.
+This Agreement is governed by the laws of the Province of Ontario and the federal laws of Canada that apply there, and the courts of Ontario have jurisdiction over any dispute about it, unless the law where you live gives you the right to bring it in your local courts. If a part of it can't be enforced, the rest still applies. It is the whole agreement between us about the Software. We may update it for future versions; the version that came with your copy applies to that copy.
+
+## Who we are
+
+"PIXL Foundation" is the trading name of Syed Ali ([xuckless on GitHub](https://github.com/xuckless)), an independent developer in Ontario, Canada, who designed and built the PIXL engine, Pixl Playroom, Space Pixl and our websites. Despite the word "Foundation", PIXL Foundation is a **for-profit business**: not a charity, a non-profit or a registered foundation. It is not yet registered as a company; Syed intends to register one soon. When that happens, this document, your PIXL account and any beta access, trial or licence carry over to the company, and our legal name may change, as may the names PIXL, PIXL Foundation, Pixl Playroom and Space Pixl (a rebrand). We will tell you about any such change.
+
+## Names and trademarks
+
+Names of cameras, lenses, file formats, software and companies that appear in our apps or on our websites belong to their owners. We use them only to say what our apps work with, and their use doesn't mean their owners endorse us. If you believe a name, mark or anything else we use infringes your trademark or other rights, email [support@pixlfoundation.com](mailto:support@pixlfoundation.com) and we will look into it promptly.
 
 ## Contact
 

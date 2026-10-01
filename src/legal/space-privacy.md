@@ -1,11 +1,11 @@
 ---
 title: Privacy policy
 summary: What Space Pixl collects, and why. Your photos never leave your computer.
-updated: 2026-09-30
+updated: 2026-10-01
 draft: true
 ---
 
-This policy covers Space Pixl, published by [Company legal name] ("PIXL Foundation", "we", "us"). Our other apps and our websites under pixlfoundation.com have their own policy at [pixlfoundation.com/legal/privacy](https://pixlfoundation.com/legal/privacy/).
+This policy covers Space Pixl, published by Syed Ali, trading as PIXL Foundation ("PIXL Foundation", "we", "us"), who decides how the data described here is used (the "controller"). Our other apps and our websites under pixlfoundation.com have their own policy at [pixlfoundation.com/legal/privacy](https://pixlfoundation.com/legal/privacy/).
 
 ## The short version
 
@@ -33,6 +33,10 @@ Depending on where you live (for example, under the GDPR or the CCPA), you may h
 
 If we change this policy, we'll update the date above, and for significant changes we'll say so in the app's release notes.
 
+## Who we are
+
+"PIXL Foundation" is the trading name of Syed Ali ([xuckless on GitHub](https://github.com/xuckless)), an independent developer in Ontario, Canada, who designed and built the PIXL engine, Pixl Playroom, Space Pixl and our websites. Despite the word "Foundation", PIXL Foundation is a **for-profit business**: not a charity, a non-profit or a registered foundation. It is not yet registered as a company; Syed intends to register one soon. When that happens, this document, your PIXL account and any beta access, trial or licence carry over to the company, and our legal name may change, as may the names PIXL, PIXL Foundation, Pixl Playroom and Space Pixl (a rebrand). We will tell you about any such change.
+
 ## Contact
 
-[Company legal name], [postal address]. Email: [hello@pixlfoundation.com](mailto:hello@pixlfoundation.com).
+Syed Ali, trading as PIXL Foundation, Ontario, Canada [postal address]. Email: [hello@pixlfoundation.com](mailto:hello@pixlfoundation.com); for data requests or rights concerns, [support@pixlfoundation.com](mailto:support@pixlfoundation.com).

@@ -9,7 +9,7 @@ import { SITES, type SiteId } from './sites'
     pages point their canonical at the company site's, so only those are listed;
     Space Pixl's are its own documents, so it lists them. */
 export const SITEMAP: Record<SiteId, string[]> = {
-  home: ['/', '/legal/beta/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
+  home: ['/', '/legal/', '/legal/beta/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   playroom: ['/', '/beta/'],
   space: ['/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   engine: ['/']

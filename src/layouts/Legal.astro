@@ -22,6 +22,7 @@ interface Props {
 
 const { site = 'home', title, summary, updated, path, draft = true, canonicalSite = 'home' } = Astro.props
 const nav = [
+  { label: 'Who we are', to: href(site, '/legal/', site) },
   { label: 'Licence agreement', to: href(site, '/legal/eula/', site) },
   { label: 'Privacy', to: href(site, '/legal/privacy/', site) },
   { label: 'Third-party notices', to: href(site, '/legal/third-party/', site) },

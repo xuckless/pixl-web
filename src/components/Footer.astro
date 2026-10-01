@@ -55,12 +55,19 @@ const domain = origin(site).replace(/^https?:\/\//, '')
       <div>
         <h2 class="b-micro">Legal</h2>
         <ul class="b-body">
+          <li><a href={href(legal, '/legal/', site)}>Who we are</a></li>
           <li><a href={href(legal, '/legal/eula/', site)}>Licence agreement</a></li>
+          <li><a href={href(legal, '/legal/beta/', site)}>Beta terms</a></li>
           <li><a href={href(legal, '/legal/privacy/', site)}>Privacy</a></li>
           <li><a href={href(legal, '/legal/third-party/', site)}>Third-party notices</a></li>
         </ul>
       </div>
     </div>
+    <p class="foot-notice b-body">
+      PIXL Foundation is the trading name of <a href={href(legal, '/legal/', site)}>Syed Ali</a>, a for-profit business
+      that is not yet registered as a company; names may change when it is. Trademark or rights concerns:{' '}
+      <a href="mailto:support@pixlfoundation.com">support@pixlfoundation.com</a>.
+    </p>
     <div class="foot-base b-body">
       <span>© {year} PIXL Foundation</span>
       <span class="b-mono">{domain}</span>
