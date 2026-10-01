@@ -426,6 +426,77 @@ the app.
       (`minidump-stackwalk --symbols-path`); Electron's own come from
       https://symbols.electronjs.org.
 
+## Reports become GitHub issues
+
+Requested 2026-10-01: every crash and problem report that lands in R2 should
+turn into a GitHub issue we can fix from, without anyone reading the bucket.
+The app side is pixl-playroom's Pass 24a.
+
+**Decide first:** pixl-playroom, pixl-web and space-pixl are **public**
+repositories, and reports must never appear there. They carry the user's own
+words, log tails with file names, and minidumps with fragments of memory. So
+the issues go to a **private triage repository** (say `xuckless/pixl-triage`).
+A fix in a public repository then references the private issue by number,
+without quoting it. The privacy policy must also name GitHub as somewhere
+reports are kept.
+
+- [ ] **The watcher**:
+  - R2 event notifications on `pixl-reports` (object created, under
+    `crash/`, `minidump/` and `report/`) feed a Cloudflare Queue,
+    `pixl-report-events`.
+  - A `queue()` consumer in this Worker reads each new object and files or
+    updates an issue. The queue gives retries and batching for free.
+  - A nightly cron (`scheduled()`) sweeps the last day's keys, catching
+    anything an event missed.
+- [ ] **Grouping**, so one bug is one issue, not a thousand:
+  - Each JSON crash gets a fingerprint: a hash of the app, the kind, the
+    message with numbers, paths and ids taken out, and the top few frames
+    of our own code in the stack.
+  - A D1 table `report_issues` maps each fingerprint to its issue number,
+    with a count, first and last seen, the versions and platforms hit, and
+    the state.
+  - A new fingerprint opens an issue: title from the message, labels
+    `crash`, `auto`, the app, the platform and the version. The body holds
+    the scrubbed stack, the versions, and the R2 keys of a few examples.
+  - A known fingerprint only updates the table, plus a comment when
+    something new shows up: a new version, a new platform, or every 10x in
+    the count.
+  - A **regression** reopens the issue with a `regression` label: the
+    issue was closed as fixed in version N, and a report comes in from N
+    or later.
+- [ ] **Minidumps** need `minidump-stackwalk` and the symbols, which a
+      Worker can't run. The consumer sends a `repository_dispatch` to the
+      triage repository. A workflow there (pixl-playroom Pass 24a) fetches
+      the dump from R2 and symbolicates it with `symbols/` and Electron's
+      symbol server. It takes the fingerprint from the crashing thread's
+      top frames and files or updates the issue the same way, through this
+      Worker's `/api/triage/issue`, so all the grouping stays in one place.
+- [ ] **Problem reports** are what a person wrote, so each one gets its own
+      issue (labels `user-report`, the app, the version, the platform). It
+      holds:
+  - the message, the reference the user was given, and the log tail,
+    already scrubbed by the app, inside a collapsed block;
+  - **not** the email address, which stays in R2 only. The issue says
+    "reply address on file". Answering is a script that reads it from R2:
+    `scripts/report.mts <reference>`.
+- [ ] **Flood control**:
+  - At most 20 new issues a day; past that, a single daily digest issue.
+  - Per-client rate limits as now.
+  - A fingerprint that's muted (label `wontfix` or `noise`) is only
+    counted.
+- [ ] **GitHub access**: a GitHub App installed on the triage repository
+      only, with Issues read and write. Secrets `GITHUB_APP_ID` and
+      `GITHUB_APP_PRIVATE_KEY`; the Worker mints installation tokens. Better
+      than a personal token: scoped to one repository, and not tied to a
+      person.
+- [ ] **Fixing from the issue**: each issue carries what's needed to start,
+      such as the app version, the commit it was built from (sent with the
+      report from Pass 24a), the symbolicated stack and the file and line.
+      A `fix-me` label can hand it to a coding agent (for example Claude
+      Code's GitHub Action, with access to the app's repository).
+- [ ] Space Pixl's reports, when it sends them: same pipeline, labelled
+      `space`.
+
 ## Site
 
 - [ ] `CLOUDFLARE_API_TOKEN` repository secret, so pushes to `main` deploy
