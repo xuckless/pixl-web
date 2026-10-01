@@ -159,14 +159,14 @@ Next:
     `DELETE /api/account` checks for a site session (not an app's) with a
     sign-in in the last 10 minutes.
   - Tested in Chrome: the lists, profile save, freeing a device, revoking
-    an app, and the delete endpoint's rules. The email-change and delete
-    code steps weren't run, because of the email limit below.
+    an app, the email change with both codes, and deleting through the
+    page.
+  - The delete endpoint refuses an app's token and a missing token.
+  - Supabase sends one email per address a minute, so asking for a delete
+    code right after another code says "wait N seconds".
   - Receipts through Lemon Squeezy's customer portal come with billing.
-- [ ] **Raise Supabase's email rate limit** before anyone signs up:
-      `rate_limit_email_sent` is 2 an hour for the whole project
-      (Supabase's default). Every sign-in code counts, so a third person in
-      an hour gets "email rate limit exceeded". Set it to what the Resend
-      plan allows.
+- [x] Supabase's email rate limit is raised from its default, 2 an hour
+      for the whole project, to 500 an hour (2026-10-01).
 - [x] Worker API (`worker/account.ts`, `auth.ts`, `entitlements.ts`,
       `supabase.ts`), as in "Contract with the apps":
   - It checks Supabase access tokens against the JWKS (`jose`). An app's
