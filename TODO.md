@@ -2,6 +2,258 @@
 
 Grouped by area; roughly in priority order within each.
 
+**Top priority (2026-10-01)**: the PIXL account, the open beta, billing and
+updates (the next four sections) come before everything else here. Playroom
+can't ship a build until they work (pixl-playroom TODO, Phase C). Start
+with the redirect-URI spike under "PIXL account".
+
+## PIXL account (every app) — top priority
+
+Decided 2026-10-01, with the app side in pixl-playroom's TODO (Phase C). One
+account for every PIXL app, as JetBrains does:
+
+- **Supabase Auth** is the identity provider and an **OAuth 2.1 server**.
+  Each desktop app is a public client (authorization code with PKCE). The
+  sites sign in with supabase-js.
+- **Supabase Postgres** holds accounts, entitlements (beta, trial, licence,
+  add-on subscriptions), devices and trials. It replaces the D1 draft
+  (`migrations/0001_accounts.sql`).
+- **The Worker** (`worker/api.ts`) is the API: it checks Supabase JWTs,
+  takes Lemon Squeezy's webhooks and signs entitlement tokens for the apps.
+- **Lemon Squeezy** handles checkout, billing, tax and refunds only. Pay
+  once, US$69.99, 3 devices; the 14-day trial needs an account but no card.
+  Refunds follow each country's legal minimum.
+- **Sign-in**: an email code, Google or Apple, on Supabase's own domain
+  for now (a custom auth domain can come later). The project is `pixl-core`
+  (`lskosagqyekwklxyuczi`, "pixl" org, Pro, ca-central-1).
+- **The beta** is open to anyone, with 3 devices. Testers' discount codes
+  must be redeemed within 90 days of 1.0.
+
+Done so far:
+
+- [x] `/api/webhooks/lemonsqueezy` checks the `X-Signature` HMAC and logs the
+      event (`worker/api.ts`). Set the secret with
+      `wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET` and point the store's
+      webhook at `https://pixlfoundation.com/api/webhooks/lemonsqueezy`.
+- [x] `/account/` explains licences until accounts exist; the app's "Manage
+      devices" link goes there.
+- [x] Draft D1 schema: `migrations/0001_accounts.sql`. Superseded by the
+      Supabase schema below; delete it when that lands.
+
+Next:
+
+- [x] **Spike**: Supabase's OAuth server with a desktop client, done
+      2026-10-01 with `node scripts/oauth-smoke.mts`, which signs a throwaway
+      user in through the Playroom client without a browser and deletes it
+      again. Findings:
+  - Both redirect URIs are accepted, `http://127.0.0.1:47823/callback` and
+    `pixlplayroom://auth/callback`. Matching is exact: another loopback port
+    gets 400 `invalid redirect_uri`.
+  - `/oauth/authorize` redirects to
+    `https://pixlfoundation.com/oauth/consent?authorization_id=…` (the
+    authorization path, already set). After `approveAuthorization`, it
+    redirects to the app's URI with `code` and the app's `state`.
+  - `/oauth/token`, form-encoded with `client_id` and `code_verifier` (no
+    secret), returns `access_token`, `refresh_token`, `id_token` and
+    `expires_in` 3600. A code works once.
+  - Access-token claims: `iss` `https://lskosagqyekwklxyuczi.supabase.co/auth/v1`,
+    `aud` `authenticated`, `sub`, `email`, `session_id`, `client_id`,
+    `scope`, and `amr` `[{method: "oauth_provider/authorization_code"}]`.
+    ES256, and it verifies against `/auth/v1/.well-known/jwks.json`. A site
+    session's token has no `client_id`.
+  - Refresh rotates the refresh token every time. Reusing an old one still
+    worked 11 s later (the reuse interval is 10 s), so reuse doesn't revoke
+    anything; don't count on it.
+  - After the first consent, `getAuthorizationDetails` returns only a
+    `redirect_url`, so consent isn't asked again. Our consent page approves
+    first-party clients outright anyway.
+  - supabase-js `auth.oauth.listGrants()` and `revokeGrant({ clientId })`
+    work with a site session. After a revoke, the app's refresh fails with
+    400 `refresh_token_not_found`. Access tokens already issued last until
+    they expire, which is at most an hour.
+  - The secret key (`sb_secret_…`) works on the admin API as the `apikey`
+    header. As a `Bearer` token alone it gets 401.
+- [x] OAuth clients (`node scripts/oauth-smoke.mts --register`):
+  - "Pixl Playroom", `83eab600-baf2-4f5e-aac4-252010db94b2`: public, scopes
+    `openid email profile`, the two redirect URIs above. One client serves
+    dev and production, since the app's redirect is the same in both.
+  - Redirects allowed now also include `http://*.localhost:8787/**`, for
+    `pnpm preview`'s subdomains.
+- [x] Project settings, done 2026-10-01 through the Management API:
+  - Site URL `https://pixlfoundation.com`. Redirects allowed: the company
+    and Playroom sites, plus `localhost:4321` and `localhost:8787`.
+  - Mail through Resend's SMTP (a send-only key), from
+    `PIXL <noreply@pixlfoundation.com>`. Resend's DNS records came from its
+    Cloudflare integration; DMARC is `p=none` for now.
+  - Sign-in and sign-up emails carry a 6-digit code (`{{ .Token }}`) that
+    lasts 10 minutes.
+  - Cloudflare Turnstile is on as the CAPTCHA: widget "PIXL account
+    sign-in", site key `0x4AAAAAAFK_346N2pRbOtxq`, allowed on
+    pixlfoundation.com, playroom… and localhost. The secret is kept only in
+    Supabase. The sign-in page must send a Turnstile token with every
+    email-code request.
+  - ES256 signing keys and the OAuth server were already on.
+  - Minimum password length 12. The pages offer no password sign-in, but
+    Supabase's email provider still accepts one through the API.
+- [x] Google and Apple sign-in are on (2026-10-01). Both use the callback
+      `https://lskosagqyekwklxyuczi.supabase.co/auth/v1/callback`. Apple's
+      client secret expires 2027-03-30; renew it with
+      `node scripts/apple-client-secret.mts --apply`.
+- [ ] Still to set: DMARC at `p=quarantine` once mail flows cleanly.
+- [ ] Schema, as Supabase migrations, with row-level security (users read
+      only their own rows; only the Worker writes, with the secret key):
+  - `profiles`
+  - `programs`: the beta per product (open or closed, `ended_at`, a cap)
+  - `entitlements`: user, product, kind (beta, trial, licence, add-on),
+    status, starts and ends, device limit, and the Lemon Squeezy order or
+    subscription id behind it
+  - `devices`: user, product, hashed device id, name, first and last seen
+  - `trials`: unique on product + device hash, and on product + user
+  - `webhook_events` (idempotency) and `discount_codes`
+- [ ] Pages (Astro, with supabase-js on the page):
+  - `/account/sign-in`
+  - `/account/`: products and what each includes, devices with "Free this
+    device", signed-in apps with "Revoke", receipts through Lemon Squeezy's
+    customer portal
+  - `/oauth/consent`: approves our own apps without asking, and asks for
+    any other app
+- [ ] Worker API. The Worker checks access tokens against Supabase's JWKS
+      (issuer, audience and `client_id`).
+  - `POST /api/entitlements` (product, device hash, device name): registers
+    the device within the limit and returns an Ed25519-signed token (what
+    the account holds, until when, when to refresh). The signing key is a
+    Worker secret with a key id; the apps carry the public keys.
+  - `POST /api/trials` starts a trial.
+  - `DELETE /api/devices/:id` frees a device.
+- [ ] Trial abuse:
+  - a verified email and Turnstile to sign up
+  - disposable-email domains refused
+  - sign-ups rate-limited per IP (a Workers rate limit binding, plus
+    Supabase's own auth limits)
+  - one trial per account _and_ per device per product
+  - flag a device hash that turns up on many accounts
+- [ ] Privacy policy: the account, the hashed device id, the entitlement
+      checks (with the lawyer, under Legal).
+- [ ] Later: Space Pixl as a second OAuth client, once it sells anything.
+
+### Contract with the apps
+
+Agreed 2026-10-01 with the pixl-playroom session that builds Pass 25/26 (it
+mirrors this in its `src/shared/account.ts`). Change it only together with
+the app.
+
+- **Sign-in**:
+  - OAuth 2.1, authorization code with PKCE S256, through the system
+    browser to `http://127.0.0.1:47823/callback`. The app runs a one-shot
+    server on that port only while signing in.
+  - Client "Pixl Playroom" (above), scopes `openid email profile`.
+  - `/oauth/consent` approves our own clients without a screen. A
+    signed-out visitor goes through `/account/sign-in/?next=<consent URL>`
+    and back.
+- **Endpoints**:
+  - Every endpoint takes `Authorization: Bearer <Supabase access token>`.
+  - The Worker checks `iss`, `aud` `authenticated`, and that the token's
+    `client_id` belongs to the product asked for.
+  - `POST /api/entitlements`
+    `{ product, deviceHash, deviceName, os: "macos"|"windows", appVersion }`
+    → 200 `{ token }`. It registers the device, or updates its name, os,
+    version and last seen. It never counts the same device twice, and a
+    freed device registers again if there's room.
+  - `POST /api/trials`, same body → the same answer. It's idempotent: an
+    active trial just returns the token.
+  - `DELETE /api/devices/:id` frees a device; the app may call it too. The
+    id is a device row's uuid, as listed in `device_limit`.
+- **deviceHash**:
+  - Lowercase hex HMAC-SHA256: key `pixl:<product>:device:v1`, message the
+    OS machine id (IOPlatformUUID on macOS, MachineGuid on Windows).
+  - The server checks `^[0-9a-f]{64}$`, and stores it HMAC'd again with
+    the Worker secret `DEVICE_PEPPER`.
+- **Token**:
+  - A compact JWS, header `{ alg: "EdDSA", kid, typ: "JWT" }`, signed with
+    Ed25519.
+  - Payload, in unix seconds: `{ iss: "pixlfoundation.com", sub, aud:
+    product, dev: deviceHash, iat, exp: iat + 30 d, rfa: iat + 1 d, email?,
+    ent: { beta?: { until? }, trial?: { until }, licence?: { since },
+    addons: [] }, discount?: { code, expires } }`.
+  - `exp` is the offline grace and `rfa` is "refresh after".
+  - The app gets the public keys as `{ kid: base64url raw 32 bytes }`, the
+    current key and the next.
+- **Errors**, JSON `{ error, … }`:
+
+  | Status | `error` | Meaning |
+  |---|---|---|
+  | 401 | `auth` | refresh, else sign in again |
+  | 403 | `wrong_client` | the app's client isn't this product's |
+  | 403 | `device_limit` | carries `devices: [{ id, name, lastSeen }]` |
+  | 409 | `trial_used_account` | the account has had its trial |
+  | 409 | `trial_used_device` | this device has had a trial |
+  | 403 | `no_beta` | a beta build (`appVersion` has `-beta`), an account without beta |
+  | 410 | `beta_ended` | a beta build after 1.0 |
+  | 400 | `bad_request` | with `field` |
+  | 429 | `too_many` | with `Retry-After` |
+
+- **`policy.json`** (`updates.pixlfoundation.com/playroom/policy.json`,
+  `{ minVersion, betaOpen, message? }`) is written by Playroom's release
+  tooling, not here.
+
+## Open beta
+
+- [ ] `playroom.pixlfoundation.com/beta/`: what the beta is, then sign up or
+      sign in, then accept the beta terms. Accepting grants beta access on
+      the account; after that the page shows the download buttons and "Open
+      Playroom and sign in". Windows users of 0.1.1-beta are told to
+      reinstall once.
+- [ ] Beta terms, `src/legal/beta.md`: pre-release with no warranty, how
+      feedback may be used, that it ends at 1.0, and what data is collected.
+- [ ] Admin: close sign-ups or cap them (the `programs` row), list testers,
+      and export the emails of those who agreed to email.
+- [ ] Ending the beta (at 1.0):
+  - set the program's `ended_at`, which ends every beta entitlement, and
+    flip `betaOpen` in `policy.json`
+  - make a one-use Lemon Squeezy discount code for each tester account
+    (Lemon Squeezy API) that expires 90 days after 1.0, show it on the
+    account page and email it
+  - testers then get the normal 14-day trial (they have used none)
+
+## Billing (Lemon Squeezy)
+
+- [ ] Checkout from the account page and the buy buttons: Lemon Squeezy's
+      hosted checkout with `checkout_data.custom.user_id` and the account's
+      email filled in. A buyer who isn't signed in is asked to sign in first,
+      so every order lands on an account.
+- [ ] The webhook stores each event once (`webhook_events`) and acts on it:
+  - `order_created` grants the licence
+  - `order_refunded` revokes it
+  - `subscription_*` events manage add-ons (cloud tiers, playroom Pass 71),
+    ending at the period's end
+  - a failed payment gets a grace period, then the add-on ends
+- [ ] Chargebacks:
+  - find out what Lemon Squeezy tells us about disputes (it fights them as
+    merchant of record)
+  - a nightly Worker cron checks orders and subscriptions against Lemon
+    Squeezy's API, which also catches missed webhooks
+  - revoked access leaves the app at its next refresh, within the offline
+    grace (30 days)
+- [ ] `offers` on the Playroom page and the buy buttons, once checkout works
+      (see Search).
+
+## Updates (updates.pixlfoundation.com)
+
+- [x] R2 bucket `pixl-updates` on updates.pixlfoundation.com (custom
+      domain, TLS 1.2 minimum), created 2026-10-01. Cache lifetimes come from
+      each object's `Cache-Control`, set at upload: `no-cache` for the
+      `*.yml` feeds and `policy.json`, `immutable` for installers.
+- [ ] Layout `/playroom/` (feeds, installers, blockmaps, `policy.json`),
+      and later `/space/`. Playroom's release.yml uploads to it (pixl-playroom
+      Pass 23).
+- [ ] Stable download links: `playroom…/download/mac-arm64`, `mac-x64` and
+      `win-x64` redirect, through the Worker, to the installer named in the
+      current feed. During the beta, the beta page shows them only after
+      sign-in. That's for appearance only, since the app is locked without
+      beta access anyway.
+- [ ] Download counts per version and platform (Workers Analytics Engine),
+      if wanted.
+
 ## Space Pixl
 
 - [ ] **Migrate Space Pixl onto the company site.** space.pixlfoundation.com is
@@ -23,7 +275,11 @@ Grouped by area; roughly in priority order within each.
 - [ ] Competitor prices in the Playroom three-year cost table
       (`src/data/playroom.ts`, `COST_3Y`), gathered September 2026.
 - [ ] `hello@pixlfoundation.com` is used for every contact and "notify me"
-      link. Make sure it exists (Cloudflare Email Routing can forward it).
+      link. Cloudflare Email Routing is on (2026-10-01: MX, SPF and DKIM
+      records added), and `hello@` and `support@` forward to the owner's
+      Gmail once its destination is verified and the two rules are added.
+      Replies go out as support@ through Gmail's "Send mail as", using
+      Resend's SMTP.
 - [ ] Engine figures (`src/data/engine.ts`) against pixl-engine's README when
       the engine changes.
 
@@ -56,28 +312,6 @@ Grouped by area; roughly in priority order within each.
       from Playroom's release build are under `symbols/` in Breakpad's layout
       (`minidump-stackwalk --symbols-path`); Electron's own come from
       https://symbols.electronjs.org.
-
-## Accounts and licensing
-
-The app side is built (pixl-playroom: Settings → Licence, against Lemon
-Squeezy's licence API, not enforced). The website side is stubbed:
-
-- [x] `/api/webhooks/lemonsqueezy` checks the `X-Signature` HMAC and logs the
-      event (`worker/api.ts`). Set the secret with
-      `wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET` and point the store's
-      webhook at `https://pixlfoundation.com/api/webhooks/lemonsqueezy`.
-- [x] `/account/` explains licences until accounts exist; the app's "Manage
-      devices" link goes there.
-- [x] Draft D1 schema: `migrations/0001_accounts.sql` (users, licences,
-      devices, webhook events). Not applied, and no database bound.
-- [ ] Sign-in (email magic link, or Clerk/Supabase Auth), then:
-  - [ ] the webhook storing orders and licence keys against accounts
-        (idempotently: Lemon Squeezy retries);
-  - [ ] `/api/account`, `/api/licences`, `/api/devices` (list, deactivate
-        one, via Lemon Squeezy's API with the store key as a Worker secret);
-  - [ ] `/api/checkout` and the buy buttons on playroom.pixlfoundation.com
-        (Lemon Squeezy checkout overlay or hosted page).
-- [ ] The account page: licences, devices, "deactivate", receipts.
 
 ## Site
 
