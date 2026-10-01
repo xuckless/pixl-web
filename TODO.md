@@ -132,12 +132,24 @@ Next:
     hostile `next` values fall back, and Google and Apple hand off.
     Turnstile refuses automated browsers unless Chrome's automation flags
     are off.
+- [x] `/oauth/consent/`, where an app's sign-in lands:
+  - Signed out, it goes to sign-in and comes back.
+  - For our own apps (`FIRST_PARTY_CLIENTS` in `src/lib/auth.ts`) there's
+    no consent screen. Fresh from signing in it approves at once. With a
+    session already in the browser it takes one click on "Continue" (with
+    "Use another account"), so an app never quietly gets an account
+    nobody chose.
+  - Other apps get Allow or Deny, with their scopes in words.
+  - Supabase answers the consent calls only from the Site URL's origin
+    (`https://pixlfoundation.com`), so the page works only there. Tested
+    locally by proxying those calls (approve, then the code exchanges;
+    deny gives `access_denied`; an unknown id is explained).
+- [ ] Deploy, then sign in once from a real app build (handoff (b) to the
+      Playroom session).
 - [ ] Pages (Astro, with supabase-js on the page):
   - `/account/`: products and what each includes, devices with "Free this
     device", signed-in apps with "Revoke", receipts through Lemon Squeezy's
     customer portal
-  - `/oauth/consent`: approves our own apps without asking, and asks for
-    any other app
 - [ ] Worker API. The Worker checks access tokens against Supabase's JWKS
       (issuer, audience and `client_id`).
   - `POST /api/entitlements` (product, device hash, device name): registers

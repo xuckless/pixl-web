@@ -1,0 +1,183 @@
+---
+// Where an app's sign-in lands (Supabase's OAuth server sends the browser here
+// with ?authorization_id=…; the path is pixl-core's authorization path).
+//   * Signed out: sign in first, then back here.
+//   * Our own apps (FIRST_PARTY_CLIENTS): approved without a consent screen.
+//     Fresh from signing in, at once; with a session already in the browser,
+//     after one click on "Continue as …", so the app never quietly gets an
+//     account the person didn't mean.
+//   * Any other app: what it asks for, and Allow or Deny.
+// Approving sends the browser back to the app with a code (supabase-js
+// approveAuthorization), e.g. to http://127.0.0.1:47823/callback.
+import '../../../../styles/account.css'
+import Base from '../../../../layouts/Base.astro'
+import { href } from '../../../../lib/links'
+---
+
+<Base
+  site="home"
+  title="Sign in to an app · PIXL Foundation"
+  description="Connect an app to your PIXL account."
+  path="/oauth/consent/"
+  noindex
+  nav={[
+    { label: 'Products', to: href('home', '/#products', 'home') },
+    { label: 'About', to: href('home', '/#about', 'home') },
+  ]}
+>
+  <section class="wrap acct" aria-labelledby="consent-title" data-consent data-sign-in={href('home', '/account/sign-in/', 'home')}>
+    <span class="b-chip">PIXL account</span>
+    <h1 class="b-disp" id="consent-title" data-title>Signing you in…</h1>
+
+    <div class="panel" data-state="working" aria-busy="true">
+      <p class="b-body msg">One moment.</p>
+    </div>
+
+    <div class="panel" data-state="choose" hidden>
+      <p class="b-body"><span data-app></span> will use your PIXL account:</p>
+      <p class="acct-email b-disp" data-email></p>
+      <button class="b-cta fo" type="button" data-continue>Continue</button>
+      <button class="linkish b-body" type="button" data-switch>Use another account</button>
+    </div>
+
+    <div class="panel" data-state="consent" hidden>
+      <p class="b-body"><strong data-app></strong> wants to sign in with your PIXL account, <strong data-email></strong>. It will see:</p>
+      <ul class="ticks b-body" data-scopes></ul>
+      <p class="fine b-body">It won't see anything else, and you can disconnect it any time on your account page.</p>
+      <button class="b-cta fo" type="button" data-allow>Allow</button>
+      <button class="b-cta sec" type="button" data-deny>Deny</button>
+      <button class="linkish b-body" type="button" data-switch>Use another account</button>
+    </div>
+
+    <div class="panel" data-state="done" hidden>
+      <p class="b-body"><strong data-app></strong> is signed in to your PIXL account. You can close this tab and go back to the app.</p>
+    </div>
+
+    <div class="panel" data-state="error" hidden>
+      <p class="b-body msg error" data-error></p>
+      <p class="fine b-body">Start signing in again from the app. If it keeps happening, write to <a class="textlink" href="mailto:support@pixlfoundation.com">support@pixlfoundation.com</a>.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .acct-email { font-size: 22px; word-break: break-all; }
+  .panel .linkish { align-self: center; font-size: 14px; }
+  .panel strong { color: var(--ink); font-weight: 600; }
+  .panel .ticks { gap: 8px; }
+  .panel .ticks li { align-items: baseline; }
+  .panel .ticks li::before { content: ''; flex: none; width: 6px; height: 6px; background: var(--accent); transform: translateY(-2px); }
+</style>
+
+<script>
+  import { FIRST_PARTY_CLIENTS, supabase } from '../../../../lib/auth'
+
+  /** What each OAuth scope lets an app see, in words. */
+  const SCOPES: Record<string, string> = {
+    openid: 'That you are signed in, and your account id',
+    email: 'Your email address',
+    profile: 'Your name',
+  }
+
+  const section = document.querySelector<HTMLElement>('[data-consent]')!
+  const params = new URLSearchParams(location.search)
+  const id = params.get('authorization_id')
+  // Set when this page sent the visitor to sign in: they just chose the account.
+  const fresh = params.get('signed_in') === '1'
+  const sb = supabase()
+
+  const show = (state: string): void => {
+    section.querySelectorAll<HTMLElement>('[data-state]').forEach((p) => (p.hidden = p.dataset.state !== state))
+  }
+  const fill = (sel: string, text: string): void => section.querySelectorAll(sel).forEach((el) => (el.textContent = text))
+  const fail = (message: string): void => {
+    fill('[data-title]', 'That didn’t work.')
+    fill('[data-error]', message)
+    show('error')
+  }
+  const busy = (on: boolean): void => section.querySelectorAll<HTMLButtonElement>('button').forEach((b) => (b.disabled = on))
+
+  /** To sign in, then back here, marked as a fresh choice. */
+  function signIn(): void {
+    const back = new URL(location.href)
+    back.searchParams.set('signed_in', '1')
+    location.replace(`${section.dataset.signIn}?next=${encodeURIComponent(back.href)}`)
+  }
+
+  function back(to: string, app: string): void {
+    fill('[data-title]', 'Signed in.')
+    fill('[data-app]', app)
+    show('done')
+    location.assign(to)
+  }
+
+  async function approve(app: string): Promise<void> {
+    busy(true)
+    const { data, error } = await sb.auth.oauth.approveAuthorization(id!, { skipBrowserRedirect: true })
+    if (error || !data?.redirect_url) return fail(error?.message ?? 'The sign-in request could not be approved.')
+    back(data.redirect_url, app)
+  }
+
+  async function main(): Promise<void> {
+    if (!id) return fail('This sign-in link is incomplete.')
+    const { data: s } = await sb.auth.getSession()
+    if (!s.session) return signIn()
+
+    const { data, error } = await sb.auth.oauth.getAuthorizationDetails(id)
+    if (error || !data) {
+      // A stale session (signed out elsewhere) can't read it: sign in again.
+      if (error?.status === 401) {
+        await sb.auth.signOut({ scope: 'local' })
+        return signIn()
+      }
+      return fail(
+        error?.status === 404 ? 'This sign-in request has expired or was already used.' : (error?.message ?? 'Unknown sign-in request.')
+      )
+    }
+    // Consented before: Supabase hands back the app's redirect straight away.
+    if (!('authorization_id' in data)) return back(data.redirect_url, 'The app')
+
+    const app = FIRST_PARTY_CLIENTS[data.client.id] ?? data.client.name
+    const email = data.user.email ?? s.session.user.email ?? ''
+    fill('[data-app]', app)
+    fill('[data-email]', email)
+
+    if (data.client.id in FIRST_PARTY_CLIENTS) {
+      if (fresh) return approve(app)
+      fill('[data-title]', `Sign in to ${app}`)
+      show('choose')
+      return
+    }
+
+    fill('[data-title]', `Allow ${app}?`)
+    const list = section.querySelector('[data-scopes]')!
+    for (const scope of (data.scope ?? '').split(' ').filter(Boolean)) {
+      const li = document.createElement('li')
+      li.textContent = SCOPES[scope] ?? scope
+      list.append(li)
+    }
+    show('consent')
+  }
+
+  section.querySelector('[data-continue]')!.addEventListener('click', () => {
+    void approve(section.querySelector('[data-state="choose"] [data-app]')!.textContent ?? 'The app')
+  })
+  section.querySelector('[data-allow]')!.addEventListener('click', () => {
+    void approve(section.querySelector('[data-state="consent"] [data-app]')!.textContent ?? 'The app')
+  })
+  section.querySelector('[data-deny]')!.addEventListener('click', async () => {
+    busy(true)
+    const { data, error } = await sb.auth.oauth.denyAuthorization(id!, { skipBrowserRedirect: true })
+    if (error || !data?.redirect_url) return fail(error?.message ?? 'Could not tell the app.')
+    location.assign(data.redirect_url)
+  })
+  section.querySelectorAll('[data-switch]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      busy(true)
+      await sb.auth.signOut({ scope: 'local' })
+      signIn()
+    })
+  )
+
+  main().catch((e: Error) => fail(e.message))
+</script>
