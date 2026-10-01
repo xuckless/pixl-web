@@ -32,9 +32,25 @@ Before an error report is sent, your home folder is removed from it, so folder n
 
 Settings → Report a problem sends us what you write, the app version, your operating system and processor type, and, if you leave it ticked, the recent part of the app's log (which names the files it worked on, with your home folder removed as above). If you give an email address, we use it only to reply about that report. Problem reports are stored the same way as crash reports and deleted automatically after [one year]; email us to have one deleted sooner.
 
-### Licences and purchases (when they launch)
+### Your PIXL account
 
-When you buy a licence, our payment provider, [Lemon Squeezy](https://www.lemonsqueezy.com/privacy), acts as the merchant of record: it handles your payment details and sales tax, and shares your name, email address and order with us. When you activate a licence on a device, the app sends your licence key and a name for the device, so you can see and manage your devices.
+You need a PIXL account to join a beta, start a trial or buy a licence. It's one account for every PIXL app, and it holds:
+
+- your email address, and a name if you give one (or Google or Apple shares one when you sign in with them);
+- what the account holds for each app (beta access, a trial, a licence, add-ons) and the terms you accepted;
+- the devices you use each app on: a name for each (such as "Studio (macOS)"), the operating system, the app version, when it was last seen, and a one-way hash of the computer's identifier. We never receive the identifier itself;
+- the apps you signed in to with it;
+- whether you want emails about new products and releases (off unless you turn it on).
+
+Signed in, an app checks what your account holds when it starts and about once a day, so it can work offline in between. Like any web request, that check shows our server your IP address.
+
+Sign-in codes are emailed through [Resend](https://resend.com/legal/privacy-policy). Cloudflare Turnstile checks that the sign-in form is used by a person. Accounts are stored with [Supabase](https://supabase.com/privacy) in Canada [confirm the region in the final text].
+
+You can see all of this, change it and delete your account on your [account page](https://pixlfoundation.com/account/). When you delete it, everything above goes with it, except one thing: if a device had a free trial, we keep the hashed identifier of that device and the app it was for, so the trial can't be started again there. We keep that for [period to be decided].
+
+### Purchases (when they launch)
+
+When you buy a licence, our payment provider, [Lemon Squeezy](https://www.lemonsqueezy.com/privacy), acts as the merchant of record. It handles your payment details and sales tax, and shares your name, email address and order with us, which we attach to your PIXL account.
 
 ### What the apps don't do
 

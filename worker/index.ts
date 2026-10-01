@@ -6,6 +6,7 @@
 
 import { ROOT_DOMAIN, SHARED_PREFIXES, siteForSub } from '../src/lib/sites'
 import { handleApi, type ApiEnv } from './api'
+import { handleDownload } from './downloads'
 
 interface Env extends ApiEnv {
   ASSETS: Fetcher
@@ -40,6 +41,7 @@ export default {
     }
 
     if (url.pathname.startsWith('/api/')) return handleApi(request, url, env)
+    if (sub === 'playroom' && url.pathname.startsWith('/download/')) return handleDownload(url)
 
     if (SHARED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
       return done(await env.ASSETS.fetch(request))

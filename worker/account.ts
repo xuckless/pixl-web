@@ -3,6 +3,7 @@
 //   POST   /api/trials        start the 14-day trial, then the same answer
 //   DELETE /api/devices/:id   free a device (from the app, or the account page)
 //   DELETE /api/account       delete the account (the account page, after a fresh sign-in)
+//   POST   /api/beta/join     accept the beta terms and join a product's beta (the beta page)
 // The decisions themselves are database functions (supabase/migrations/
 // *_device_functions.sql), one transaction each.
 
@@ -164,12 +165,48 @@ async function deleteAccount(request: Request, env: AccountEnv): Promise<Respons
   return new Response(null, { status: 204 })
 }
 
+const BETA_STATUS: Record<string, number> = { closed: 403, full: 403, beta_ended: 410, terms_changed: 409, no_program: 404 }
+
+/**
+ * Join a product's beta from its beta page: { product, termsVersion,
+ * marketingOptIn }. The site's own session only (an app joins through the page).
+ */
+async function joinBeta(request: Request, env: AccountEnv): Promise<Response> {
+  if (request.method !== 'POST') return json(405, { error: 'method' }, { Allow: 'POST' })
+  const who = await caller(request, env)
+  if (!who) return json(401, { error: 'auth' })
+  if (who.clientId) return json(403, { error: 'wrong_client' })
+  const slow = await limited(env, [`user:${who.userId}`])
+  if (slow) return slow
+  let b: Record<string, unknown>
+  try {
+    const text = await request.text()
+    if (text.length > MAX_BODY) return bad('body')
+    b = JSON.parse(text) as Record<string, unknown>
+  } catch {
+    return bad('body')
+  }
+  const product = typeof b.product === 'string' ? b.product : ''
+  const termsVersion = typeof b.termsVersion === 'string' ? b.termsVersion : ''
+  if (!/^[a-z]+$/.test(product)) return bad('product')
+  if (!termsVersion || termsVersion.length > 40) return bad('termsVersion')
+  const r = await rpc<{ joined?: boolean; error?: string }>(env, 'join_beta', {
+    p_user: who.userId,
+    p_program: `${product}-beta`,
+    p_terms_version: termsVersion,
+    p_marketing: b.marketingOptIn === true
+  })
+  if (r.error) return json(BETA_STATUS[r.error] ?? 400, { error: r.error })
+  return json(200, { joined: true })
+}
+
 /** The account routes, or null when the path isn't one of them. */
 export async function handleAccount(request: Request, url: URL, env: AccountEnv): Promise<Response | null> {
   try {
     if (url.pathname === '/api/entitlements') return await checkIn(request, env, 'check_in')
     if (url.pathname === '/api/trials') return await checkIn(request, env, 'start_trial')
     if (url.pathname === '/api/account') return await deleteAccount(request, env)
+    if (url.pathname === '/api/beta/join') return await joinBeta(request, env)
     const device = /^\/api\/devices\/([^/]+)$/.exec(url.pathname)
     if (device) return await freeDevice(request, env, device[1])
     return null

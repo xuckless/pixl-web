@@ -3,6 +3,7 @@
 // (worker/account.ts; the schema is in supabase/migrations/).
 
 import { handleAccount, type AccountEnv } from './account'
+import { handleDownloadApi } from './downloads'
 
 export interface ApiEnv extends AccountEnv {
   /** Lemon Squeezy's webhook signing secret (`wrangler secret put LEMON_SQUEEZY_WEBHOOK_SECRET`). */
@@ -166,6 +167,7 @@ export async function handleApi(request: Request, url: URL, env: ApiEnv): Promis
   if (url.pathname === '/api/crash') return crash(request, env)
   if (url.pathname === '/api/report') return problem(request, env)
   if (url.pathname === '/api/webhooks/lemonsqueezy') return lemonSqueezyWebhook(request, env)
+  if (url.pathname === '/api/downloads/playroom') return handleDownloadApi(url)
   const account = await handleAccount(request, url, env)
   if (account) return account
   const planned = Object.entries(PLANNED).find(([p]) => url.pathname === p || url.pathname.startsWith(`${p}/`))

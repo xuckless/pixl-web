@@ -299,9 +299,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_holdings: {
+        Args: { p_product: string; p_user: string }
+        Returns: Json
+      }
+      beta_status: { Args: { p_program: string }; Returns: Json }
+      check_in: {
+        Args: {
+          p_beta_build: boolean
+          p_hash: string
+          p_name: string
+          p_os: string
+          p_product: string
+          p_user: string
+          p_version: string
+        }
+        Returns: Json
+      }
       entitlement_ends_at: {
         Args: { e: Database["public"]["Tables"]["entitlements"]["Row"] }
         Returns: string
+      }
+      join_beta: {
+        Args: {
+          p_marketing: boolean
+          p_program: string
+          p_terms_version: string
+          p_user: string
+        }
+        Returns: Json
+      }
+      release_device: {
+        Args: { p_device: string; p_product?: string; p_user: string }
+        Returns: boolean
+      }
+      start_trial: {
+        Args: {
+          p_beta_build: boolean
+          p_hash: string
+          p_name: string
+          p_os: string
+          p_product: string
+          p_user: string
+          p_version: string
+        }
+        Returns: Json
       }
     }
     Enums: {

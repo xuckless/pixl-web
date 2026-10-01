@@ -210,8 +210,9 @@ Next:
     Supabase's own auth limits)
   - one trial per account _and_ per device per product
   - flag a device hash that turns up on many accounts
-- [ ] Privacy policy: the account, the hashed device id, the entitlement
-      checks (with the lawyer, under Legal).
+- [x] Privacy policy: the account, the hashed device id and the entitlement
+      checks are drafted ("Your PIXL account"). The lawyer's review is
+      under Legal.
 - [ ] Later: Space Pixl as a second OAuth client, once it sells anything.
 
 ### Contract with the apps
@@ -289,15 +290,32 @@ the app.
 
 ## Open beta
 
-- [ ] `playroom.pixlfoundation.com/beta/`: what the beta is, then sign up or
-      sign in, then accept the beta terms. Accepting grants beta access on
-      the account; after that the page shows the download buttons and "Open
-      Playroom and sign in". Windows users of 0.1.1-beta are told to
-      reinstall once.
-- [ ] Beta terms, `src/legal/beta.md`: pre-release with no warranty, how
-      feedback may be used, that it ends at 1.0, and what data is collected.
-- [ ] Admin: close sign-ups or cap them (the `programs` row), list testers,
-      and export the emails of those who agreed to email.
+- [x] `playroom.pixlfoundation.com/beta/` (2026-10-01):
+  - The page says what the beta is, then offers sign-in (the embedded
+    form) and the beta terms with a product-news checkbox, then Join.
+  - Once joined it shows the downloads (the newest beta build, from the
+    feeds), how to sign in in the app, and the note that Windows 0.1.1-beta
+    users must reinstall.
+  - There are closed, full and ended states.
+  - Joining is `POST /api/beta/join` → `join_beta()`, which records the
+    agreement and grants beta access on 3 devices
+    (`supabase/tests/beta.sql`).
+  - `beta_status()` tells anyone whether the beta is open, full or over.
+  - The Playroom landing page doesn't link to it yet; the app's "Join the
+    beta" does.
+- [x] Download links: `playroom…/download/{mac-arm64,mac-x64,win-x64}` and
+      `?channel=beta` redirect to the installer the current feed names, and
+      `/api/downloads/playroom` lists them (`worker/downloads.ts`). Until
+      there's a feed, they go back to the page.
+- [x] Beta terms, `src/legal/beta.md` (draft, version `2026-10`, at
+      `/legal/beta/` on both sites). The privacy policy's new "Your PIXL
+      account" section covers the account, devices and checks. Both still
+      need the lawyer, and the discount amount is still in brackets.
+  - When the terms change, change `version:` in `beta.md` and
+    `programs.terms_version` together: joining refuses a mismatch.
+- [x] Admin: close sign-ups or cap them, list testers, and export the
+      emails of those who agreed to email, all in SQL
+      (`supabase/README.md`).
 - [ ] Ending the beta (at 1.0):
   - set the program's `ended_at`, which ends every beta entitlement, and
     flip `betaOpen` in `policy.json`
@@ -337,11 +355,10 @@ the app.
 - [ ] Layout `/playroom/` (feeds, installers, blockmaps, `policy.json`),
       and later `/space/`. Playroom's release.yml uploads to it (pixl-playroom
       Pass 23).
-- [ ] Stable download links: `playroom…/download/mac-arm64`, `mac-x64` and
-      `win-x64` redirect, through the Worker, to the installer named in the
-      current feed. During the beta, the beta page shows them only after
-      sign-in. That's for appearance only, since the app is locked without
-      beta access anyway.
+- [x] Stable download links: `playroom…/download/mac-arm64`, `mac-x64` and
+      `win-x64` (see "Open beta"). Layout: `playroom/<version>/<file>`, with
+      the feeds pointing into it. The names carry no version
+      (`pixl-playroom-mac-arm64.dmg`, `pixl-playroom-win-x64-setup.exe`…).
 - [ ] Download counts per version and platform (Workers Analytics Engine),
       if wanted.
 

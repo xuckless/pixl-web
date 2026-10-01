@@ -1,0 +1,233 @@
+---
+// The Pixl Playroom beta: what it is, then sign in (or make an account),
+// accept the beta terms and join; joined, the downloads and how to sign in in
+// the app. The app's "Join the beta" opens this page. Joining is
+// POST /api/beta/join (worker/account.ts); whether the beta takes new testers
+// is beta_status() in the database.
+import '../../../styles/playroom.css'
+import '../../../styles/account.css'
+import Base from '../../../layouts/Base.astro'
+import SignIn from '../../../components/account/SignIn.astro'
+import { frontmatter as terms } from '../../../legal/beta.md'
+import { href } from '../../../lib/links'
+
+const icon = { check: 'M5 12.5l4.5 4.5L19 7.5', download: 'M12 4v11M7 10l5 5 5-5M5 20h14' }
+const PLATFORMS = [
+  { id: 'mac-arm64', label: 'macOS', note: 'Apple silicon' },
+  { id: 'mac-x64', label: 'macOS', note: 'Intel' },
+  { id: 'win-x64', label: 'Windows', note: '64-bit' },
+]
+---
+
+<Base
+  site="playroom"
+  title="Join the beta · Pixl Playroom"
+  description="Try Pixl Playroom free before 1.0: every tool, on up to three computers. Testers get a discount on the full version."
+  path="/beta/"
+  nav={[
+    { label: 'Features', to: '/#features' },
+    { label: 'Tools', to: '/#tools' },
+    { label: 'Pricing', to: '/#pricing' },
+  ]}
+>
+  <section class="wrap acct" aria-labelledby="beta-title">
+    <span class="b-chip">Open beta · macOS &amp; Windows</span>
+    <h1 class="b-disp" id="beta-title">Try Playroom<br /><span class="accent">before 1.0.</span></h1>
+    <p class="b-body lede">
+      The beta is free and open to anyone with a PIXL account: every tool, on up to three computers, until 1.0 ships.
+      Testers then get the normal 14-day trial and a discount on the full version.
+    </p>
+
+    <div
+      class="beta-steps"
+      data-beta
+      data-terms={terms.version}
+      data-terms-href={href('playroom', '/legal/beta/', 'playroom')}
+      data-account={href('home', '/account/', 'playroom')}
+    >
+      <div class="panel" data-state="loading" aria-busy="true"><p class="b-body msg">One moment.</p></div>
+
+      <div data-state="signin" hidden>
+        <p class="b-body step-lede">First, sign in or make your PIXL account.</p>
+        <SignIn site="playroom" />
+      </div>
+
+      <form class="panel" data-state="join" novalidate hidden>
+        <p class="b-body">Signed in as <strong data-email></strong>.</p>
+        <label class="check b-body">
+          <input type="checkbox" name="terms" required />
+          <span>I accept the <a class="textlink" href={href('playroom', '/legal/beta/', 'playroom')} target="_blank">beta terms</a>. It's pre-release software: keep backups of your photos.</span>
+        </label>
+        <label class="check b-body">
+          <input type="checkbox" name="news" />
+          <span>Email me about new PIXL products and releases. A few times a year.</span>
+        </label>
+        <button class="b-cta pri" type="submit">Join the beta</button>
+        <button class="linkish b-body" type="button" data-switch>Use another account</button>
+        <p class="msg" role="status" aria-live="polite" data-join-msg></p>
+      </form>
+
+      <div class="panel" data-state="joined" hidden>
+        <p class="b-body"><strong>You're in.</strong> Beta access is on <strong data-email></strong>.</p>
+        <div class="downloads" data-downloads>
+          {
+            PLATFORMS.map((p) => (
+              <a class="b-cta pri" href={href('playroom', `/download/${p.id}?channel=beta`, 'playroom')} data-platform={p.id}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>
+                {p.label} <span class="soon">· {p.note}</span>
+              </a>
+            ))
+          }
+        </div>
+        <p class="b-body note" data-version></p>
+        <p class="b-body note" data-soon hidden>The first beta build is on its way. These buttons light up here when it's out.</p>
+        <ol class="b-body howto">
+          <li>Install Playroom and open it.</li>
+          <li>Choose <strong>Sign in</strong>. Your browser opens; choose <strong>Continue</strong>.</li>
+          <li>Back in Playroom, everything is unlocked.</li>
+        </ol>
+        <p class="b-body note">
+          Had version 0.1.1-beta on Windows? Uninstall it first: it can't update itself to this build.
+          Manage your devices on your <a class="textlink" href={href('home', '/account/', 'playroom')}>account page</a>.
+        </p>
+      </div>
+
+      <div class="panel" data-state="closed" hidden>
+        <p class="b-body msg" data-closed-msg></p>
+        <p class="b-body note">Want to hear when it opens again, or when 1.0 ships? Turn on product news on your <a class="textlink" href={href('home', '/account/', 'playroom')}>account page</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap band" aria-labelledby="expect-title">
+    <h2 class="sr-only" id="expect-title">What to expect</h2>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">It's a beta</span>
+        <h3 class="b-disp">Rough edges, real tools.</h3>
+        <p class="b-body">Everything is there to try. Some of it will change before 1.0, and you may meet bugs: keep backups. Playroom never changes your original files.</p>
+      </li>
+      <li>
+        <span class="b-micro">Tell us</span>
+        <h3 class="b-disp">Help → Report a Problem.</h3>
+        <p class="b-body">Send what went wrong, or what you'd change, from inside the app. Crash reports are off until you turn them on.</p>
+      </li>
+      <li>
+        <span class="b-micro">At 1.0</span>
+        <h3 class="b-disp">A discount for testers.</h3>
+        <p class="b-body">When 1.0 ships, the beta ends. You get the 14-day trial and a one-time discount code, good for 90 days.</p>
+      </li>
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .beta-steps { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .beta-steps > div[data-state='signin'] { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .step-lede { font-size: 16px; color: var(--ink-2); }
+  .panel strong { color: var(--ink); font-weight: 600; word-break: break-word; }
+  .panel .linkish { align-self: center; font-size: 14px; }
+  .note { font-size: 14px; color: var(--ink-3); }
+  .downloads { display: flex; flex-direction: column; gap: 10px; }
+  .downloads .b-cta[aria-disabled='true'] { opacity: .5; pointer-events: none; }
+  .howto { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; color: var(--ink-2); }
+</style>
+
+<script>
+  import { api, onSignedIn, supabase } from '../../../lib/auth'
+
+  const PROGRAM = 'playroom-beta'
+  const root = document.querySelector<HTMLElement>('[data-beta]')!
+  const $ = <T extends Element = HTMLElement>(sel: string): T => root.querySelector<T>(sel)!
+  const sb = supabase()
+
+  const show = (state: string): void => {
+    root.querySelectorAll<HTMLElement>(':scope > [data-state]').forEach((el) => (el.hidden = el.dataset.state !== state))
+  }
+  const closed = (message: string): void => {
+    $('[data-closed-msg]').textContent = message
+    show('closed')
+  }
+
+  /** Download buttons for the newest beta build; "on its way" before the first. */
+  async function downloads(): Promise<void> {
+    try {
+      const res = await fetch('/api/downloads/playroom?channel=beta')
+      const d = (await res.json()) as { version: string | null; files: Record<string, string> }
+      root.querySelectorAll<HTMLAnchorElement>('[data-platform]').forEach((a) => {
+        const url = d.files[a.dataset.platform!]
+        if (url) a.href = url
+        else a.setAttribute('aria-disabled', 'true')
+      })
+      $('[data-version]').textContent = d.version ? `Version ${d.version}.` : ''
+      $('[data-soon]').hidden = !!d.version
+    } catch {
+      // The links still go through /download/…, which knows what's there.
+    }
+  }
+
+  async function update(): Promise<void> {
+    const { data } = await sb.auth.getSession()
+    const [{ data: status }, held] = await Promise.all([
+      sb.rpc('beta_status', { p_program: PROGRAM }),
+      data.session
+        ? sb.from('entitlements').select('id').eq('product', 'playroom').eq('kind', 'beta').limit(1)
+        : Promise.resolve({ data: [] as { id: string }[] }),
+    ])
+    const s = (status ?? {}) as { open?: boolean; full?: boolean; ended?: boolean }
+
+    if (data.session && held.data?.length) {
+      root.querySelectorAll('[data-email]').forEach((el) => (el.textContent = data.session!.user.email ?? ''))
+      show('joined')
+      return downloads()
+    }
+    if (s.ended) return closed('The beta has ended: Pixl Playroom 1.0 is out.')
+    if (s.open === false) return closed('The beta is closed to new testers for now.')
+    if (s.full) return closed('The beta is full for now.')
+    if (!data.session) {
+      show('signin')
+      return onSignedIn(root, () => void update())
+    }
+    root.querySelectorAll('[data-email]').forEach((el) => (el.textContent = data.session!.user.email ?? ''))
+    show('join')
+  }
+
+  const form = $<HTMLFormElement>('[data-state="join"]')
+  const msg = $('[data-join-msg]')
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const agreed = (form.elements.namedItem('terms') as HTMLInputElement).checked
+    if (!agreed) {
+      msg.textContent = 'Accept the beta terms to join.'
+      msg.classList.add('error')
+      return
+    }
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!
+    button.disabled = true
+    msg.textContent = ''
+    const res = await api('/api/beta/join', {
+      method: 'POST',
+      body: JSON.stringify({ product: 'playroom', termsVersion: root.dataset.terms, marketingOptIn: (form.elements.namedItem('news') as HTMLInputElement).checked }),
+    })
+    const body = (await res.json().catch(() => ({}))) as { error?: string }
+    button.disabled = false
+    if (res.ok) return void update()
+    const why: Record<string, string> = {
+      closed: 'The beta closed to new testers a moment ago.',
+      full: 'The beta filled up a moment ago.',
+      beta_ended: 'The beta has ended.',
+      terms_changed: 'The beta terms changed. Reload the page to read the new ones.',
+      auth: 'Your session ended. Sign in again.',
+      too_many: 'Too many tries. Wait a minute.',
+    }
+    msg.textContent = why[body.error ?? ''] ?? "That didn't work. Try again."
+    msg.classList.add('error')
+  })
+
+  $('[data-switch]').addEventListener('click', async () => {
+    await sb.auth.signOut({ scope: 'local' })
+    location.reload()
+  })
+
+  update().catch(() => closed("The beta page couldn't load. Reload to try again."))
+</script>
