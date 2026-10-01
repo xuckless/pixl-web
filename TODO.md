@@ -290,7 +290,9 @@ the app.
 
 ## Open beta
 
-- [x] `playroom.pixlfoundation.com/beta/` (2026-10-01):
+- [x] `playroom.pixlfoundation.com/beta/`, live since 2026-10-01 (Worker
+      `3a8a8e32`; checked on production by joining with a throwaway
+      account):
   - The page says what the beta is, then offers sign-in (the embedded
     form) and the beta terms with a product-news checkbox, then Join.
   - Once joined it shows the downloads (the newest beta build, from the
