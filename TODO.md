@@ -149,7 +149,9 @@ Next:
       loopback with a code that exchanges, and the cookie shared with
       playroom.pixlfoundation.com. Handoffs (b) and (c) were sent to the
       Playroom session.
-- [ ] Sign in once from a real Playroom build (Pass 25).
+- [x] Signed in from a real Playroom build against production (2026-10-01,
+      Pass 25): the owner joined through `/beta/`, and the app's token and
+      key set verify offline against root-1 alone.
 - [x] `/account/`, which signs out visitors through sign-in and back:
   - Products: beta, trial and licence, ended ones too, plus a tester's
     discount code.
