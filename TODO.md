@@ -428,6 +428,9 @@ the app.
 
 ## Reports become GitHub issues
 
+**Deferred (owner, 2026-10-01): not now.** The plan below is kept for later;
+don't start on it until it's picked up again.
+
 Requested 2026-10-01: every crash and problem report that lands in R2 should
 turn into a GitHub issue we can fix from, without anyone reading the bucket.
 The app side is pixl-playroom's Pass 24a.
