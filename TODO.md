@@ -305,8 +305,10 @@ the app.
     agreement and grants beta access on 3 devices
     (`supabase/tests/beta.sql`).
   - `beta_status()` tells anyone whether the beta is open, full or over.
-  - The Playroom landing page doesn't link to it yet; the app's "Join the
-    beta" does.
+  - The Playroom page links to it from the nav ("Beta", and the "Join the
+    beta" button), the hero, a beta section (`#beta`, before pricing), the
+    pricing card and the closing call. The app's "Join the beta" opens it
+    too.
 - [x] Download links: `playroom…/download/{mac-arm64,mac-x64,win-x64}` and
       `?channel=beta` redirect to the installer the current feed names, and
       `/api/downloads/playroom` lists them (`worker/downloads.ts`). Until

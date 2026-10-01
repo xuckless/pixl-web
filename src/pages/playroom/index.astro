@@ -11,6 +11,7 @@ import { faqPage, softwareApp } from '../../lib/seo'
 
 const own = (p: string) => href('playroom', p, 'playroom')
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
+const beta = own('/beta/')
 const icon = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
@@ -38,10 +39,11 @@ const icon = {
     { label: 'Features', to: '#features' },
     { label: 'Examples', to: '#developed' },
     { label: 'Tools', to: '#tools' },
+    { label: 'Beta', to: '#beta' },
     { label: 'Pricing', to: '#pricing' },
     { label: 'FAQ', to: '#faq' },
   ]}
-  cta={{ label: 'Get notified', to: '#pricing' }}
+  cta={{ label: 'Join the beta', to: '/beta/' }}
 >
   <!-- ── hero ─────────────────────────────────────────────────── -->
   <section class="wrap hero" aria-labelledby="hero-title">
@@ -52,11 +54,11 @@ const icon = {
       working straight on the folders you already have. Pay once, and it's yours.
     </p>
     <div class="ctas">
-      <a class="b-cta pri" href="#pricing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>{PRICE.amount} · Pay once</a>
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try the free beta</a>
       <a class="b-cta sec" href="#developed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.play}></path></svg>See the results</a>
     </div>
     <ul class="proof b-body" aria-label="At a glance">
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>No subscription</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.amount} once, no subscription</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.devices} computers per licence</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Edits never leave your machine</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free {PRICE.trialDays}-day trial</li>
@@ -189,6 +191,35 @@ const icon = {
     <p class="b-body fine">Prices as listed by each vendor in September 2026, in USD, before tax. Plans change, so check before you buy.</p>
   </section>
 
+  <!-- ── beta ─────────────────────────────────────────────────── -->
+  <section class="wrap band beta" id="beta" aria-labelledby="beta-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="beta-title">Try it now, free.<br /><span class="accent">The beta is open.</span></h2>
+      <p class="b-body">Anyone with a free PIXL account can join and use Playroom before 1.0. Tell us what breaks and what you'd change, and help shape the release.</p>
+    </div>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Free until 1.0</span>
+        <h3 class="b-disp">Every tool, unlocked.</h3>
+        <p class="b-body">The whole app, on up to {PRICE.devices} computers, macOS or Windows. Sign in once in the app and you're in.</p>
+      </li>
+      <li>
+        <span class="b-micro">Shape it</span>
+        <h3 class="b-disp">Your report, our fix list.</h3>
+        <p class="b-body">Help → Report a Problem sends what happened straight to us. It's pre-release software, so keep backups; your originals are never changed.</p>
+      </li>
+      <li>
+        <span class="b-micro">Thank you</span>
+        <h3 class="b-disp">A discount at launch.</h3>
+        <p class="b-body">When 1.0 ships, every tester gets the {PRICE.trialDays}-day trial and a one-time discount code for the full version, good for 90 days.</p>
+      </li>
+    </ul>
+    <div class="ctas">
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the beta</a>
+      <a class="b-cta sec" href={own('/legal/beta/')}>Read the beta terms</a>
+    </div>
+  </section>
+
   <!-- ── pricing ──────────────────────────────────────────────── -->
   <section class="wrap band pricing" id="pricing" aria-labelledby="price-title">
     <div class="price-head">
@@ -214,7 +245,7 @@ const icon = {
           <button type="button" class="b-cta pri" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>macOS <span class="soon">· Soon</span></button>
           <button type="button" class="b-cta sec" aria-disabled="true">Windows <span class="soon">· Soon</span></button>
         </div>
-        <a class="notify textlink b-body" href={notify}>Get an email the day it launches</a>
+        <a class="notify textlink b-body" href={beta}>On sale at 1.0. Until then, try the free beta</a>
       </article>
 
       <article class="plan later" aria-labelledby="plan-agent">
@@ -263,8 +294,8 @@ const icon = {
   <section class="wrap closing" aria-labelledby="close-title">
     <h2 class="b-disp" id="close-title">Your photos deserve better<br /><span class="accent">than a rental.</span></h2>
     <div class="ctas">
-      <a class="b-cta pri" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
-      <a class="b-cta sec" href="#tools">Explore the tools</a>
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the free beta</a>
+      <a class="b-cta sec" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
     </div>
   </section>
 </Base>

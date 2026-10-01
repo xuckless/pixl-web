@@ -149,10 +149,10 @@ export const FAQ = [
   },
   {
     q: 'Can I try it first?',
-    a: `Yes. There will be a free ${PRICE.trialDays}-day trial with every tool unlocked.`
+    a: `Yes. The beta is open now and free: every tool, on up to ${PRICE.devices} computers, until 1.0 ships. Join at playroom.pixlfoundation.com/beta with a free PIXL account. From 1.0 there is a free ${PRICE.trialDays}-day trial with every tool unlocked.`
   },
   {
     q: 'When can I buy it?',
-    a: 'Soon. Email hello@pixlfoundation.com and we will tell you the day it opens.'
+    a: 'When 1.0 ships, soon. Until then the beta is free, and everyone who tests it gets a discount code for the full version.'
   }
 ]
