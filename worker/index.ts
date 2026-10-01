@@ -85,10 +85,17 @@ function cacheFor(pathname: string, contentType: string): string {
   return DAY
 }
 
+/** Pages that act on the PIXL account: never inside another site's frame (clickjacking). */
+const UNFRAMED = ['/account/', '/oauth/']
+
 function finish(res: Response, pathname: string, noindex: boolean): Response {
   const headers = new Headers(res.headers)
   if (res.ok) headers.set('Cache-Control', cacheFor(pathname, headers.get('Content-Type') ?? ''))
   if (noindex) headers.set('X-Robots-Tag', 'noindex')
+  if (UNFRAMED.some((p) => pathname.startsWith(p))) {
+    headers.set('X-Frame-Options', 'DENY')
+    headers.set('Content-Security-Policy', "frame-ancestors 'none'")
+  }
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers })
 }
 

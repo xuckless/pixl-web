@@ -41,6 +41,7 @@ const local = (to: string) => (/^([a-z][a-z+.-]*:|\/\/)/i.test(to) ? to : href(s
     <span class="grow"></span>
     <ul class="nav-links" id="nav-links">
       {links.map((l) => <li><a class="b-body" href={local(l.to)}>{l.label}</a></li>)}
+      <li><a class="b-body" href={href('home', '/account/sign-in/', site)} data-account={href('home', '/account/', site)}>Sign in</a></li>
     </ul>
     {cta && <a class:list={['b-cta nav-cta', CTA[site]]} href={local(cta.to)}>{cta.label}</a>}
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
@@ -50,6 +51,17 @@ const local = (to: string) => (/^([a-z][a-z+.-]*:|\/\/)/i.test(to) ? to : href(s
 </header>
 
 <script>
+  import { signedInHint } from '../lib/session-hint'
+
+  // "Sign in" becomes "Account" when this browser holds a session (the account
+  // page itself sends anyone whose session has lapsed to sign in).
+  if (signedInHint()) {
+    document.querySelectorAll<HTMLAnchorElement>('a[data-account]').forEach((a) => {
+      a.textContent = 'Account'
+      a.href = a.dataset.account!
+    })
+  }
+
   const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle')
   const list = document.getElementById('nav-links')
   if (toggle && list) {

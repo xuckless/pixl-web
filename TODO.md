@@ -116,10 +116,23 @@ Next:
 - [x] Disposable email domains are refused at sign-up: the "Before User
       Created" hook checks 9,189 domains
       (`node scripts/disposable-domains.mts` refreshes them).
-- [ ] Try a sign-up with a mailinator address once the sign-in page exists:
-      the admin API skips the hook, so it's untested end to end.
+- [x] Checked end to end on the sign-in page: a mailinator address gets
+      "Please use a permanent email address".
+- [x] `/account/sign-in/` (`src/components/account/SignIn.astro`, which the
+      beta page will embed; `src/lib/auth.ts`):
+  - an email code with Turnstile, or Google, or Apple. Signing in creates
+    the account.
+  - Afterwards it goes to `?next=` if that's a PIXL page, otherwise to
+    `/account/`.
+  - The session is a cookie on `.pixlfoundation.com`, so every site's nav
+    shows "Account" instead of "Sign in". On localhost the cookie belongs
+    to its one host.
+  - `/account/*` and `/oauth/*` refuse to be framed.
+  - Tested in Chrome against `pnpm preview`: the code arrives and signs in,
+    hostile `next` values fall back, and Google and Apple hand off.
+    Turnstile refuses automated browsers unless Chrome's automation flags
+    are off.
 - [ ] Pages (Astro, with supabase-js on the page):
-  - `/account/sign-in`
   - `/account/`: products and what each includes, devices with "Free this
     device", signed-in apps with "Revoke", receipts through Lemon Squeezy's
     customer portal

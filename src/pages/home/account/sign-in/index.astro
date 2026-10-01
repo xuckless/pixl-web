@@ -1,0 +1,42 @@
+---
+// Sign in to the PIXL account, or make one. Afterwards the visitor goes to
+// ?next= (a PIXL page, e.g. the consent page an app's sign-in came through), or
+// to the account page.
+import Base from '../../../../layouts/Base.astro'
+import SignIn from '../../../../components/account/SignIn.astro'
+import { href } from '../../../../lib/links'
+---
+
+<Base
+  site="home"
+  title="Sign in · PIXL Foundation"
+  description="Sign in to your PIXL account, or create one."
+  path="/account/sign-in/"
+  noindex
+  nav={[
+    { label: 'Products', to: href('home', '/#products', 'home') },
+    { label: 'About', to: href('home', '/#about', 'home') },
+  ]}
+>
+  <section class="wrap acct" aria-labelledby="signin-title" data-fallback={href('home', '/account/', 'home')}>
+    <span class="b-chip">PIXL account</span>
+    <h1 class="b-disp" id="signin-title">Sign in.</h1>
+    <p class="b-body lede" data-lede>
+      One account for every PIXL app: your beta access, trial and licence, and the devices you use them on.
+    </p>
+    <SignIn site="home" />
+  </section>
+</Base>
+
+<script>
+  import { onSignedIn, safeNext } from '../../../../lib/auth'
+
+  const section = document.querySelector<HTMLElement>('[data-fallback]')!
+  const next = safeNext(new URLSearchParams(location.search).get('next'), section.dataset.fallback!)
+  // Coming from an app's sign-in: say where this leads.
+  if (next.includes('/oauth/consent')) {
+    section.querySelector('[data-lede]')!.textContent =
+      'Sign in to connect the app to your PIXL account. New here? This creates your account.'
+  }
+  onSignedIn(section, () => location.replace(next))
+</script>
