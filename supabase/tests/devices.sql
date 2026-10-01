@@ -29,6 +29,7 @@ begin
 
   -- With beta access: three devices fit, the fourth doesn't; the same device again doesn't count twice.
   insert into public.entitlements (user_id, product, kind, program_id) values (a, 'playroom', 'beta', 'playroom-beta');
+  insert into public.agreements (user_id, document, version) select a, 'playroom-beta-terms', terms_version from public.programs where id = 'playroom-beta';
   r := public.check_in(a, 'playroom', d1, 'Mac', 'macos', '0.2.0-beta.1', true);
   if r ? 'error' or not (r -> 'ent' ? 'beta') or r -> 'ent' -> 'beta' ? 'until' then raise exception 'beta: %', r; end if;
   r := public.check_in(a, 'playroom', d1, 'Mac renamed', 'macos', '0.2.0-beta.2', true);

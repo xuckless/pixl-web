@@ -318,7 +318,27 @@ the app.
       account" section covers the account, devices and checks. Both still
       need the lawyer, and the discount amount is still in brackets.
   - When the terms change, change `version:` in `beta.md` and
-    `programs.terms_version` together: joining refuses a mismatch.
+    `programs.terms_version` together: joining refuses a mismatch. Beta
+    access then **pauses** for every tester until they accept again on the
+    beta page; the app gets `no_beta`, and the account page says "Paused".
+  - Joining takes two boxes: 18+ with the terms, and a separate one for
+    section 9 (no warranty, no liability). Both are recorded as agreements,
+    `playroom-beta-terms` and `playroom-beta-liability`.
+  - Owner decisions (2026-10-01): 18+, Ontario law (in the EULAs too), and
+    30% off for testers.
+  - The app ships a plain-text copy of `beta.md`
+    (pixl-playroom `scripts/legal-copy.mjs`): tell the app side whenever
+    the text changes.
+- [x] Who we are: "PIXL Foundation" is the trading name of Syed Ali,
+      a for-profit business, not yet registered.
+  - A notice on every page's footer, `/legal/` ("Who we are", with the
+    trademark note), and a line in the company site's About section.
+  - The EULAs and privacy policies name him; the privacy policy names him
+    as controller.
+  - When the company is registered: update `src/legal/about.md`, the
+    footer and every document's opening.
+- [x] `support@` and `hello@` forward to the owner's Gmail (Cloudflare
+      Email Routing rules, added 2026-10-01).
 - [x] Admin: close sign-ups or cap them, list testers, and export the
       emails of those who agreed to email, all in SQL
       (`supabase/README.md`).
@@ -388,10 +408,10 @@ the app.
 
 - [ ] Competitor prices in the Playroom three-year cost table
       (`src/data/playroom.ts`, `COST_3Y`), gathered September 2026.
-- [ ] `hello@pixlfoundation.com` is used for every contact and "notify me"
+- [x] `hello@pixlfoundation.com` is used for every contact and "notify me"
       link. Cloudflare Email Routing is on (2026-10-01: MX, SPF and DKIM
-      records added), and `hello@` and `support@` forward to the owner's
-      Gmail once its destination is verified and the two rules are added.
+      records added). `hello@` and `support@` forward to the owner's
+      verified Gmail.
       Replies go out as support@ through Gmail's "Send mail as", using
       Resend's SMTP.
 - [ ] Engine figures (`src/data/engine.ts`) against pixl-engine's README when

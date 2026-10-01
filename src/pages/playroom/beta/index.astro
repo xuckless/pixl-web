@@ -35,7 +35,7 @@ const PLATFORMS = [
     <h1 class="b-disp" id="beta-title">Try Playroom<br /><span class="accent">before 1.0.</span></h1>
     <p class="b-body lede">
       The beta is free and open to anyone with a PIXL account: every tool, on up to three computers, until 1.0 ships.
-      Testers then get the normal 14-day trial and a discount on the full version.
+      Testers then get the normal 14-day trial and 30% off the full version.
     </p>
 
     <div
@@ -54,9 +54,14 @@ const PLATFORMS = [
 
       <form class="panel" data-state="join" novalidate hidden>
         <p class="b-body">Signed in as <strong data-email></strong>.</p>
+        <p class="b-body" data-new-terms hidden><strong>The beta terms have changed.</strong> Your beta access is paused until you accept them.</p>
         <label class="check b-body">
           <input type="checkbox" name="terms" required />
-          <span>I accept the <a class="textlink" href={href('playroom', '/legal/beta/', 'playroom')} target="_blank">beta terms</a>. It's pre-release software: keep backups of your photos.</span>
+          <span>I'm 18 or older and accept the <a class="textlink" href={href('playroom', '/legal/beta/', 'playroom')} target="_blank">beta terms</a>. It's pre-release software: keep backups of your photos.</span>
+        </label>
+        <label class="check b-body">
+          <input type="checkbox" name="liability" required />
+          <span>I understand the beta is free, provided as is without any warranty, and that PIXL Foundation (Syed Ali) accepts no liability for any loss, including lost photos or edits. I'll keep backups.</span>
         </label>
         <label class="check b-body">
           <input type="checkbox" name="news" />
@@ -114,8 +119,8 @@ const PLATFORMS = [
       </li>
       <li>
         <span class="b-micro">At 1.0</span>
-        <h3 class="b-disp">A discount for testers.</h3>
-        <p class="b-body">When 1.0 ships, the beta ends. You get the 14-day trial and a one-time discount code, good for 90 days.</p>
+        <h3 class="b-disp">30% off for testers.</h3>
+        <p class="b-body">When 1.0 ships, the beta ends. You get the 14-day trial and a one-time code for 30% off a licence, good for 90 days.</p>
       </li>
     </ul>
   </section>
@@ -166,39 +171,50 @@ const PLATFORMS = [
     }
   }
 
+  const form = $<HTMLFormElement>('[data-state="join"]')
+
   async function update(): Promise<void> {
     const { data } = await sb.auth.getSession()
-    const [{ data: status }, held] = await Promise.all([
+    const none = Promise.resolve({ data: [] as { id: string }[] })
+    const [{ data: status }, held, accepted] = await Promise.all([
       sb.rpc('beta_status', { p_program: PROGRAM }),
+      data.session ? sb.from('entitlements').select('id').eq('product', 'playroom').eq('kind', 'beta').limit(1) : none,
+      // Beta access counts only with these terms accepted (they may have changed since joining).
       data.session
-        ? sb.from('entitlements').select('id').eq('product', 'playroom').eq('kind', 'beta').limit(1)
-        : Promise.resolve({ data: [] as { id: string }[] }),
+        ? sb.from('agreements').select('version').eq('document', 'playroom-beta-terms').eq('version', root.dataset.terms!).limit(1)
+        : Promise.resolve({ data: [] as { version: string }[] }),
     ])
     const s = (status ?? {}) as { open?: boolean; full?: boolean; ended?: boolean }
+    const inBeta = !!(data.session && held.data?.length)
 
-    if (data.session && held.data?.length) {
+    if (inBeta && accepted.data?.length) {
       root.querySelectorAll('[data-email]').forEach((el) => (el.textContent = data.session!.user.email ?? ''))
       show('joined')
       return downloads()
     }
     if (s.ended) return closed('The beta has ended: Pixl Playroom 1.0 is out.')
-    if (s.open === false) return closed('The beta is closed to new testers for now.')
-    if (s.full) return closed('The beta is full for now.')
+    // A tester behind on the terms may accept them even while the beta is closed or full.
+    if (!inBeta && s.open === false) return closed('The beta is closed to new testers for now.')
+    if (!inBeta && s.full) return closed('The beta is full for now.')
     if (!data.session) {
       show('signin')
       return onSignedIn(root, () => void update())
     }
     root.querySelectorAll('[data-email]').forEach((el) => (el.textContent = data.session!.user.email ?? ''))
+    $('[data-new-terms]').hidden = !inBeta
+    form.querySelector('button[type=submit]')!.textContent = inBeta ? 'Accept and continue' : 'Join the beta'
     show('join')
   }
 
-  const form = $<HTMLFormElement>('[data-state="join"]')
   const msg = $('[data-join-msg]')
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
     const agreed = (form.elements.namedItem('terms') as HTMLInputElement).checked
-    if (!agreed) {
-      msg.textContent = 'Accept the beta terms to join.'
+    const liability = (form.elements.namedItem('liability') as HTMLInputElement).checked
+    if (!agreed || !liability) {
+      msg.textContent = !agreed
+        ? 'Confirm you are 18 or older and accept the beta terms to join.'
+        : 'Confirm that the beta comes without warranty or liability to join.'
       msg.classList.add('error')
       return
     }
@@ -207,7 +223,12 @@ const PLATFORMS = [
     msg.textContent = ''
     const res = await api('/api/beta/join', {
       method: 'POST',
-      body: JSON.stringify({ product: 'playroom', termsVersion: root.dataset.terms, marketingOptIn: (form.elements.namedItem('news') as HTMLInputElement).checked }),
+      body: JSON.stringify({
+        product: 'playroom',
+        termsVersion: root.dataset.terms,
+        liabilityAccepted: liability,
+        marketingOptIn: (form.elements.namedItem('news') as HTMLInputElement).checked,
+      }),
     })
     const body = (await res.json().catch(() => ({}))) as { error?: string }
     button.disabled = false
@@ -217,6 +238,7 @@ const PLATFORMS = [
       full: 'The beta filled up a moment ago.',
       beta_ended: 'The beta has ended.',
       terms_changed: 'The beta terms changed. Reload the page to read the new ones.',
+      liability_required: 'Confirm that the beta comes without warranty or liability to join.',
       auth: 'Your session ended. Sign in again.',
       too_many: 'Too many tries. Wait a minute.',
     }

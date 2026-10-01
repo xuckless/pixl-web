@@ -27,6 +27,7 @@ import { href } from '../../../lib/links'
     data-account-page
     data-sign-in={href('home', '/account/sign-in/', 'home')}
     data-home={href('home', '/', 'home')}
+    data-beta={href('playroom', '/beta/', 'home')}
   >
     <span class="b-chip">PIXL account</span>
     <h1 class="b-disp" id="acct-title">Your account</h1>
@@ -228,12 +229,18 @@ import { href } from '../../../lib/links'
 
   // ── what the account holds ──
   async function products(userId: string): Promise<void> {
-    const [{ data: ents }, { data: programs }, { data: codes }] = await Promise.all([
+    const [{ data: ents }, { data: programs }, { data: codes }, { data: agreed }] = await Promise.all([
       sb.from('entitlements').select('product, kind, plan, status, starts_at, ends_at, program_id').eq('user_id', userId).order('starts_at'),
-      sb.from('programs').select('id, ended_at'),
-      sb.from('discount_codes').select('product, code, expires_at, redeemed_at').eq('user_id', userId)
+      sb.from('programs').select('id, product, ended_at, terms_version'),
+      sb.from('discount_codes').select('product, code, expires_at, redeemed_at').eq('user_id', userId),
+      sb.from('agreements').select('document, version').eq('user_id', userId)
     ])
     const programEnd = new Map((programs ?? []).map((p) => [p.id, p.ended_at]))
+    // A beta counts only with its program's current terms accepted.
+    const termsOk = (programId: string | null): boolean => {
+      const p = (programs ?? []).find((x) => x.id === programId)
+      return !p || (agreed ?? []).some((a) => a.document === `${p.product}-beta-terms` && a.version === p.terms_version)
+    }
     const list = $('[data-products]')
     list.replaceChildren()
     const now = Date.now()
@@ -241,8 +248,11 @@ import { href } from '../../../lib/links'
       // Its own end or its program's, whichever comes first.
       const end = [e.ends_at, e.program_id ? programEnd.get(e.program_id) : null].filter((x): x is string => !!x).sort()[0] ?? null
       const live = e.status === 'active' && (!end || new Date(end).getTime() > now)
+      const paused = live && e.kind === 'beta' && !termsOk(e.program_id)
       const detail =
-        e.kind === 'beta'
+        paused
+          ? 'Paused: the beta terms have changed. Accept them on the beta page to go on.'
+          : e.kind === 'beta'
           ? live
             ? `Beta tester since ${date(e.starts_at)}. Every feature, on up to three devices, until the beta ends.`
             : `The beta ended${end ? ` on ${date(end)}` : ''}. Thanks for testing.`
@@ -259,10 +269,12 @@ import { href } from '../../../lib/links'
               : live
                 ? `${e.plan}${end ? `, until ${date(end)}` : ''}.`
                 : `${e.plan} ended.`
-      const li = row(PRODUCTS[e.product] ?? e.product, detail)
+      const li = paused
+        ? row(PRODUCTS[e.product] ?? e.product, detail, { label: 'Accept the new terms', run: () => location.assign(head.dataset.beta!) })
+        : row(PRODUCTS[e.product] ?? e.product, detail)
       const tag = document.createElement('span')
-      tag.className = `tag${live ? ' on' : ''}`
-      tag.textContent = live ? (KIND[e.kind] ?? e.kind) : 'Ended'
+      tag.className = `tag${live && !paused ? ' on' : ''}`
+      tag.textContent = paused ? 'Paused' : live ? (KIND[e.kind] ?? e.kind) : 'Ended'
       li.querySelector('.name')!.append(tag)
       list.append(li)
     }

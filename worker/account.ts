@@ -165,11 +165,21 @@ async function deleteAccount(request: Request, env: AccountEnv): Promise<Respons
   return new Response(null, { status: 204 })
 }
 
-const BETA_STATUS: Record<string, number> = { closed: 403, full: 403, beta_ended: 410, terms_changed: 409, no_program: 404 }
+const BETA_STATUS: Record<string, number> = {
+  closed: 403,
+  full: 403,
+  beta_ended: 410,
+  terms_changed: 409,
+  liability_required: 400,
+  no_program: 404
+}
 
 /**
  * Join a product's beta from its beta page: { product, termsVersion,
- * marketingOptIn }. The site's own session only (an app joins through the page).
+ * liabilityAccepted, marketingOptIn }. liabilityAccepted is the separate
+ * checkbox confirming the beta terms' no-warranty, no-liability section; both
+ * acceptances are recorded. The site's own session only (an app joins through
+ * the page).
  */
 async function joinBeta(request: Request, env: AccountEnv): Promise<Response> {
   if (request.method !== 'POST') return json(405, { error: 'method' }, { Allow: 'POST' })
@@ -194,7 +204,8 @@ async function joinBeta(request: Request, env: AccountEnv): Promise<Response> {
     p_user: who.userId,
     p_program: `${product}-beta`,
     p_terms_version: termsVersion,
-    p_marketing: b.marketingOptIn === true
+    p_marketing: b.marketingOptIn === true,
+    p_liability: b.liabilityAccepted === true
   })
   if (r.error) return json(BETA_STATUS[r.error] ?? 400, { error: r.error })
   return json(200, { joined: true })

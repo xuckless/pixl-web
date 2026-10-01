@@ -114,7 +114,10 @@ try {
   check('a beta build without beta → 403 no_beta', noBeta.status === 403 && noBeta.json.error === 'no_beta', noBeta)
 
   // With beta access: three devices, then the limit.
+  // Beta access counts with the current beta terms accepted.
   await admin.from('entitlements').insert({ user_id: user.id, product: 'playroom', kind: 'beta', program_id: 'playroom-beta' })
+  const { data: program } = await admin.from('programs').select('terms_version').eq('id', 'playroom-beta').single()
+  await admin.from('agreements').insert({ user_id: user.id, document: 'playroom-beta-terms', version: program!.terms_version })
   for (const h of d.slice(0, 3)) {
     const r = await call('POST', '/api/entitlements', user.app, checkInBody(h, '0.2.0-beta.1'))
     check(`beta device ${h.slice(0, 4)} → 200 with ent.beta`, r.status === 200 && 'beta' in (decodeJwt(String(r.json.token)).ent as object), r)

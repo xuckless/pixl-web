@@ -47,6 +47,12 @@ providers.
 | Close the beta, or cap it | `select * from admin.set_program('playroom-beta', false);` · `select * from admin.set_program('playroom-beta', true, 500);` |
 | End the beta (1.0) | `select * from admin.end_program('playroom-beta');` |
 
+Joining records two agreements per tester: `<product>-beta-terms` and
+`<product>-beta-liability` (the separate no-warranty, no-liability checkbox),
+both at the program's `terms_version`. Changing the terms means bumping
+`version:` in `src/legal/beta.md` and `programs.terms_version` together; beta
+access then pauses until each tester accepts again on the beta page.
+
 Ending a program ends every one of its beta entitlements at once, through
 `public.entitlement_ends_at`. The apps lose beta access at their next
 refresh.
