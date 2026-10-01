@@ -31,8 +31,11 @@ function load(): Promise<void> {
 }
 
 export interface Challenge {
-  /** A token for the next request; waits for the check to pass. */
-  token(): Promise<string>
+  /**
+   * A token for the next request; waits for the check to pass. `waiting` runs
+   * when it has to wait (Cloudflare may want a click on its checkbox).
+   */
+  token(waiting?: () => void): Promise<string>
   /** After a token is used: start a new check. */
   reset(): void
 }
@@ -63,13 +66,14 @@ export async function challenge(el: HTMLElement, siteKey: string): Promise<Chall
     }
   })
   return {
-    token: () =>
-      current
-        ? Promise.resolve(current)
-        : new Promise((resolve, reject) => {
-            waiting.push(resolve)
-            failed.push(reject)
-          }),
+    token: (onWait) => {
+      if (current) return Promise.resolve(current)
+      onWait?.()
+      return new Promise((resolve, reject) => {
+        waiting.push(resolve)
+        failed.push(reject)
+      })
+    },
     reset: () => {
       current = null
       window.turnstile!.reset(id)

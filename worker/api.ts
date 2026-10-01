@@ -159,7 +159,6 @@ async function lemonSqueezyWebhook(request: Request, env: ApiEnv): Promise<Respo
 
 /** Endpoints still to come; named here so the apps and the site can be written against them. */
 const PLANNED: Record<string, string> = {
-  '/api/account': 'deleting the account',
   '/api/checkout': 'a Lemon Squeezy checkout link for a product'
 }
 

@@ -6,4 +6,6 @@ export default defineConfig({
   output: 'static',
   build: { format: 'directory' },
   trailingSlash: 'ignore',
+  // `astro dev` has no Worker: pages' /api/* calls go to `pnpm preview`'s (wrangler dev on 8787).
+  vite: { server: { proxy: { '/api': 'http://localhost:8787' } } },
 })

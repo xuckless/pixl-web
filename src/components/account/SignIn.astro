@@ -157,7 +157,8 @@ const CTA: Record<SiteId, string> = { home: 'fo', playroom: 'pri', space: 'sp', 
       say('')
       try {
         const c = await (check ?? startCheck())
-        const captchaToken = await c.token()
+        const captchaToken = await c.token(() => say('Complete the security check above to get your code.'))
+        say('Sending your code…')
         const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, captchaToken } })
         c.reset()
         if (error) throw error

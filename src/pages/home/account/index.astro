@@ -1,7 +1,11 @@
 ---
-// Where licences and devices will be managed. Until the account system exists
-// (TODO.md), it says how licences work and where to ask. The apps' "Manage
-// devices" link points here.
+// The PIXL account: what it holds for each product, the devices it's used on,
+// the apps signed in with it, the profile and email, and deleting it. Signed
+// out, it sends the visitor to sign in and back. Everything here reads with
+// the visitor's own session (row-level security); freeing a device and
+// deleting the account go through the Worker (worker/account.ts). The apps'
+// "Manage devices" link points here.
+import '../../../styles/account.css'
 import Base from '../../../layouts/Base.astro'
 import { href } from '../../../lib/links'
 ---
@@ -9,53 +13,466 @@ import { href } from '../../../lib/links'
 <Base
   site="home"
   title="Your account · PIXL Foundation"
-  description="Manage your PIXL licences and the devices they're active on."
+  description="Your PIXL account: beta access, trials and licences, devices, and signed-in apps."
   path="/account/"
+  noindex
   nav={[
     { label: 'Products', to: href('home', '/#products', 'home') },
     { label: 'About', to: href('home', '/#about', 'home') },
   ]}
 >
-  <section class="wrap hero" aria-labelledby="acct-title">
-    <span class="b-chip">Accounts · Coming soon</span>
-    <h1 class="b-disp" id="acct-title">Your licences,<br /><span class="accent">in one place.</span></h1>
-    <p class="b-body lede">
-      Soon you'll sign in here to see your licences and the devices they're active on, and free up a device you no
-      longer use. Until then, everything you need is inside the app.
-    </p>
+  <section
+    class="wrap acct"
+    aria-labelledby="acct-title"
+    data-account-page
+    data-sign-in={href('home', '/account/sign-in/', 'home')}
+    data-home={href('home', '/', 'home')}
+  >
+    <span class="b-chip">PIXL account</span>
+    <h1 class="b-disp" id="acct-title">Your account</h1>
+    <p class="b-body lede" data-who>&nbsp;</p>
   </section>
 
-  <section class="wrap band" aria-labelledby="how-title">
-    <h2 class="sr-only" id="how-title">How licences work</h2>
-    <ul class="cards">
-      <li>
-        <span class="b-micro">Buy once</span>
-        <h3 class="b-disp">One key, three devices.</h3>
-        <p class="b-body">Your licence key arrives by email. It works on up to three computers at a time.</p>
-      </li>
-      <li>
-        <span class="b-micro">Activate</span>
-        <h3 class="b-disp">Settings → Licence.</h3>
-        <p class="b-body">Paste your key in the app's Settings (⌘, or Ctrl+,) and choose Activate.</p>
-      </li>
-      <li>
-        <span class="b-micro">Move it</span>
-        <h3 class="b-disp">Free a device any time.</h3>
-        <p class="b-body">Choose "Deactivate this device" in Settings on the old computer, then activate on the new one.</p>
-      </li>
-    </ul>
-  </section>
+  <div class="wrap acct-body" data-body aria-busy="true" hidden>
+    <section class="panel wide" aria-labelledby="products-title">
+      <h2 class="b-micro" id="products-title">Products</h2>
+      <ul class="rows" data-products></ul>
+      <p class="b-body empty" data-no-products hidden>
+        Nothing yet. <a class="textlink" href={href('playroom', '/beta/', 'home')}>Join the Playroom beta</a>, or start a
+        14-day trial from inside the app.
+      </p>
+    </section>
 
-  <section class="wrap closing" aria-labelledby="help-title">
-    <h2 class="b-disp" id="help-title">Lost a device?</h2>
-    <p class="b-body closing-lede">If a computer is gone and still holds a place, email us with your licence key and we'll free it.</p>
-    <div class="ctas">
-      <a class="b-cta fo" href="mailto:hello@pixlfoundation.com?subject=Licence%20devices">Email us</a>
-      <a class="b-cta sec" href={href('playroom', '/#pricing', 'home')}>Get Playroom</a>
-    </div>
-  </section>
+    <section class="panel wide" aria-labelledby="devices-title">
+      <h2 class="b-micro" id="devices-title">Devices</h2>
+      <p class="b-body note">
+        Each product works on up to three computers at a time. Free one you no longer use; it signs back in if you open
+        the app there again and there's room.
+      </p>
+      <ul class="rows" data-devices></ul>
+      <p class="b-body empty" data-no-devices hidden>No devices yet. They appear once you open an app signed in.</p>
+      <p class="msg" role="status" aria-live="polite" data-devices-msg></p>
+    </section>
+
+    <section class="panel wide" aria-labelledby="apps-title">
+      <h2 class="b-micro" id="apps-title">Signed-in apps</h2>
+      <p class="b-body note">
+        Apps you signed in to with this account. Revoking signs the app out the next time it checks in (within an hour).
+      </p>
+      <ul class="rows" data-apps></ul>
+      <p class="b-body empty" data-no-apps hidden>No apps yet.</p>
+      <p class="msg" role="status" aria-live="polite" data-apps-msg></p>
+    </section>
+
+    <section class="panel wide" aria-labelledby="profile-title">
+      <h2 class="b-micro" id="profile-title">Profile</h2>
+      <form class="stack" data-profile novalidate>
+        <div class="field">
+          <label class="b-micro" for="acct-name">Name</label>
+          <input id="acct-name" name="name" autocomplete="name" maxlength="80" />
+        </div>
+        <label class="check b-body">
+          <input type="checkbox" name="news" />
+          <span>Email me about new PIXL products and releases. A few times a year, never shared.</span>
+        </label>
+        <button class="b-cta sec" type="submit">Save</button>
+        <p class="msg" role="status" aria-live="polite" data-profile-msg></p>
+      </form>
+    </section>
+
+    <section class="panel wide" aria-labelledby="email-title">
+      <h2 class="b-micro" id="email-title">Email</h2>
+      <p class="b-body">Signed in as <strong data-email></strong>.</p>
+      <form class="stack" data-email-form novalidate>
+        <div class="field">
+          <label class="b-micro" for="acct-new-email">New email address</label>
+          <input id="acct-new-email" name="email" type="email" autocomplete="email" spellcheck="false" />
+        </div>
+        <button class="b-cta sec" type="submit">Change email</button>
+      </form>
+      <form class="stack" data-email-codes novalidate hidden>
+        <p class="b-body">
+          We sent a code to <strong data-old></strong> and another to <strong data-new></strong>. Enter both to confirm
+          the change.
+        </p>
+        <div class="two">
+          <div class="field">
+            <label class="b-micro" for="acct-code-old">Code from your current address</label>
+            <input id="acct-code-old" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" />
+          </div>
+          <div class="field">
+            <label class="b-micro" for="acct-code-new">Code from the new address</label>
+            <input id="acct-code-new" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" />
+          </div>
+        </div>
+        <button class="b-cta sec" type="submit">Confirm</button>
+        <button class="linkish b-body" type="button" data-email-cancel>Cancel</button>
+      </form>
+      <p class="msg" role="status" aria-live="polite" data-email-msg></p>
+    </section>
+
+    <section class="panel wide" aria-labelledby="session-title">
+      <h2 class="b-micro" id="session-title">Signing out</h2>
+      <div class="actions">
+        <button class="b-cta sec" type="button" data-sign-out>Sign out</button>
+        <button class="b-cta sec" type="button" data-sign-out-all>Sign out everywhere</button>
+      </div>
+      <p class="b-body note">"Everywhere" signs out every browser. Apps stay signed in until you revoke them above.</p>
+    </section>
+
+    <section class="panel wide danger-zone" aria-labelledby="delete-title">
+      <h2 class="b-micro" id="delete-title">Delete account</h2>
+      <p class="b-body note">
+        This deletes your account and everything on it: beta access, any trial, any licence, your devices and signed-in
+        apps. <strong>A licence is not refunded and can't be restored.</strong> Receipts stay with Lemon Squeezy, who sold
+        it. A device that had a trial keeps that record, without your account, so a new account there gets no new trial.
+      </p>
+      <button class="b-cta danger" type="button" data-delete-start>Delete my account…</button>
+      <form class="stack" data-delete-form novalidate hidden>
+        <div class="field">
+          <label class="b-micro" for="acct-delete-email">Type your email address to confirm</label>
+          <input id="acct-delete-email" type="email" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="signin-check" data-delete-turnstile></div>
+        <button class="b-cta sec" type="submit" data-delete-send>Email me a code</button>
+        <div class="field" data-delete-code-field hidden>
+          <label class="b-micro" for="acct-delete-code">Code</label>
+          <input id="acct-delete-code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" />
+        </div>
+        <button class="b-cta danger" type="button" data-delete-confirm hidden>Delete my account for good</button>
+      </form>
+      <p class="msg" role="status" aria-live="polite" data-delete-msg></p>
+    </section>
+  </div>
 </Base>
 
-<style>
-  .closing-lede { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+<style is:global>
+  /* Global: the rows are made by the script, which Astro's scoped styles never reach. */
+  .acct-body { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 48px; }
+  .acct-body .panel.wide { max-width: 760px; }
+  .acct-body .panel h2 { color: var(--ink-2); }
+  .acct-body .panel strong { color: var(--ink); font-weight: 600; word-break: break-word; }
+  .acct-body .note { font-size: 15px; color: var(--ink-3); }
+  .acct-body .empty { font-size: 15px; color: var(--ink-2); }
+  .acct-body .stack { display: flex; flex-direction: column; gap: 16px; }
+  .acct-body .stack .b-cta, .acct-body .actions .b-cta, .acct-body .danger-zone > .b-cta { width: auto; align-self: flex-start; }
+  .acct-body .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .acct-body .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .acct-body .rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .acct-body .rows:empty { display: none; }
+  .acct-body .rows li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .acct-body .rows li:first-child { border-top: 0; padding-top: 4px; }
+  .acct-body .rows .what { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .acct-body .rows .name { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 18px; font-weight: 600; color: var(--ink); }
+  .acct-body .rows .detail { font-size: 14px; color: var(--ink-3); }
+  .acct-body .rows .code-chip { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--ink); }
+  .acct-body .rows .linkish { flex: none; font-size: 14px; }
+  .acct-body .tag {
+    display: inline-flex; align-items: center; height: 22px; padding: 0 8px; margin-left: 10px; vertical-align: middle;
+    border: 1px solid var(--line); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .acct-body .tag.on { border-color: color-mix(in srgb, var(--accent) 50%, transparent); color: var(--accent-soft); }
+  .acct-body .danger-zone { border-color: rgba(255, 120, 120, .25); }
+  @media (max-width: 760px) {
+    .acct-body .two { grid-template-columns: 1fr; }
+    .acct-body .rows li { flex-direction: column; align-items: flex-start; }
+  }
 </style>
+
+<script>
+  import type { Session } from '@supabase/supabase-js'
+  import { api, supabase, TURNSTILE_SITE_KEY } from '../../../lib/auth'
+  import { challenge, type Challenge } from '../../../lib/turnstile'
+
+  const PRODUCTS: Record<string, string> = { playroom: 'Pixl Playroom', space: 'Space Pixl' }
+  const OS: Record<string, string> = { macos: 'macOS', windows: 'Windows', linux: 'Linux' }
+  const KIND: Record<string, string> = { beta: 'Beta', trial: 'Trial', licence: 'Licence', addon: 'Add-on' }
+
+  const head = document.querySelector<HTMLElement>('[data-account-page]')!
+  const body = document.querySelector<HTMLElement>('[data-body]')!
+  const $ = <T extends Element = HTMLElement>(sel: string): T => body.querySelector<T>(sel)!
+  const sb = supabase()
+
+  const date = (when: string | number): string =>
+    new Date(typeof when === 'number' ? when * 1000 : when).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+  const say = (el: HTMLElement, text: string, error = false): void => {
+    el.textContent = text
+    el.classList.toggle('error', error)
+  }
+  const failure = (e: unknown): string => (e as { message?: string })?.message || 'Something went wrong. Try again.'
+  const signIn = (): void => location.replace(`${head.dataset.signIn}?next=${encodeURIComponent(location.href)}`)
+
+  /** One line of a list: a name, a detail, and maybe an action on the right. */
+  function row(name: string, detail: string, action?: { label: string; run: (li: HTMLLIElement, button: HTMLButtonElement) => void }): HTMLLIElement {
+    const li = document.createElement('li')
+    const what = document.createElement('div')
+    what.className = 'what'
+    const n = document.createElement('span')
+    n.className = 'name'
+    n.textContent = name
+    const d = document.createElement('span')
+    d.className = 'detail b-body'
+    d.textContent = detail
+    what.append(n, d)
+    li.append(what)
+    if (action) {
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.className = 'linkish b-body'
+      b.textContent = action.label
+      b.addEventListener('click', () => action.run(li, b))
+      li.append(b)
+    }
+    return li
+  }
+
+  // ── what the account holds ──
+  async function products(userId: string): Promise<void> {
+    const [{ data: ents }, { data: programs }, { data: codes }] = await Promise.all([
+      sb.from('entitlements').select('product, kind, plan, status, starts_at, ends_at, program_id').eq('user_id', userId).order('starts_at'),
+      sb.from('programs').select('id, ended_at'),
+      sb.from('discount_codes').select('product, code, expires_at, redeemed_at').eq('user_id', userId)
+    ])
+    const programEnd = new Map((programs ?? []).map((p) => [p.id, p.ended_at]))
+    const list = $('[data-products]')
+    list.replaceChildren()
+    const now = Date.now()
+    for (const e of ents ?? []) {
+      // Its own end or its program's, whichever comes first.
+      const end = [e.ends_at, e.program_id ? programEnd.get(e.program_id) : null].filter((x): x is string => !!x).sort()[0] ?? null
+      const live = e.status === 'active' && (!end || new Date(end).getTime() > now)
+      const detail =
+        e.kind === 'beta'
+          ? live
+            ? `Beta tester since ${date(e.starts_at)}. Every feature, on up to three devices, until the beta ends.`
+            : `The beta ended${end ? ` on ${date(end)}` : ''}. Thanks for testing.`
+          : e.kind === 'trial'
+            ? live
+              ? `Trial until ${date(end!)}.`
+              : `Your trial ended${end ? ` on ${date(end)}` : ''}.`
+            : e.kind === 'licence'
+              ? live
+                ? `Licence, bought ${date(e.starts_at)}. Yours to keep, on up to three devices.`
+                : e.status === 'revoked'
+                  ? 'Licence refunded.'
+                  : 'Licence ended.'
+              : live
+                ? `${e.plan}${end ? `, until ${date(end)}` : ''}.`
+                : `${e.plan} ended.`
+      const li = row(PRODUCTS[e.product] ?? e.product, detail)
+      const tag = document.createElement('span')
+      tag.className = `tag${live ? ' on' : ''}`
+      tag.textContent = live ? (KIND[e.kind] ?? e.kind) : 'Ended'
+      li.querySelector('.name')!.append(tag)
+      list.append(li)
+    }
+    for (const c of codes ?? []) {
+      if (c.redeemed_at || new Date(c.expires_at).getTime() < now) continue
+      const li = row(`${PRODUCTS[c.product] ?? c.product} discount`, `Your tester's code, one use, until ${date(c.expires_at)}: `)
+      const code = document.createElement('span')
+      code.className = 'code-chip'
+      code.textContent = c.code
+      li.querySelector('.detail')!.append(code)
+      list.append(li)
+    }
+    $('[data-no-products]').hidden = list.children.length > 0
+  }
+
+  // ── devices ──
+  async function devices(userId: string): Promise<void> {
+    const { data } = await sb
+      .from('devices')
+      .select('id, product, name, os, app_version, last_seen_at')
+      .eq('user_id', userId)
+      .is('released_at', null)
+      .order('last_seen_at', { ascending: false })
+    const list = $('[data-devices]')
+    const msg = $('[data-devices-msg]')
+    list.replaceChildren()
+    for (const d of data ?? []) {
+      list.append(
+        row(d.name, `${PRODUCTS[d.product] ?? d.product} ${d.app_version} on ${OS[d.os] ?? d.os} · last seen ${date(d.last_seen_at)}`, {
+          label: 'Free this device',
+          run: async (li, button) => {
+            button.disabled = true
+            const res = await api(`/api/devices/${d.id}`, { method: 'DELETE' })
+            if (res.ok || res.status === 404) {
+              li.remove()
+              say(msg, `${d.name} is freed.`)
+              $('[data-no-devices]').hidden = list.children.length > 0
+            } else {
+              button.disabled = false
+              say(msg, res.status === 429 ? 'Too many tries. Wait a minute.' : "That didn't work. Try again.", true)
+            }
+          }
+        })
+      )
+    }
+    $('[data-no-devices]').hidden = list.children.length > 0
+  }
+
+  // ── signed-in apps ──
+  async function apps(): Promise<void> {
+    const { data } = await sb.auth.oauth.listGrants()
+    const list = $('[data-apps]')
+    const msg = $('[data-apps-msg]')
+    list.replaceChildren()
+    for (const g of data ?? []) {
+      list.append(
+        row(g.client.name, `Signed in ${date(g.granted_at)}`, {
+          label: 'Revoke',
+          run: async (li, button) => {
+            button.disabled = true
+            const { error } = await sb.auth.oauth.revokeGrant({ clientId: g.client.id })
+            if (error) {
+              button.disabled = false
+              return say(msg, failure(error), true)
+            }
+            li.remove()
+            say(msg, `${g.client.name} is signed out.`)
+            $('[data-no-apps]').hidden = list.children.length > 0
+          }
+        })
+      )
+    }
+    $('[data-no-apps]').hidden = list.children.length > 0
+  }
+
+  // ── profile ──
+  async function profile(userId: string): Promise<void> {
+    const form = $<HTMLFormElement>('[data-profile]')
+    const name = form.elements.namedItem('name') as HTMLInputElement
+    const news = form.elements.namedItem('news') as HTMLInputElement
+    const msg = $('[data-profile-msg]')
+    const { data } = await sb.from('profiles').select('display_name, marketing_opt_in').eq('id', userId).single()
+    name.value = data?.display_name ?? ''
+    news.checked = data?.marketing_opt_in ?? false
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const display_name = name.value.trim().slice(0, 80) || null
+      const { error } = await sb.from('profiles').update({ display_name, marketing_opt_in: news.checked }).eq('id', userId)
+      say(msg, error ? failure(error) : 'Saved.', !!error)
+    })
+  }
+
+  // ── email: Supabase's secure change sends a code to both addresses ──
+  function email(session: Session): void {
+    const current = session.user.email ?? ''
+    const form = $<HTMLFormElement>('[data-email-form]')
+    const codes = $<HTMLFormElement>('[data-email-codes]')
+    const input = $<HTMLInputElement>('#acct-new-email')
+    const msg = $('[data-email-msg]')
+    let next = ''
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      next = input.value.trim()
+      if (!input.checkValidity() || !next || next.toLowerCase() === current.toLowerCase()) return say(msg, 'Enter a new email address.', true)
+      const { error } = await sb.auth.updateUser({ email: next })
+      if (error) return say(msg, failure(error), true)
+      $('[data-old]').textContent = current
+      $('[data-new]').textContent = next
+      form.hidden = true
+      codes.hidden = false
+      say(msg, '')
+      $<HTMLInputElement>('#acct-code-old').focus()
+    })
+    codes.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const oldCode = $<HTMLInputElement>('#acct-code-old').value.replace(/\D/g, '')
+      const newCode = $<HTMLInputElement>('#acct-code-new').value.replace(/\D/g, '')
+      if (oldCode.length !== 6 || newCode.length !== 6) return say(msg, 'Each code has 6 digits.', true)
+      const a = await sb.auth.verifyOtp({ email: current, token: oldCode, type: 'email_change' })
+      if (a.error) return say(msg, `The code from ${current}: ${failure(a.error)}`, true)
+      const b = await sb.auth.verifyOtp({ email: next, token: newCode, type: 'email_change' })
+      if (b.error) return say(msg, `The code from ${next}: ${failure(b.error)}`, true)
+      say(msg, `Your email is now ${next}.`)
+      setTimeout(() => location.reload(), 1200)
+    })
+    $('[data-email-cancel]').addEventListener('click', () => {
+      codes.hidden = true
+      form.hidden = false
+      say(msg, '')
+    })
+  }
+
+  // ── delete: type the email, prove it's you with a fresh code, then the Worker deletes ──
+  function deletion(session: Session): void {
+    const current = session.user.email ?? ''
+    const form = $<HTMLFormElement>('[data-delete-form]')
+    const msg = $('[data-delete-msg]')
+    const typed = $<HTMLInputElement>('#acct-delete-email')
+    const code = $<HTMLInputElement>('#acct-delete-code')
+    let check: Promise<Challenge> | undefined
+    $('[data-delete-start]').addEventListener('click', () => {
+      $('[data-delete-start]').hidden = true
+      form.hidden = false
+      check ??= challenge($('[data-delete-turnstile]'), TURNSTILE_SITE_KEY)
+      check.catch((e: Error) => say(msg, e.message, true))
+      typed.focus()
+    })
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      if (typed.value.trim().toLowerCase() !== current.toLowerCase()) return say(msg, `Type ${current} exactly.`, true)
+      say(msg, '')
+      try {
+        const c = await check!
+        const captchaToken = await c.token(() => say(msg, 'Complete the security check above to get your code.'))
+        say(msg, 'Sending your code…')
+        const { error } = await sb.auth.signInWithOtp({ email: current, options: { shouldCreateUser: false, captchaToken } })
+        c.reset()
+        if (error) throw error
+      } catch (err) {
+        return say(msg, failure(err), true)
+      }
+      $('[data-delete-code-field]').hidden = false
+      $('[data-delete-confirm]').hidden = false
+      $('[data-delete-send]').textContent = 'Send a new code'
+      say(msg, `We sent a code to ${current}.`)
+      code.focus()
+    })
+    $('[data-delete-confirm]').addEventListener('click', async () => {
+      const token = code.value.replace(/\D/g, '')
+      if (token.length !== 6) return say(msg, 'The code has 6 digits.', true)
+      const v = await sb.auth.verifyOtp({ email: current, token, type: 'email' })
+      if (v.error) return say(msg, failure(v.error), true)
+      const res = await api('/api/account', { method: 'DELETE' })
+      if (res.status !== 204) {
+        return say(msg, res.status === 401 ? 'Sign in again, then try once more.' : "That didn't work. Write to support@pixlfoundation.com and we'll do it for you.", true)
+      }
+      await sb.auth.signOut({ scope: 'local' })
+      location.replace(head.dataset.home!)
+    })
+  }
+
+  async function main(): Promise<void> {
+    const { data } = await sb.auth.getSession()
+    if (!data.session) return signIn()
+    // The cookie may hold a session ended elsewhere: ask Supabase once.
+    const { data: u, error } = await sb.auth.getUser()
+    if (error || !u.user) {
+      await sb.auth.signOut({ scope: 'local' })
+      return signIn()
+    }
+    const userId = u.user.id
+    head.querySelector('[data-who]')!.textContent = u.user.email ?? ''
+    $('[data-email]').textContent = u.user.email ?? ''
+    body.hidden = false
+    await Promise.all([products(userId), devices(userId), apps(), profile(userId)])
+    email(data.session)
+    deletion(data.session)
+    body.setAttribute('aria-busy', 'false')
+
+    $('[data-sign-out]').addEventListener('click', async () => {
+      await sb.auth.signOut({ scope: 'local' })
+      location.replace(head.dataset.home!)
+    })
+    $('[data-sign-out-all]').addEventListener('click', async () => {
+      await sb.auth.signOut({ scope: 'global' })
+      location.replace(head.dataset.home!)
+    })
+  }
+
+  main().catch((e: Error) => {
+    head.querySelector('[data-who]')!.textContent = `Your account couldn't load: ${e.message}`
+  })
+</script>

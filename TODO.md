@@ -146,10 +146,27 @@ Next:
     deny gives `access_denied`; an unknown id is explained).
 - [ ] Deploy, then sign in once from a real app build (handoff (b) to the
       Playroom session).
-- [ ] Pages (Astro, with supabase-js on the page):
-  - `/account/`: products and what each includes, devices with "Free this
-    device", signed-in apps with "Revoke", receipts through Lemon Squeezy's
-    customer portal
+- [x] `/account/`, which signs out visitors through sign-in and back:
+  - Products: beta, trial and licence, ended ones too, plus a tester's
+    discount code.
+  - Devices, with "Free this device" (`DELETE /api/devices/:id`).
+  - Signed-in apps, with "Revoke".
+  - Profile: name and the product-news opt-in.
+  - Email change: Supabase's secure change, so codes go to both
+    addresses.
+  - "Sign out" and "Sign out everywhere".
+  - Delete account: type the email, then a fresh email code. Then
+    `DELETE /api/account` checks for a site session (not an app's) with a
+    sign-in in the last 10 minutes.
+  - Tested in Chrome: the lists, profile save, freeing a device, revoking
+    an app, and the delete endpoint's rules. The email-change and delete
+    code steps weren't run, because of the email limit below.
+  - Receipts through Lemon Squeezy's customer portal come with billing.
+- [ ] **Raise Supabase's email rate limit** before anyone signs up:
+      `rate_limit_email_sent` is 2 an hour for the whole project
+      (Supabase's default). Every sign-in code counts, so a third person in
+      an hour gets "email rate limit exceeded". Set it to what the Resend
+      plan allows.
 - [x] Worker API (`worker/account.ts`, `auth.ts`, `entitlements.ts`,
       `supabase.ts`), as in "Contract with the apps":
   - It checks Supabase access tokens against the JWKS (`jose`). An app's

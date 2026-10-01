@@ -2,12 +2,13 @@
 //   POST   /api/entitlements  check in: register this device, get a signed entitlement token
 //   POST   /api/trials        start the 14-day trial, then the same answer
 //   DELETE /api/devices/:id   free a device (from the app, or the account page)
+//   DELETE /api/account       delete the account (the account page, after a fresh sign-in)
 // The decisions themselves are database functions (supabase/migrations/
 // *_device_functions.sql), one transaction each.
 
 import { caller, type AuthEnv, type Caller } from './auth'
 import { entitlementToken, type Ent, type EntitlementEnv } from './entitlements'
-import { rpc, type SupabaseEnv } from './supabase'
+import { deleteUser, rpc, type SupabaseEnv } from './supabase'
 
 export interface AccountEnv extends AuthEnv, SupabaseEnv, EntitlementEnv {
   /** Hashes the apps' device hashes again before they are stored (a secret). */
@@ -140,11 +141,35 @@ async function freeDevice(request: Request, env: AccountEnv, id: string): Promis
   return freed ? new Response(null, { status: 204 }) : json(404, { error: 'not_found' })
 }
 
+/** How recently the person must have signed in (any method) to delete their account. */
+const REAUTH_S = 10 * 60
+
+/**
+ * Delete the account and everything on it (entitlements, devices, agreements:
+ * the foreign keys cascade; a trial's device record stays, without the
+ * account). Only from the site, and only within REAUTH_S of a sign-in, so a
+ * session left open somewhere can't do it.
+ */
+async function deleteAccount(request: Request, env: AccountEnv): Promise<Response> {
+  if (request.method !== 'DELETE') return json(405, { error: 'method' }, { Allow: 'DELETE' })
+  const who = await caller(request, env)
+  if (!who) return json(401, { error: 'auth' })
+  if (who.clientId) return json(403, { error: 'wrong_client' })
+  const slow = await limited(env, [`user:${who.userId}`])
+  if (slow) return slow
+  const last = Math.max(0, ...who.amr.map((a) => a.timestamp))
+  if (Date.now() / 1000 - last > REAUTH_S) return json(401, { error: 'reauth' })
+  await deleteUser(env, who.userId)
+  console.log('account deleted', JSON.stringify({ user: who.userId }))
+  return new Response(null, { status: 204 })
+}
+
 /** The account routes, or null when the path isn't one of them. */
 export async function handleAccount(request: Request, url: URL, env: AccountEnv): Promise<Response | null> {
   try {
     if (url.pathname === '/api/entitlements') return await checkIn(request, env, 'check_in')
     if (url.pathname === '/api/trials') return await checkIn(request, env, 'start_trial')
+    if (url.pathname === '/api/account') return await deleteAccount(request, env)
     const device = /^\/api\/devices\/([^/]+)$/.exec(url.pathname)
     if (device) return await freeDevice(request, env, device[1])
     return null

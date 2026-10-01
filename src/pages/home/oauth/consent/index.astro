@@ -65,8 +65,9 @@ import { href } from '../../../../lib/links'
   .panel .linkish { align-self: center; font-size: 14px; }
   .panel strong { color: var(--ink); font-weight: 600; }
   .panel .ticks { gap: 8px; }
-  .panel .ticks li { align-items: baseline; }
-  .panel .ticks li::before { content: ''; flex: none; width: 6px; height: 6px; background: var(--accent); transform: translateY(-2px); }
+  /* The scopes are listed by the script, so these reach them with :global. */
+  .panel .ticks :global(li) { align-items: baseline; }
+  .panel .ticks :global(li)::before { content: ''; flex: none; width: 6px; height: 6px; background: var(--accent); transform: translateY(-2px); }
 </style>
 
 <script>
