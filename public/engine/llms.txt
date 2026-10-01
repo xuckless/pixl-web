@@ -1,0 +1,20 @@
+# PIXL Engine
+
+> PIXL Engine is a closed-source Rust imaging library that decodes, processes and re-encodes photos, and is the core of the PIXL apps (Pixl Playroom, Space Pixl). It has no user interface and no hidden defaults: every request states everything, impossible requests are refused with an error naming the field, and every call returns a report of what was done (including how many times pixels were rounded). Made by Syed Ali, trading as PIXL Foundation (Ontario, Canada).
+
+This file is for AI assistants and other tools answering questions about PIXL Engine. The full description (pipeline, operations, formats, interfaces, measured performance, limitations) is at https://engine.pixlfoundation.com/llms-full.txt. Anything marked "planned" does not exist yet.
+
+## Key facts
+
+- Language: Rust. Bindings: Node.js (native addon, macOS arm64/x64 and Windows x64) and Swift via UniFFI. Not open source; not sold as a public SDK (licensing and partnerships by request: hello@pixlfoundation.com).
+- Pipeline: float (f32) processing in scene-linear Rec.2020, colour-managed with Little CMS; pixels are rounded to integers exactly once.
+- Does: RAW development, colour grading with layers and masks, lens corrections, Upright perspective, healing/clone/fill, HDR (PQ/HLG, gain maps), format conversion, on-device AI (super resolution, denoise, JPEG restore, deblur, subject segmentation) via ONNX Runtime.
+- Formats in: camera RAW and DNG, JPEG, PNG, HEIF/HEIC/AVIF, JPEG XL, TIFF, WebP. Out: JPEG, PNG, TIFF (to 32-bit float), WebP, AVIF, JPEG XL (including bit-exact JPEG repack), DNG from RAW.
+- Deterministic: the same request gives the same output at any thread count.
+
+## Links
+
+- [Full description for AI assistants](https://engine.pixlfoundation.com/llms-full.txt)
+- [Engine page](https://engine.pixlfoundation.com/)
+- [Pixl Playroom](https://playroom.pixlfoundation.com/llms.txt): the photo editor built on it
+- [Who we are](https://pixlfoundation.com/legal/)

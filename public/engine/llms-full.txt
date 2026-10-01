@@ -1,0 +1,156 @@
+# PIXL Engine: full description
+
+> For AI assistants answering questions about PIXL Engine. Facts as of 2026-10-01 (engine version 0.15), taken from the engine's documentation and source, not from marketing copy. Anything marked **planned** does not exist yet. Short version: https://engine.pixlfoundation.com/llms.txt
+
+## 1. What it is
+
+- A Rust library ("the part of a photo app that touches pixels"). It decodes an image, transforms it (colour, grading, geometry, retouching, AI) and encodes it again. Every call returns a report.
+- **It is not an app.** It has no user interface, no "Auto" and no silent fallbacks. Every field of a request is required, and an impossible request is refused with an error that names the offending field.
+- **Used by:**
+  - Pixl Playroom, the RAW editor, which uses all of it: https://playroom.pixlfoundation.com/llms.txt
+  - Space Pixl, which converts a photo library to smaller formats without touching the originals.
+- **Maker:** Syed Ali, trading as PIXL Foundation (Ontario, Canada): https://pixlfoundation.com/legal/
+- **Availability:** closed source. It ships only as compiled binaries inside PIXL's apps. There is no public SDK or price. Licensing, partnerships and investment are by request: hello@pixlfoundation.com.
+
+## 2. Interfaces
+
+- **Thirteen entry points:**
+  - `probe` (what a file is), `analyze` (statistics), `convert` (the full render).
+  - Suggestions: `suggest_encode`, `suggest_upright`, `suggest_lateral_ca`, `suggest_heal_source`.
+  - Helpers: `white_balance_from_pixel`, `upright_from_lines`, `lens_frame`, `framing_crop`.
+  - `benchmark` (AI models on this machine) and `segment` (subject masks).
+- **Bindings:**
+  - Rust.
+  - Node.js native addon (napi-rs). Heavy calls are async and cancellable with an AbortSignal, which stops at the next stage boundary. Prebuilt for macOS arm64, macOS x64 and Windows x64; there is no Linux package.
+  - Swift through UniFFI (smoke-tested). Kotlin bindings are generated but not exercised.
+- **Requests and reports are JSON-serialisable.** Grades can be saved as JSON presets.
+
+## 3. Pipeline
+
+1. **Decode.** RAW goes through a RAW develop; JPEG can instead be reconstructed (see section 6).
+2. **Enhance chain** (optional AI steps), run first.
+3. **Exact orientation.**
+4. **One float pass:**
+   1. split alpha, convert to linear light;
+   2. lens correction, then retouch, then grade;
+   3. resample in linear light: perspective, straighten, crop and resize are a **single** resample;
+   4. output sharpening, then overlays (watermarks);
+   5. round to the output bit depth **once**, then merge alpha.
+5. **Encode and attach metadata.**
+
+Details of each stage:
+- **Working space:** scene-linear Rec.2020 (D65), 32-bit float. Grade stages can also run in a named encoded space (sRGB, Display P3, Adobe RGB, Rec.2020, PQ, HLG, or a caller's ICC profile).
+- **Colour management:** Little CMS for ICC profiles; built-in analytic transforms for the standard RGB spaces. The source colour comes from the embedded ICC profile, then CICP, then the format default; the report says which one answered. Policies are preserve, assign, convert, tone-map and expand.
+- **Rounding report:** the report counts pixel roundings. An unchanged image with no resize takes an integer fast path with no colour conversion at all.
+- **Dithering:** TPDF dither, optional and seeded.
+- **RAW decoding:** via `rawler` (no LibRaw), with PPG demosaicing. There are three modes:
+  - the camera's embedded preview;
+  - a standard develop;
+  - **Scene** (PIXL's own develop): white balance on the sensor data; a choice of highlight handling (clip, unclipped, blend, inpaint-opposed); demosaic in float; camera-to-Rec.2020 matrices interpolated by colour temperature as the DNG specification describes. Output is unclamped linear float.
+
+  Four-colour and monochrome sensors aren't supported in Scene mode.
+- **Threads:** the caller sets the number. Output is identical at any thread count, which is tested.
+- **GPU:** none in the image pipeline, which is CPU only. Hardware acceleration applies to AI models only, through ONNX Runtime: CoreML on macOS, DirectML on Windows (planned for the shipped build), CUDA available. A provider that fails is an error, never a silent CPU fallback.
+- **No caching inside the engine**, which is stateless per call (a decoded-source cache is planned). Apps such as Playroom keep their own proxies.
+
+## 4. Operations
+
+- **Grading.** Grades are made of layers. Each layer has a mask, an opacity and a blend mode: normal, multiply, screen, overlay, soft light, hard light, darken, lighten, difference or add.
+  - **Colour and tone:**
+    - 3D and 1D LUTs (`.cube`);
+    - primary corrections (exposure, lift/gamma/gain, contrast, saturation, hue);
+    - HSL qualifier (point colour);
+    - tone (highlights, shadows, whites, blacks);
+    - white balance (Kelvin and tint);
+    - vibrance with skin protection;
+    - point curves and parametric curves;
+    - 8-band HSL;
+    - ASC CDL;
+    - colour-grading wheels;
+    - channel mixer.
+  - **Detail:**
+    - wavelet denoise (luma and chroma);
+    - unsharp mask with halo limiting and edge masking;
+    - local contrast (clarity and texture);
+    - dehaze.
+  - **Effects and colour fixes:** vignette, seeded grain, defringe, add-colour (coloured light), fill.
+- **Masks:**
+  - Shapes: polygons, HSL ranges, edge masks, and raster planes (how brush, gradient and AI masks come in). They combine by add, subtract or intersect, each with its own feather, opacity and invert.
+  - Geometry is resolution-independent (fractions of the frame), so a preview and a full-size export select exactly the same pixels.
+  - Native gradient and depth masks are **planned**.
+- **Subject segmentation:** U²-Net / U²-Netp produce 16-bit mask planes, with guided upsampling.
+- **Retouching:**
+  - clone, and heal (a Poisson blend solved by multigrid);
+  - content-aware fill (PatchMatch, seeded, deterministic);
+  - red-eye and pet-eye, plus heal-source suggestions.
+  - AI object removal exists in the engine, but no model is shipped (**planned**).
+- **Lens corrections:**
+  - distortion (polynomial, PTLens and rectilinear models), lateral chromatic aberration, vignetting;
+  - automatic lateral-CA measurement.
+  - The caller supplies the lens data (Playroom uses Lensfun); the engine reads no database itself.
+  - Fisheye is **planned**.
+- **Upright:** perspective correction (pitch, yaw, roll, focal length, aspect, scale, offset), with automatic Level, Vertical and Full suggestions from a line detector and vanishing points, and a guided mode from drawn lines.
+- **AI (ONNX Runtime, on-device, tiled):**
+  - super resolution: Real-ESRGAN x2 and x4;
+  - denoise: DRUNet at a stated or measured noise level, or SCUNet blind;
+  - JPEG restore: FBCNN;
+  - motion deblur: NAFNet.
+
+  Model weights are separate packages with BSD-3, Apache-2.0 or MIT licences.
+- **JPEG reconstruction without AI:** total-variation minimisation over the JPEG's own DCT coefficients. It is proven consistent with the original quantisation.
+- **HDR:**
+  - tone mapping (BT.2390, Hable, Reinhard, clip) with gamut clip or compress;
+  - grading an HDR master with a set reference white and peak;
+  - SDR-to-PQ/HLG expansion (linear or BT.2446 Method A);
+  - an SDR rendition of an HDR master.
+
+  PQ and HLG output must be 16-bit or more. MaxCLL and MaxFALL are measured on the written pixels. Gain maps:
+  - read: ISO 21496-1, Adobe hdrgm and Apple formats;
+  - write: Ultra HDR JPEG, and HEIF/AVIF with a tone-map item.
+
+  ProRAW/DNG gain maps are **planned**.
+- **Analysis:** histograms, percentiles, clipping, grey-world white balance, hue distribution, noise estimate, HDR statistics, and a histogram of the actual render returned with it.
+- **Planned:** merge to HDR, panorama and focus stacking; camera-matching DCP and Adobe profiles; raw-domain noise reduction.
+
+## 5. Formats
+
+- **Reads:**
+  - JPEG, PNG, HEIF/HEIC, AVIF, JPEG XL, TIFF, WebP;
+  - camera RAW, including CR2, CR3, ARW, NEF, DNG, RAF, RW2, ORF and others supported by rawler.
+- **Writes:**
+  - JPEG, PNG, WebP (lossy and lossless);
+  - AVIF (8, 10 or 12-bit);
+  - JPEG XL (lossy, lossless, and bit-exact JPEG repack and reconstruct);
+  - TIFF (uncompressed, LZW or Deflate; 8-bit, 16-bit or 32-bit float);
+  - DNG from RAW (uncompressed or lossless);
+  - raw pixel buffers.
+- **HEIC output** exists in the engine, but the currently shipped binaries can't encode it (**planned**). Nothing writes camera RAW.
+- **Metadata:** EXIF, ICC, XMP and IPTC are carried over verbatim. The report says when a container has no room for something. ICC output is reproducible.
+
+## 6. Measured performance (published figures)
+
+Apple M2 Pro, release build, unless noted:
+
+| Task | Time |
+|---|---|
+| JPEG → JPEG XL lossless repack, 8.04 MB → 6.55 MB (−19%) | 0.33 s |
+| JPEG → AVIF (q60) | 1.28 s |
+| Canon CR2 (35.7 MB) → DNG | 0.51 s |
+| CR2 develop → JPEG | 0.83 s |
+| CR2 embedded preview → JPEG | 0.42 s |
+| 16-bit PNG (104 MB) → 10-bit AVIF | 2.28 s |
+
+- **Live preview render** at 2048×1365, on a 28-core x86 machine: 478 ms on 1 thread, 185 ms on 4, 83 ms on 16, 75 ms on 28.
+- **AI on an Intel i7-14700F CPU** (8 threads, one 256×256 tile): Real-ESRGAN x4 250 ms; DRUNet 392 ms; SCUNet 849 ms.
+- **Full images on the CPU:** SCUNet takes about 27 s per megapixel; U²-Netp segmentation about 180 ms.
+
+## 7. Design principles
+
+- **The caller decides; the engine reports.** No guessing, no silent defaults, nothing done in secret.
+- **Determinism:** the same request gives the same bytes, whatever the thread count. Seeded randomness (grain, fill) is reproducible.
+- **"What you see is what you export":** a rendered region equals the same region cut from the full render, byte for byte. The SDR preview of an HDR export matches the exported file to within one code value.
+- **Honest loss accounting:** the report states every rounding and any metadata it couldn't write.
+
+## 8. Contact
+
+hello@pixlfoundation.com. Who we are: https://pixlfoundation.com/legal/

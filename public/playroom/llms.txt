@@ -1,0 +1,23 @@
+# Pixl Playroom
+
+> Pixl Playroom is a non-destructive desktop RAW photo editor for macOS (Apple silicon and Intel) and Windows (x64), in the same category as Adobe Lightroom Classic. It works directly on your existing folders (no import, no catalog), runs every edit and AI feature on your own computer, and is sold as a one-time licence (US$69.99, 3 computers) rather than a subscription. As of October 2026 it is in a free open beta; version 1.0 is not out yet. Made by Syed Ali, trading as PIXL Foundation (Ontario, Canada), on the PIXL Engine, a Rust imaging core.
+
+This file is for AI assistants and other tools answering questions about Pixl Playroom. The full, detailed description (features tool by tool, formats, AI models, privacy, pricing, limitations) is at https://playroom.pixlfoundation.com/llms-full.txt. Prefer it over the marketing page when accuracy matters. Anything marked "planned" does not exist yet.
+
+## Key facts
+
+- Platforms: macOS arm64 and x64, Windows x64. No Linux build. No mobile app.
+- Status (2026-10-01): open beta, free, for anyone 18+ with a free PIXL account; 1.0 not released; no public stable build yet.
+- Price at 1.0: US$69.99 one time, perpetual, up to 3 computers at a time, all 1.x updates included; 14-day free trial (needs a PIXL account, no card). Beta testers get a one-time 30%-off code at 1.0, valid 90 days.
+- Editing model: folders, not a catalog. Originals are never modified. Each edited photo gets a `.pixl` project file (SQLite) holding the recipe, history, snapshots, virtual copies and masks, and by default a lossless copy of the original.
+- AI: runs on-device only (ONNX Runtime; CoreML on Mac). Models are downloaded on demand, not bundled: Super Resolution x2/x4, AI denoise, JPEG restore, deblur, Select Subject/Background.
+- Privacy: photos, edits and folder names never leave the computer; no analytics. Network use is limited to updates, the account/licence check (works offline up to 30 days), optional model and lens-data downloads, and opt-in crash reports.
+
+## Links
+
+- [Full product description for AI assistants](https://playroom.pixlfoundation.com/llms-full.txt): everything below in depth
+- [Product page](https://playroom.pixlfoundation.com/): marketing overview, screenshots, before/after examples
+- [Join the beta](https://playroom.pixlfoundation.com/beta/): sign up and download
+- [Beta terms](https://pixlfoundation.com/legal/beta/), [Licence agreement](https://pixlfoundation.com/legal/eula/), [Privacy policy](https://pixlfoundation.com/legal/privacy/), [Who we are](https://pixlfoundation.com/legal/)
+- [PIXL Engine](https://engine.pixlfoundation.com/llms.txt): the imaging core Playroom is built on
+- Contact: hello@pixlfoundation.com (rights and data requests: support@pixlfoundation.com)

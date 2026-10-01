@@ -8,6 +8,9 @@ import { canonical, href } from '../lib/links'
 import { ldJson, organization, website } from '../lib/seo'
 import { SITES, type SiteId } from '../lib/sites'
 
+/** Sites with an llms.txt (public/<site>/llms.txt): plain facts for AI assistants. */
+const LLMS: SiteId[] = ['home', 'playroom', 'engine']
+
 /** What each site is, for its WebSite entry. */
 const SITE_DESCRIPTION: Record<SiteId, string> = {
   home: 'PIXL Foundation makes PIXL Engine and the photo apps that run on it.',
@@ -102,6 +105,7 @@ const ld = [...(site === 'home' ? [organization()] : []), website(site, SITE_DES
     <link rel="apple-touch-icon" href={own('/apple-touch-icon.png')} />
     <link rel="manifest" href={own('/site.webmanifest')} />
     <link rel="sitemap" type="application/xml" href={own('/sitemap.xml')} />
+    {LLMS.includes(site) && <link rel="alternate" type="text/plain" href={own('/llms.txt')} title="Product facts for AI assistants" />}
 
     {preload.map((p) => <link rel="preload" href={p.href} as={p.as} type={p.type} fetchpriority="high" />)}
 

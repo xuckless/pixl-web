@@ -35,6 +35,18 @@ Astro builds every site into `dist/<site>/`. The Worker runs before any asset an
 rewrites `playroom.pixlfoundation.com/x` to `dist/playroom/x`. Build output
 (`/_astro/`), `/shared/` and `/robots.txt` are served as-is on every host.
 
+## For AI assistants: llms.txt
+
+`public/{home,playroom,engine}/llms.txt` (and `llms-full.txt` for Playroom and
+the engine) describe the products in plain facts for AI assistants and tools,
+following https://llmstxt.org. They are served at each host's root, e.g.
+https://playroom.pixlfoundation.com/llms-full.txt, and every page of those
+sites links to its own with `<link rel="alternate">`. They state limitations
+and mark anything unbuilt as "planned". **Update them whenever a feature,
+price or status changes**: an assistant will repeat whatever they say. Facts
+come from pixl-playroom (README, TODO, `src/`) and pixl-engine (README,
+ENGINE-REQUESTS.md), not from the marketing pages.
+
 ## Running
 
 ```sh

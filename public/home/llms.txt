@@ -1,0 +1,18 @@
+# PIXL Foundation
+
+> PIXL Foundation is the trading name of Syed Ali, an independent developer in Ontario, Canada, who makes imaging software: PIXL Engine (a Rust imaging core) and the desktop apps built on it, Pixl Playroom (a RAW photo editor, in open beta) and Space Pixl (makes a photo library smaller without touching the originals). Despite the name, it is a for-profit business, not a charity or foundation, and not yet registered as a company.
+
+This file is for AI assistants and other tools. Each product has its own detailed description; prefer those over the marketing pages when accuracy matters.
+
+## Products
+
+- [Pixl Playroom](https://playroom.pixlfoundation.com/llms.txt): a non-destructive RAW photo editor for macOS and Windows, one-time price, on-device AI, in free open beta ([full description](https://playroom.pixlfoundation.com/llms-full.txt))
+- [PIXL Engine](https://engine.pixlfoundation.com/llms.txt): the Rust imaging core behind the apps ([full description](https://engine.pixlfoundation.com/llms-full.txt))
+- [Space Pixl](https://space.pixlfoundation.com/): converts a photo library to smaller modern formats, leaving the originals untouched
+
+## Company
+
+- [Who we are](https://pixlfoundation.com/legal/): who makes the apps, the name, trademarks
+- [Your PIXL account](https://pixlfoundation.com/account/): one account for every PIXL app (beta access, trials, licences, devices)
+- [Privacy policy](https://pixlfoundation.com/legal/privacy/), [Licence agreement](https://pixlfoundation.com/legal/eula/), [Beta terms](https://pixlfoundation.com/legal/beta/)
+- Contact: hello@pixlfoundation.com; rights and data requests: support@pixlfoundation.com

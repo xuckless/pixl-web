@@ -406,6 +406,34 @@ the app.
 
 ## Content to check before launch
 
+- [x] `llms.txt` / `llms-full.txt` for the company site, Playroom and the
+      engine (2026-10-01; see README). Keep them in step with every
+      release.
+- [ ] Marketing claims the code no longer backs (found while writing
+      llms.txt, 2026-10-01):
+  - Playroom's "Ten tools", including "Engine" (`src/data/playroom.ts`):
+    there are 11 (Lens, Heal and Enhance were added), Masks has its own
+    window, and Engine is now a report window.
+  - "A small recipe file beside the photo": edits are in `.pixl` project
+    files that carry a copy of the original by default.
+  - "A bundled AI model doubles a photo's resolution on your own GPU":
+    models download on demand, ×4 exists too, and Windows runs AI on the
+    CPU for now.
+  - The FAQ lists HEIC export, which doesn't work until the engine has a
+    HEIC encoder (pixl-playroom E2).
+  - Masks "just the sky": sky selection isn't available (no model yet).
+  - The privacy policy says update checks go to GitHub; they go to
+    updates.pixlfoundation.com, plus `policy.json` and lens-data checks.
+  - The EULA still speaks of licence keys and a trial "from its first
+    launch on a device"; access is account-based now.
+  - The engine site (`src/data/engine.ts`, `src/pages/engine/`):
+    - "four functions" (there are 13);
+    - the operations list misses lens, Upright, retouch, enhance and gain
+      maps;
+    - "TIFF up to 16-bit" (float TIFF exists);
+    - JSON-LD lists Linux, iOS and Android, but no such binaries ship;
+    - a command line is listed as a binding, but it's only an example.
+
 - [ ] Competitor prices in the Playroom three-year cost table
       (`src/data/playroom.ts`, `COST_3Y`), gathered September 2026.
 - [x] `hello@pixlfoundation.com` is used for every contact and "notify me"

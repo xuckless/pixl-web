@@ -1,0 +1,131 @@
+# Pixl Playroom: full product description
+
+> For AI assistants answering questions about Pixl Playroom. Facts as of 2026-10-01, taken from the app's source and documentation, not from marketing copy. Anything marked **planned** does not exist yet; do not describe it as available. Short version: https://playroom.pixlfoundation.com/llms.txt
+
+## 1. What it is
+
+Pixl Playroom is a desktop RAW photo developer ("the Lightroom kind"): you cull, organise and develop camera RAW and other photos non-destructively, then export them. It is built on PIXL Engine, a Rust imaging core by the same maker (https://engine.pixlfoundation.com/llms.txt).
+
+- **Maker:** Syed Ali, trading as PIXL Foundation, an independent developer in Ontario, Canada. PIXL Foundation is a for-profit business (not a charity or foundation), not yet registered as a company. Website: https://playroom.pixlfoundation.com
+- **Platforms:** macOS on Apple silicon (arm64) and Intel (x64), as a DMG; Windows x64, as a per-user installer. **No Linux** build ("Linux comes later"). No iOS, Android or web version. Minimum OS versions are not published.
+- **Technology:** an Electron app (React UI). All image processing runs in the native PIXL Engine in separate worker processes (one for interactive previews, one for background work like thumbnails and exports), so an engine crash can't take the app down. The library index is a local SQLite database.
+- **Release status (2026-10-01):** in **open beta**. Version 1.0 has not shipped. The first public beta build is being prepared; the download buttons on the beta page light up when it is out. Builds are code-signed (Apple Developer ID with notarisation on macOS, Azure Trusted Signing on Windows) and update themselves (beta and stable channels).
+- **Source code:** the app's repository is public for reference only, all rights reserved; it cannot be built without the private engine. It is not open source.
+
+## 2. How it works with your files
+
+- **Folders, not a catalog.** Open any folder; photos stay where they are. There is no import step and no catalog to maintain. The sidebar has pinned and recent folders, a folder tree (optionally including subfolders), collections and keywords. Open folders are watched, so files added or removed outside the app appear live.
+- **Originals are never modified.** Every edit is a recipe that is rendered on the fly and when exporting.
+- **The `.pixl` project file.** On a photo's first edit, Playroom creates a project file next to it (`IMG_0001.pixl`), or in `~/Pixl Projects`, or a folder of your choice. It is a single SQLite file that holds:
+  - the develop settings (recipe), full edit history, snapshots and virtual copies;
+  - painted masks, and the results of pixel operations (AI denoise, Enhance, healing);
+  - rating, flag and colour label, stack membership, and a preview.
+  - **By default, a copy of the original** (RAW as lossless DNG; JPEG repacked as JPEG XL, which can rebuild the exact original JPEG and is about 20% smaller; large PNG/TIFF as lossless JPEG XL). So a project is roughly the size of the photo again, and still opens, develops and exports if the original goes missing. This can be turned off in Settings.
+- **Metadata interoperability.** Titles, captions, copyright and hierarchical keywords are written to standard XMP sidecars (`IMG_0001.xmp`) that other apps can read. Develop settings are not written to XMP; reading or writing Lightroom's develop settings (`crs:`) is **planned**. Playroom does not read or change a Lightroom catalog.
+- Ratings, flags and labels alone don't create a project (they live in a small sidecar until the first edit).
+
+## 3. Library (organising and culling)
+
+Available:
+- Virtualised grid of engine-rendered thumbnails; filmstrip.
+- Ratings 0 to 5, pick/reject flags, colour labels (red, yellow, green, blue, purple), all with keyboard shortcuts.
+- Manual collections, collection sets, and smart collections with nested all/any/none rules over rating, flag, label, RAW or not, camera, lens, ISO, focal length, aperture, shutter speed, capture date, keywords, text and other collections. Collections export and import as JSON.
+- Hierarchical keywords (e.g. Places › Canada › Winnipeg), editable on many photos at once.
+- Search over file names, titles, captions, keywords, camera and lens, plus a filter bar.
+- Stacks (manual, or automatic by capture time), stored with the photos.
+- Duplicate finder: exact duplicates (size plus hash) and near duplicates (perceptual hash with adjustable distance), per folder or across the library.
+- Copy, paste and sync develop settings across a selection, choosing which groups of settings.
+- Batch auto white balance, batch export, batch Enhance.
+- "Open With Pixl Playroom" from Finder and Explorer (never takes over as the default app).
+- Rebindable keyboard shortcuts.
+
+**Planned, not available:** compare and survey views, batch rename, moving/copying/deleting files from the app, map view, face recognition / people, slideshow, print, web gallery, book, tethered capture, light theme.
+
+## 4. Develop (editing)
+
+Tools sit on a thumb-wheel, one at a time, so the photo keeps the screen: **Basic, Tone Curve, HSL / Colour, Colour Grading, Detail, Lens Corrections, Effects, Heal, Crop & Rotate, Calibration, Enhance** (11 tools), plus a separate **Masks** window. Every slider updates the picture and the histogram live; previews go through the same engine path as export ("what you see is what you export").
+
+- **Profiles:** Neutral, Playroom Standard (default for RAW), Vivid, Monochrome, or any imported `.cube` 3D LUT with an amount control. Camera-matching DCP and Adobe camera profiles are **not supported** (planned).
+- **White balance:** as shot, auto, eyedropper, custom and saved presets. RAW uses real Kelvin and tint from the camera's as-shot white (with Daylight, Cloudy and so on); other files use relative sliders.
+- **Tone:** exposure (±5 stops), contrast, highlights, shadows, whites, blacks; scene-aware auto tone.
+- **Presence:** texture, clarity, dehaze, vibrance, saturation.
+- **Tone curve:** parametric curve with 4 regions and movable splits (master channel), point curves for RGB and each channel, curve presets, targeted adjustment tool. Per-channel parametric curves are planned.
+- **HSL / colour mixer:** 8 colour bands × hue, saturation and luminance; black-and-white mix; point colour (up to 8 colours sampled from the photo, each with its own shift and range); targeted adjustment tool.
+- **Colour grading:** shadow, midtone, highlight and global wheels with blending and balance; "Add colour" (additive coloured light) with neutralise and match pickers.
+- **Detail:** sharpening (amount, radius, detail, masking); noise reduction, either classic (luminance and colour, tuned from the measured noise level) or AI (see section 6).
+- **Lens corrections:** automatic lens profiles from a bundled Lensfun database (about 1,500 lenses, matched from the photo's metadata, works offline), or imported profiles; chromatic aberration removal measured on the photo; manual distortion and vignetting; defringe (purple and green). Fisheye correction, Adobe LCP import and corrections from DNG or maker-note data are **planned**.
+- **Effects:** post-crop vignette, colour wash, film grain (reproducible).
+- **Calibration:** shadow tint; red, green and blue primary hue and saturation.
+- **Crop & Rotate:** aspect presets, straighten, rotate, flip, composition guides; **Upright** perspective correction (Auto, Level, Vertical, Full, or Guided with 2 to 4 drawn lines) plus manual transform sliders.
+- **Masks (local adjustments):** a Lightroom-style masks panel. Components combine by add, subtract and intersect:
+  - brush (with pen pressure and colour-aware auto mask);
+  - linear and radial gradients;
+  - lasso;
+  - colour range and luminance range;
+  - AI **Select Subject** and **Select Background**.
+  Each component has feather, plus edge shift (contract or expand) and harden. Each mask has its own amount, opacity, blend mode (normal, multiply, screen, overlay, soft light, hard light, darken, lighten, difference, add), invert, and almost every global control as a local slider. Mask overlays can be shown in several colours and modes. **Not available yet:** sky selection, depth range, people and object selection, edge-aware brush.
+- **Heal:** heal, clone and content-aware fill, as spots or painted strokes, with the source dragged live or found automatically; red-eye and pet-eye; "visualise spots" to find dust. Generative AI remove is **planned** (no shippable model yet).
+- **Presets:** built-in looks (black-and-white, film, matte, vivid, teal & orange, landscape, portrait, vignette) that only set their own controls, plus your own presets with chosen setting groups.
+- **History and snapshots:** per-photo undo/redo and a history list where any step can be hidden or removed; snapshots; virtual copies.
+- **HDR photos:** gain-map photos (iPhone HEIC, Ultra HDR and Apple JPEGs) and PQ/HLG files are recognised. You can edit on the SDR base or the HDR version, with a headroom overlay and HDR histogram; highlights above white are kept. The editor shows HDR tone-mapped to SDR; true HDR display on HDR screens is **planned**. ProRAW/DNG gain maps are planned.
+- **Scopes and viewing:** RGB histogram measured from the actual render, with clipping warnings; a colour distribution chart; before, split before/after, zoom to 400% with full-resolution 1:1 detail (except on photos with perspective or lens warps, which show an enlarged preview).
+- **Engine report:** an advanced window showing exactly what the engine was asked to do and what it reported, with custom engine layers for experts.
+- **Not supported:** soft proofing and gamut warning (planned), merge to HDR, panorama, focus stacking (planned in the engine), and a layer-based editing stack (masks are the only layers today; a full layer stack is planned).
+
+## 5. File formats
+
+- **Opens:** camera RAW (CR2, CR3, CRW, ARW, SRF, SR2, NEF, NRW, DNG, RAF, RW2, ORF, PEF, SRW, MRW, 3FR, IIQ, ERF, KDC, X3F), JPEG, PNG, HEIC/HEIF, AVIF, JPEG XL, TIFF, WebP, and `.pixl` projects. RAW is decoded and developed inside PIXL Engine in linear light with the camera's colour matrix. RAW highlight reconstruction and raw-domain noise reduction are not available yet.
+- **Exports:** JPEG, PNG, TIFF, WebP, AVIF and JPEG XL. HEIC export is in the app but **does not work in current builds** (the engine build has no HEIC encoder yet).
+  - **Bit depth:** 8 or 16-bit (PNG, TIFF, JPEG XL); 8, 10 or 12-bit (AVIF).
+  - **Colour space:** sRGB, Display P3, Adobe RGB or Rec.2020, with rendering intent and black-point compensation.
+  - **HDR export:** SDR (tone-mapped), keep HDR (PQ or HLG), expand SDR to HDR, or SDR plus gain map (Ultra HDR JPEG, AVIF).
+  - **Size and finish:** resize by long edge, short edge, width, height, megapixels or percent; output sharpening for screen, matte or glossy.
+  - **Naming:** filename templates ({name}, {seq}, {date}, {rating}, {copy}).
+  - **Metadata control:** EXIF, ICC, XMP and IPTC on or off, copyright-only mode, and location removal.
+  - **Watermark:** a PNG image watermark (text watermarks are planned).
+  - **Batch:** export presets, with progress and cancel.
+
+## 6. AI features (all on your computer)
+
+- Everything runs locally through ONNX Runtime; nothing is uploaded. On macOS the Apple Neural Engine/GPU is used through CoreML where the model supports it; on Windows, AI currently runs on the CPU (GPU acceleration via DirectML is planned).
+- **Models are downloaded on demand** from models.pixlfoundation.com (Settings → AI models), checked by hash, and can be removed; the app shows each model's size, licence and what is known about its training data. Nothing is bundled.
+- **Available models:** Real-ESRGAN (Super Resolution x2, x4 and x4 "keep texture"); SCUNet and DRUNet (AI denoise); FBCNN (JPEG artefact removal); NAFNet (motion deblur); U²-Net and U²-Netp (Select Subject/Background). All have permissive licences (BSD-3, Apache-2.0 or MIT).
+- **AI denoise** (Detail → Noise reduction → AI): fast draft first, then a full-resolution 16-bit result, stored in the project and usable inside a mask. Slow on CPU: SCUNet takes about 27 s per megapixel (about 10 minutes for 24 MP). Not for HDR photos.
+- **Enhance** runs on the original as one chain: JPEG restore (rebuilt from the JPEG's own data, or FBCNN), optional deblur, then Super Resolution x2 or x4. It always writes a new 16-bit TIFF beside the original, which starts with the source photo's edits. It shows the output size and a time estimate, and works in batches. SDR only.
+- **Planned, not available:** sky selection, generative remove, people and object selection, learned auto white balance and tone, and an optional "Playroom Agent & Cloud" add-on (bring your own AI agent, or PIXL's agent with cloud tools paid by credits; every agent action would be an undoable history step).
+
+## 7. Performance
+
+- Each photo is decoded once into a 16-bit working proxy (up to 2560 px), with smaller drafts for live slider drags; the full proxy renders when you stop dragging, and newer edits cancel older renders. Lens corrections are baked into the proxies, so a settled render takes about 0.6 to 0.9 s and a draft about 0.2 s on a test Canon RAW.
+- Thumbnails, exports and Enhance run in a separate low-priority engine process so editing stays responsive. Brush painting runs on the GPU.
+- Known heavy spots: full-resolution 1:1 views decode the whole source each time; dehaze is memory-hungry at high resolutions; AI on CPU is slow (see above).
+- No official hardware requirements are published.
+
+## 8. Privacy and network
+
+- **Photos, edits and folder names never leave your computer.** There are no analytics or tracking in the app.
+- What it does contact:
+  - update checks and the release policy (updates.pixlfoundation.com), at launch and every few hours;
+  - lens-data updates and on-demand AI model downloads (models.pixlfoundation.com);
+  - the PIXL account (sign-in through your browser with an email code, Google or Apple), and a licence/beta check about once a day. This sends a one-way hash of the computer's ID (never the ID itself) and a device name. The app works **offline for up to 30 days** between checks.
+  - Crash reports are **off unless you opt in** (asked at first launch); problem reports are sent only when you send one. Your home folder is removed from both.
+- Account data is stored with Supabase in Canada; servers run on Cloudflare. You can delete your account and its data on the account page. Privacy policy: https://pixlfoundation.com/legal/privacy/
+
+## 9. Pricing, licensing and the beta
+
+- **At 1.0:** US$69.99 one time, perpetual, personal or commercial use, on up to **3 computers at a time** (free one up any time in the app or on the account page). Every 1.x update included; a future major version may be a discounted upgrade. Lemon Squeezy will sell it as merchant of record. Not on sale yet.
+- **Trial:** 14 days with everything unlocked, needs a free PIXL account but no card; one per account and one per computer.
+- **No licence keys:** access lives on your PIXL account (one account for all PIXL apps). If a trial or licence lapses, only exporting is locked; browsing and editing keep working.
+- **Open beta (now):** free for anyone 18 or older with a PIXL account, every feature, up to 3 computers, until 1.0 ships. Join at https://playroom.pixlfoundation.com/beta/ by accepting the beta terms, which include a separate confirmation that the beta comes as is, without warranty or liability. At 1.0, beta builds stop working and offer the update; testers get the normal trial plus a one-time **30% off** code, valid 90 days.
+- **Planned add-ons:** optional cloud tiers, credits and the Agent; the app never requires them.
+- **Three-year cost comparison** on the product page (vendor prices as of September 2026): Playroom $69.99 once; Lightroom (Photography 20 GB) $9.99/month, $359.64 over three years; Capture One Pro $349 one-time or subscription; Darkroom $39.99/year or $99.99 lifetime.
+
+## 10. How it compares (facts only)
+
+- Like Lightroom Classic: a RAW developer with library tools, masks, Upright, healing and presets, and many controls modelled on Lightroom's. Unlike it: no import or catalog (works on folders), a one-time price, and all AI on-device.
+- It does not read Lightroom catalogs or (yet) Lightroom XMP develop settings, so edits made in Lightroom do not carry over.
+- Missing compared with mature editors today: layers beyond masks, print, tethering, HDR/panorama merge, camera-matching profiles, sky/people AI masks, generative remove, Linux.
+
+## 11. Contact
+
+hello@pixlfoundation.com. Rights, trademarks and data requests: support@pixlfoundation.com. Who we are: https://pixlfoundation.com/legal/
