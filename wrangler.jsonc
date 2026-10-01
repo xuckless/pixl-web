@@ -20,6 +20,13 @@
   ],
   "workers_dev": true,
   "observability": { "enabled": true },
+  // Crash and problem reports, and crash symbols (worker/api.ts). Create the
+  // bucket and its retention rules first: scripts/reports-bucket.sh.
+  "r2_buckets": [{ "binding": "REPORTS", "bucket_name": "pixl-reports" }],
+  // Reports per client (IP) per minute, across /api/crash and /api/report.
+  "ratelimits": [
+    { "name": "REPORT_LIMIT", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } }
+  ],
   "env": {
     // `pnpm preview`: no routes, so wrangler dev keeps each request's own host
     // (playroom.localhost:8787) instead of rewriting it to the first route.

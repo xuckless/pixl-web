@@ -1,7 +1,7 @@
 ---
 title: Privacy policy
 summary: What PIXL Foundation's apps and websites collect, and why. Your photos never leave your computer.
-updated: 2026-09-29
+updated: 2026-10-01
 ---
 
 This policy covers [Company legal name] ("PIXL Foundation", "we", "us"), our apps (Pixl Playroom and Space Pixl) and our websites under pixlfoundation.com. Space Pixl, which sends nothing but update checks, also has its own shorter policy at [space.pixlfoundation.com/legal/privacy](https://space.pixlfoundation.com/legal/privacy/).
@@ -26,7 +26,11 @@ If you turn on crash reports, the app sends us a report when it crashes or hits 
 - for a native crash, a technical snapshot of the app's state at that moment (a "minidump"), which can include fragments of memory;
 - the app version, your operating system and processor type.
 
-Before an error report is sent, your home folder is removed from it, so folder names under it (which often include your name) don't leave your computer. Reports go to our server at pixlfoundation.com, hosted by Cloudflare, and are used only to find and fix bugs. [Retention period to be decided.]
+Before an error report is sent, your home folder is removed from it, so folder names under it (which often include your name) don't leave your computer. Reports go to our server at pixlfoundation.com, hosted by Cloudflare, are stored in Cloudflare's R2 storage, and are used only to find and fix bugs. They are deleted automatically after [90 days].
+
+### Problem reports (only when you send one)
+
+Settings → Report a problem sends us what you write, the app version, your operating system and processor type, and, if you leave it ticked, the recent part of the app's log (which names the files it worked on, with your home folder removed as above). If you give an email address, we use it only to reply about that report. Problem reports are stored the same way as crash reports and deleted automatically after [one year]; email us to have one deleted sooner.
 
 ### Licences and purchases (when they launch)
 

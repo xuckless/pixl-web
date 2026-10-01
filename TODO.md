@@ -44,10 +44,18 @@ Grouped by area; roughly in priority order within each.
 
 ## Crash reports
 
-- [ ] `/api/crash` (`worker/api.ts`) only logs a summary of each report. Keep
-      them (an R2 bucket with a retention period, stated in the privacy
-      policy) or hand them to Sentry, and add rate limiting before the app ships
-      widely.
+- [x] `/api/crash` and `/api/report` (`worker/api.ts`) keep each report in
+      the `pixl-reports` R2 bucket (crash/, minidump/, report/ by day), rate
+      limited per client (`REPORT_LIMIT`, 20 a minute). Problem reports are
+      what users send from Playroom's Settings → Report a problem.
+- [ ] Create the bucket and its retention rules before the next deploy:
+      `scripts/reports-bucket.sh` (90 days for crashes, a year for problem
+      reports; the privacy policy says the same, in brackets until confirmed).
+- [ ] Reading reports: list with `wrangler r2 object get`/the dashboard;
+      minidumps are kept as Crashpad sent them (multipart, gzipped). Symbols
+      from Playroom's release build are under `symbols/` in Breakpad's layout
+      (`minidump-stackwalk --symbols-path`); Electron's own come from
+      https://symbols.electronjs.org.
 
 ## Accounts and licensing
 
