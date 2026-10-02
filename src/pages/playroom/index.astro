@@ -31,7 +31,7 @@ const icon = {
       category: 'MultimediaApplication',
       os: 'macOS, Windows',
       description: 'A professional RAW photo editor you pay for once: AI masks, looks, colour grading, noise reduction and AI Super Resolution, on the folders you already have.',
-      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'AI masks for the subject, objects and sky, plus brush, gradient and range masks', 'Over 300 looks, with smart looks that adjust just the subject or sky', 'Colour grading wheels', 'On-device AI noise reduction, JPEG repair, deblur and Super Resolution', 'No import, no catalog: each photo\'s edits in one .pixl project file beside it']
+      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'Automatic lens correction from built-in profiles', 'AI masks for the subject, objects and sky, plus brush, gradient and range masks', 'Over 300 looks, with smart looks that adjust just the subject or sky', 'Colour grading wheels', 'On-device AI noise reduction, JPEG repair, deblur and Super Resolution', 'No import, no catalog: each photo\'s edits in one .pixl project file beside it']
     }),
     faqPage(FAQ)
   ]}
@@ -40,6 +40,7 @@ const icon = {
     { label: 'Features', to: '#features' },
     { label: 'Examples', to: '#developed' },
     { label: 'Tools', to: '#tools' },
+    { label: 'Next', to: '#next' },
     { label: 'Beta', to: '#beta' },
     { label: 'Pricing', to: '#pricing' },
     { label: 'FAQ', to: '#faq' },
@@ -140,7 +141,7 @@ const icon = {
       <div class="copy">
         <span class="b-micro">03 · Looks</span>
         <h2 class="b-disp h2" id="f3">Start from a look. Make it yours.</h2>
-        <p class="b-body">Over 300 looks inspired by camera colour, film stocks, cinema and TV, previewed live on your own photo. Hover to try one, dial it in with Amount, and keep editing. Smart looks find the subject, the sky or an object and adjust just that part, and the looks you save keep their masks.</p>
+        <p class="b-body">Over 300 looks inspired by camera colour, film stocks, cinema and TV, previewed live on your own photo. Hover to try one, dial it in with Amount, and keep editing. Smart looks go further: they find the subject or the sky and adjust just that part.</p>
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
@@ -161,6 +162,23 @@ const icon = {
     </section>
   </div>
 
+  <!-- ── smart, automatic ─────────────────────────────────────── -->
+  <section class="wrap band smart" aria-labelledby="smart-title">
+    <h2 class="sr-only" id="smart-title">Lens correction and smart looks</h2>
+    <ul class="cards two">
+      <li>
+        <span class="b-micro">Optics</span>
+        <h3 class="b-disp">Lenses, corrected for you.</h3>
+        <p class="b-body">Playroom reads your lens from the file, and one click corrects its distortion and vignetting from built-in profiles for about 1,500 lenses, offline. Chromatic aberration is measured on the photo itself, fringes go with a picker, and fisheye shots can be defished.</p>
+      </li>
+      <li>
+        <span class="b-micro">Smart looks</span>
+        <h3 class="b-disp">Looks that do the masking.</h3>
+        <p class="b-body">A smart look carries instructions as well as sliders: find the subject, click the sky, quiet the background, denoise. Playroom runs them on each photo you apply it to and leaves ordinary masks and steps you can change or undo. Save your own edit as a look, and its AI masks are made again on the next photo.</p>
+      </li>
+    </ul>
+  </section>
+
   <!-- ── before / after ───────────────────────────────────────── -->
   <section class="wrap band developed" id="developed" aria-labelledby="dev-title">
     <div class="sec-head">
@@ -177,6 +195,31 @@ const icon = {
       <p class="b-body">Crop, Heal and Masks are one click away, and every adjustment folds into one column. Every slider updates the picture and the histogram as you drag. Pick a panel to see it in the app. Heal clones, fills and fixes red eye too, and View ▸ Engine Report shows every step of the last render.</p>
     </div>
     <ToolShowcase tools={TOOLS} />
+  </section>
+
+  <!-- ── next ─────────────────────────────────────────────────── -->
+  <section class="wrap band next" id="next" aria-labelledby="next-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="next-title">Coming before 1.0.<br /><span class="accent">Planned, not shipped yet.</span></h2>
+      <p class="b-body">What we're building now, for the first full release. We'll say here and in the app's What's new when each one lands.</p>
+    </div>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Colour science</span>
+        <h3 class="b-disp">Our own colour, from the sensor up.</h3>
+        <p class="b-body">Today LibRaw demosaics a RAW and the camera's own matrix sets its colour. We're building PIXL's own path for every stage after demosaicing, in PIXL Engine: white balance, the colour transforms from the camera into a wide working space, highlight recovery and the base rendering. Then Playroom switches over to it, and the colour is ours from the sensor to your screen.</p>
+      </li>
+      <li>
+        <span class="b-micro">Agents, over MCP</span>
+        <h3 class="b-disp">Any agent. Every control.</h3>
+        <p class="b-body">Playroom will open itself to AI agents through MCP, so any agent that speaks it can find photos in your library, use every slider, mask and look, and work through a whole shoot. Edit by conversation, or hand an agent the idea and let it run. Every change is a history step marked with the agent that made it, for you to review or undo.</p>
+      </li>
+      <li>
+        <span class="b-micro">Better models</span>
+        <h3 class="b-disp">People, sky and sharper selections.</h3>
+        <p class="b-body">Masks for a person's face, skin, hair, eyes, lips, teeth and clothes, a dedicated sky model, and cleaner edges on every AI selection, all running on your own computer.</p>
+      </li>
+    </ul>
   </section>
 
   <!-- ── cost ─────────────────────────────────────────────────── -->
@@ -270,7 +313,7 @@ const icon = {
         </header>
         <p class="b-body">Describe the edit and let an AI agent do it, across one photo or a whole folder. Every change it makes is a normal history step you can undo.</p>
         <ul class="b-body ticks">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Bring your own AI agent, included with the app</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Bring your own agent over MCP, included with the app, planned before 1.0</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Or use ours, with cloud masking and generative tools on credits</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>See the cost before any batch runs</li>
         </ul>

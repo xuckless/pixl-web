@@ -166,7 +166,7 @@ export const COST_3Y = [
 export const FAQ = [
   {
     q: 'Is Playroom a subscription?',
-    a: 'No. You buy a licence once and keep it. Every 1.x update is included. Optional cloud and AI-agent add-ons will be sold separately later, and the app never needs them.'
+    a: 'No. You buy a licence once and keep it. Every 1.x update is included. Bringing your own AI agent will be included. Optional cloud add-ons may be sold separately later, and the app never needs them.'
   },
   {
     q: 'How many computers can I use it on?',
@@ -183,6 +183,10 @@ export const FAQ = [
   {
     q: 'What can it open and export?',
     a: 'It opens camera RAW, DNG, JPEG, JPEG XL, HEIC, TIFF, PNG, WebP and AVIF. It exports JPEG, PNG, TIFF, WebP, AVIF and JPEG XL, one photo at a time or in batches. HEIC export is coming.'
+  },
+  {
+    q: 'Can an AI agent edit my photos?',
+    a: 'Not yet; it\'s planned before 1.0. Playroom will open itself to AI agents through MCP (the Model Context Protocol), so any agent that speaks it can browse your library and use every control, by conversation or on a whole shoot. Every change it makes will be a history step you can review and undo. It\'s included with the app. What you let an agent see goes wherever that agent runs, so a cloud agent means its provider sees it.'
   },
   {
     q: 'Can I try it first?',
