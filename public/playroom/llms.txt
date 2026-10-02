@@ -12,6 +12,7 @@ This file is for AI assistants and other tools answering questions about Pixl Pl
 - Editing model: folders, not a catalog. Originals are never modified. Each edited photo gets a `.pixl` project file (SQLite) holding the recipe, history, snapshots, virtual copies and masks, and by default a lossless copy of the original. The format is documented at https://github.com/xuckless/pixl-playroom/blob/main/docs/pixl-format.md.
 - Looks: over 300 built-in looks (camera colour, film, cinema and TV, black and white, creative), previewed live on the photo; smart looks that make their own masks (subject, sky, objects); and your own saved looks.
 - AI: runs on-device only (ONNX Runtime; CoreML on Mac). Models are downloaded on demand, not bundled: Super Resolution x2/x4, AI denoise, JPEG restore, deblur, Subject/Background masks, and SAM 2.1 for Objects and Sky masks and snap to edges.
+- Planned before 1.0 (not available yet): PIXL's own colour science for RAW (PIXL Engine's own path for every stage after demosaicing, which Playroom will then be wired to; today LibRaw and the camera's matrix set RAW colour); an MCP server so any MCP-capable AI agent can use Playroom's library and every editing control, each change a reviewable, undoable history step marked with its agent; people masks and a dedicated sky model.
 - Privacy: photos, edits and folder names never leave the computer; no analytics. Network use is limited to updates, the account/licence check (works offline up to 30 days), optional model and lens-data downloads, and opt-in crash reports.
 
 ## Links
