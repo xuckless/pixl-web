@@ -12,6 +12,7 @@ import { faqPage, softwareApp } from '../../lib/seo'
 const own = (p: string) => href('playroom', p, 'playroom')
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
 const beta = own('/beta/')
+const pixlFormat = 'https://github.com/xuckless/pixl-playroom/blob/main/docs/pixl-format.md'
 const icon = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
@@ -23,14 +24,14 @@ const icon = {
 <Base
   site="playroom"
   title="Pixl Playroom · Develop everything. Rent nothing."
-  description="A professional RAW photo editor for macOS and Windows. Masks, colour grading, AI super resolution and every tool you need, on your own folders. Pay once, keep it forever."
+  description="A professional RAW photo editor for macOS and Windows. AI masks, 300+ looks, colour grading, AI noise reduction and Super Resolution, on your own folders. Pay once, keep it forever."
   preload={[{ href: own('/media/hero-poster.webp'), as: 'image', type: 'image/webp' }]}
   jsonLd={[
     softwareApp('playroom', {
       category: 'MultimediaApplication',
       os: 'macOS, Windows',
-      description: 'A professional RAW photo editor you pay for once: masks, colour grading, noise reduction and AI super resolution, on the folders you already have.',
-      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'Masks by brush, gradient, colour and luminance range', 'Layered colour grading', 'On-device AI Super Resolution', 'No import, no catalog: edits saved beside each photo', 'Metadata in standard XMP sidecars']
+      description: 'A professional RAW photo editor you pay for once: AI masks, looks, colour grading, noise reduction and AI Super Resolution, on the folders you already have.',
+      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'AI masks for the subject, objects and sky, plus brush, gradient and range masks', 'Over 300 looks, with smart looks that adjust just the subject or sky', 'Colour grading wheels', 'On-device AI noise reduction, JPEG repair, deblur and Super Resolution', 'No import, no catalog: each photo\'s edits in one .pixl project file beside it']
     }),
     faqPage(FAQ)
   ]}
@@ -50,8 +51,8 @@ const icon = {
     <span class="b-chip">The RAW editor you own · macOS &amp; Windows</span>
     <h1 class="b-disp" id="hero-title">Develop everything.<br /><span class="accent">Rent nothing.</span></h1>
     <p class="b-body lede">
-      Professional photo editing without the monthly bill. Masks, colour grading, noise reduction and AI upscaling,
-      working straight on the folders you already have. Pay once, and it's yours.
+      Professional photo editing without the monthly bill. AI masks, over 300 looks, colour grading, noise reduction
+      and AI upscaling, working straight on the folders you already have. Pay once, and it's yours.
     </p>
     <div class="ctas">
       <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try the free beta</a>
@@ -61,7 +62,7 @@ const icon = {
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.amount} once, no subscription</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.devices} computers per licence</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Edits never leave your machine</li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free {PRICE.trialDays}-day trial</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free during the beta</li>
     </ul>
     <div class="b-win hero-win">
       <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
@@ -98,12 +99,13 @@ const icon = {
       <li>
         <span class="b-micro">Keep your workflow</span>
         <h3 class="b-disp">No import. No catalog.</h3>
-        <p class="b-body">Point it at a folder and start. Each edited photo gets a project file beside it, and keywords go to standard XMP that other apps read.</p>
+        <p class="b-body">Point it at a folder and start. Each edited photo gets one <code>.pixl</code> project beside it, holding its edits, history, masks and copies, and by default a copy of the original. It's one documented SQLite file that any SQLite tool can read.</p>
+        <a class="pixl-file textlink b-body" href={pixlFormat} target="_blank" rel="noopener"><img src={own('/formats/pixl.png')} width="48" height="48" alt="" loading="lazy" />The .pixl format</a>
       </li>
       <li>
         <span class="b-micro">Private by design</span>
         <h3 class="b-disp">Your photos stay yours.</h3>
-        <p class="b-body">Every edit, preview and AI upscale runs on your own computer. Nothing is uploaded, and editing works offline.</p>
+        <p class="b-body">Every edit, preview and AI tool runs on your own computer. Nothing is uploaded, and editing works offline.</p>
       </li>
     </ul>
   </section>
@@ -124,25 +126,37 @@ const icon = {
 
     <section class="wrap feature flip" aria-labelledby="f2">
       <div class="copy">
-        <span class="b-micro">02 · Masks &amp; grading</span>
-        <h2 class="b-disp h2" id="f2">Edit exactly what you meant to.</h2>
-        <p class="b-body">Let AI select the subject, or pick it by colour, tone, brush or gradient, then grade it on its own layer. Stack as many as you like, reorder them, and change your mind later. Nothing is baked in until you export.</p>
+        <span class="b-micro">02 · Develop</span>
+        <h2 class="b-disp h2" id="f2">Every adjustment in one column.</h2>
+        <p class="b-body">Compare before and after side by side, watch the histogram and the hue chart, and work down one column of panels. Jump to any of them, or keep one open at a time. Every slider updates the picture as you drag, and your original is never touched.</p>
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/develop-masks.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="Develop with the Masks tool: a colour-range mask picks out a cluster of red berries, shown as a violet overlay, with its own sliders." />
+        <img src={own('/shots/develop.webp')} width="2000" height="1273" loading="lazy" decoding="async" alt="Develop in Split view: a sprig of yellow flowers, the untouched RAW on the left and the edit on the right, with the histogram, hue chart and adjustment panels beside it." />
       </figure>
     </section>
 
     <section class="wrap feature" aria-labelledby="f3">
       <div class="copy">
-        <span class="b-micro">03 · Super Resolution</span>
-        <h2 class="b-disp h2" id="f3">Crop harder. Print bigger.</h2>
-        <p class="b-body">An AI model running on your own computer doubles or quadruples a photo's resolution, with your edits already applied. The result is a 16-bit TIFF beside the original, ready for a large print. The model downloads once, the first time you use it.</p>
+        <span class="b-micro">03 · Looks</span>
+        <h2 class="b-disp h2" id="f3">Start from a look. Make it yours.</h2>
+        <p class="b-body">Over 300 looks inspired by camera colour, film stocks, cinema and TV, previewed live on your own photo. Hover to try one, dial it in with Amount, and keep editing. Smart looks find the subject, the sky or an object and adjust just that part, and the looks you save keep their masks.</p>
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/enhance.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The Enhance dialog, which doubles a photo's resolution into a 16-bit TIFF beside the original." />
+        <img src={own('/shots/looks.webp')} width="2000" height="1280" loading="lazy" decoding="async" alt="The Looks browser: 308 looks on shelves such as Camera colour, Cinema, Colour film and Smart looks, each previewed on a photo of yellow flowers." />
+      </figure>
+    </section>
+
+    <section class="wrap feature flip" aria-labelledby="f4">
+      <div class="copy">
+        <span class="b-micro">04 · Masks</span>
+        <h2 class="b-disp h2" id="f4">Edit exactly what you meant to.</h2>
+        <p class="b-body">Let AI find the subject, the sky or any object you click, or pick it by colour, tone, brush or gradient. Then every panel edits just that part. Stack as many masks as you like, reorder them, and change your mind later. Nothing is baked in until you export.</p>
+        <div class="b-rule"></div>
+      </div>
+      <figure class="b-win shot">
+        <img src={own('/shots/develop-masks.webp')} width="2000" height="1275" loading="lazy" decoding="async" alt="The Masks window with a Subject mask outlining a man with long hair, while the panels on the right edit only that mask." />
       </figure>
     </section>
   </div>
@@ -159,8 +173,8 @@ const icon = {
   <!-- ── tools ────────────────────────────────────────────────── -->
   <section class="wrap band tools" id="tools" aria-labelledby="tools-title">
     <div class="sec-head">
-      <h2 class="b-disp h2" id="tools-title">Every tool you reach for.<br /><span class="accent">On one thumb-wheel.</span></h2>
-      <p class="b-body">Eleven tools on one wheel, one at a time, so the photo keeps the screen, with masks in their own window. Every slider updates the picture and the histogram as you drag. Pick one to see it in the app; Lens Corrections and Heal are on the wheel too.</p>
+      <h2 class="b-disp h2" id="tools-title">Every tool you reach for.<br /><span class="accent">Right where you expect it.</span></h2>
+      <p class="b-body">Crop, Heal and Masks are one click away, and every adjustment folds into one column. Every slider updates the picture and the histogram as you drag. Pick a panel to see it in the app. Heal clones, fills and fixes red eye too, and View ▸ Engine Report shows every step of the last render.</p>
     </div>
     <ToolShowcase tools={TOOLS} />
   </section>
@@ -238,7 +252,8 @@ const icon = {
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Every Develop and Library tool, nothing held back</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Use it on {PRICE.devices} computers at a time, and swap them whenever you like</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>All 1.x updates included, delivered in the app</li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>On-device AI Super Resolution</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>On-device AI masks, noise reduction and Super Resolution</li>
+          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Over 300 looks, and your own</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free {PRICE.trialDays}-day trial with everything unlocked</li>
         </ul>
         <div class="plan-ctas">

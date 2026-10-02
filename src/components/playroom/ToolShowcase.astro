@@ -1,6 +1,5 @@
 ---
-// The Develop wheel as a tab list: pick a tool, see the real app with that
-// tool open. Arrow keys, Home and End move between tabs, as the WAI-ARIA tabs
+// The Develop panels as a tab list: pick one, see it in the real app. Arrow keys, Home and End move between tabs, as the WAI-ARIA tabs
 // pattern has it.
 import { href } from '../../lib/links'
 import type { Tool } from '../../data/playroom'
@@ -10,7 +9,7 @@ interface Props {
 }
 
 const { tools } = Astro.props
-const src = (t: Tool) => href('playroom', `/${t.shot ?? `shots/tools/${t.id}.webp`}`, 'playroom')
+const src = (t: Tool, still = false) => href('playroom', `/shots/tools/${t.id}${still ? '-still' : ''}.webp`, 'playroom')
 ---
 
 <div class="tools-show">
@@ -28,8 +27,12 @@ const src = (t: Tool) => href('playroom', `/${t.shot ?? `shots/tools/${t.id}.web
     {
       tools.map((t, i) => (
         <section role="tabpanel" id={`panel-${t.id}`} aria-labelledby={`tab-${t.id}`} hidden={i !== 0}>
-          <figure class="b-win tool-shot">
-            <img src={src(t)} width="1600" height="1000" loading="lazy" decoding="async" alt={t.alt} />
+          <figure class="tool-shot">
+            {/* Screenshots are at 2×: shown no wider than their 1× size. */}
+            <picture style={`--w: ${t.size[0] / 2}px`}>
+              {t.still && <source media="(prefers-reduced-motion: reduce)" srcset={src(t, true)} />}
+              <img src={src(t)} width={t.size[0]} height={t.size[1]} loading="lazy" decoding="async" alt={t.alt} />
+            </picture>
           </figure>
           <div class="tool-copy">
             <h3 class="b-disp">{t.pitch}</h3>

@@ -29,6 +29,9 @@
 .formats .fmt-icon { width: 48px; height: 48px; object-fit: contain; }
 
 .why { padding-top: 120px; }
+.why code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .92em; color: var(--ink); }
+.pixl-file { display: inline-flex; align-items: center; gap: 12px; align-self: flex-start; margin-top: auto; font-size: 15px; }
+.pixl-file img { width: 48px; height: 48px; object-fit: contain; }
 
 /* ── before / after ─────────────────────────────────────────── */
 .developed { gap: 36px; }
@@ -76,11 +79,22 @@
 .tool-num { font-size: 12px; color: var(--ink-4); }
 .tool-tabs button[aria-selected='true'] .tool-num { color: var(--accent); }
 .tool-name { font-size: 17px; font-weight: 600; }
-.tool-panels section { display: flex; flex-direction: column; gap: 24px; }
+/* Each panel is a tall crop of the app's sidebar, so it stands on a stage beside its copy. */
+.tool-panels section { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 44px; align-items: center; }
 .tool-panels section[hidden] { display: none; }
-.tool-shot { width: 100%; aspect-ratio: 16 / 10; margin: 0; }
-.tool-shot img { width: 100%; height: 100%; object-fit: cover; }
-.tool-copy { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
+.tool-shot {
+  height: min(720px, 84vh); margin: 0; padding: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line);
+  background: radial-gradient(70% 60% at 50% 45%, rgba(157, 139, 234, .16), transparent 72%), #050507;
+}
+.tool-shot picture { display: contents; }
+.tool-shot img {
+  width: auto; height: auto; max-width: min(100%, var(--w)); max-height: 100%;
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 30px 80px -30px rgba(0, 0, 0, .95), 0 24px 110px -50px rgba(157, 139, 234, .6);
+}
+.tool-copy { display: flex; flex-direction: column; gap: 16px; }
 .tool-copy h3 { font-size: clamp(22px, 2vw, 28px); }
 .tool-copy p { font-size: 16px; color: var(--ink-2); }
 
@@ -134,7 +148,10 @@
   .tool-tabs { flex-direction: row; overflow-x: auto; border-left: 0; border-bottom: 1px solid var(--line); scrollbar-width: none; }
   .tool-tabs button { flex: none; margin: 0 0 -1px; border-left: 0; border-bottom: 2px solid transparent; }
   .tool-tabs button[aria-selected='true'] { border-bottom-color: var(--accent); background: none; }
-  .tool-copy { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .tool-panels section { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .tool-shot { height: auto; padding: 24px 16px; }
+  .tool-shot img { max-height: 68vh; }
+  .tool-copy { gap: 12px; }
   .plans { grid-template-columns: minmax(0, 1fr); }
   .faq { grid-template-columns: minmax(0, 1fr); gap: 32px; }
 }
