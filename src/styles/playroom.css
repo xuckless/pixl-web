@@ -83,14 +83,17 @@
 .tool-panels section { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 44px; align-items: center; }
 .tool-panels section[hidden] { display: none; }
 .tool-shot {
-  height: min(720px, 84vh); margin: 0; padding: 28px;
+  --pad: 28px;
+  --stage: min(720px, 84vh);
+  height: var(--stage); margin: 0; padding: var(--pad); overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--line);
   background: radial-gradient(70% 60% at 50% 45%, rgba(157, 139, 234, .16), transparent 72%), #050507;
 }
 .tool-shot picture { display: contents; }
 .tool-shot img {
-  width: auto; height: auto; max-width: min(100%, var(--w)); max-height: 100%;
+  /* Explicit lengths, not percentages: WebKit ignores a percentage max-height here. */
+  width: auto; height: auto; max-width: min(100%, var(--w)); max-height: calc(var(--stage) - 2 * var(--pad));
   border: 1px solid rgba(255, 255, 255, .12);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), 0 30px 80px -30px rgba(0, 0, 0, .95), 0 24px 110px -50px rgba(157, 139, 234, .6);
 }
@@ -98,17 +101,33 @@
 .tool-copy h3 { font-size: clamp(22px, 2vw, 28px); }
 .tool-copy p { font-size: 16px; color: var(--ink-2); }
 
-/* ── cost ───────────────────────────────────────────────────── */
-.cost { gap: 36px; }
-.cost-table { width: 100%; border-collapse: collapse; font-size: 17px; }
-.cost-table th, .cost-table td { padding: 18px 20px; text-align: left; border-bottom: 1px solid var(--line); font-weight: 400; }
-.cost-table thead th { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
-.cost-table tbody th { font-weight: 600; }
-.cost-table td { color: var(--ink-2); }
-.cost-table td:last-child, .cost-table th:last-child { text-align: right; }
-.cost-table tr.ours { background: linear-gradient(90deg, rgba(157, 139, 234, .14), rgba(157, 139, 234, .02)); }
-.cost-table tr.ours th { color: #fff; }
-.cost-table tr.ours td:last-child { color: var(--accent); font-weight: 700; }
+/* ── compare ────────────────────────────────────────────────── */
+.compare { gap: 36px; }
+.cmp-scroll { width: 100%; overflow-x: auto; border: 1px solid var(--line); background: #050507; scrollbar-width: thin; scrollbar-color: #3a3550 transparent; }
+.cmp-scroll:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+.cmp { width: 100%; min-width: 860px; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 14px; }
+.cmp th, .cmp td { padding: 14px 16px; text-align: left; vertical-align: top; font-weight: 400; border-bottom: 1px solid var(--line); }
+.cmp thead th, .cmp thead td { position: sticky; top: 0; z-index: 2; background: #08070d; vertical-align: bottom; padding-top: 22px; padding-bottom: 16px; }
+.cmp thead .app { display: block; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+.cmp thead .sub { display: block; margin-top: 4px; font-size: 12px; color: var(--ink-3); }
+.cmp tr > th[scope='row'], .cmp thead td { width: 21%; }
+/* The row names stay put while the columns scroll. */
+.cmp th[scope='row'], .cmp thead td { position: sticky; left: 0; z-index: 1; background: #050507; color: var(--ink-2); font-weight: 600; }
+.cmp thead td { z-index: 3; background: #08070d; }
+.cmp tr.grp th { padding: 26px 16px 10px; background: #050507; }
+.cmp tr.grp .b-micro { position: sticky; left: 16px; color: var(--accent); }
+.cmp td { color: var(--ink-3); line-height: 1.45; }
+.cmp td svg { width: 16px; height: 16px; margin: 1px 8px 0 0; float: left; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.cmp td span { display: block; overflow: hidden; }
+.cmp td.yes svg { stroke: #8fd9a8; }
+.cmp td.no svg { stroke: #e58f8f; }
+.cmp td.part svg { stroke: #e7c46d; }
+.cmp td.soon svg { stroke: var(--accent); }
+.cmp .ours { background: linear-gradient(180deg, rgba(157, 139, 234, .1), rgba(157, 139, 234, .06)); color: var(--ink); }
+.cmp thead th.ours { background: linear-gradient(180deg, rgba(157, 139, 234, .26), rgba(157, 139, 234, .12)), #08070d; box-shadow: inset 0 2px 0 var(--accent); }
+.cmp thead th.ours .app { color: #fff; }
+.cmp tbody tr:last-child th, .cmp tbody tr:last-child td { border-bottom-color: var(--line); }
+.compare .fine { font-size: 13px; color: var(--ink-4); max-width: 900px; }
 
 /* ── pricing ────────────────────────────────────────────────── */
 .pricing { align-items: center; gap: 48px; }
@@ -149,8 +168,7 @@
   .tool-tabs button { flex: none; margin: 0 0 -1px; border-left: 0; border-bottom: 2px solid transparent; }
   .tool-tabs button[aria-selected='true'] { border-bottom-color: var(--accent); background: none; }
   .tool-panels section { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .tool-shot { height: auto; padding: 24px 16px; }
-  .tool-shot img { max-height: 68vh; }
+  .tool-shot { --pad: 16px; --stage: 72vh; height: auto; padding: 24px var(--pad); }
   .tool-copy { gap: 12px; }
   .plans { grid-template-columns: minmax(0, 1fr); }
   .faq { grid-template-columns: minmax(0, 1fr); gap: 32px; }
@@ -172,8 +190,9 @@
   .ba-thumbs li { flex-basis: 76px; }
   .tool-name { font-size: 15px; }
   .tool-tabs button { padding: 10px 12px; }
-  .cost-table { font-size: 15px; }
-  .cost-table th, .cost-table td { padding: 14px 8px; }
+  .cmp { min-width: 780px; font-size: 13px; }
+  .cmp th, .cmp td { padding: 12px 12px; }
+  .cmp th[scope='row'], .cmp thead td { width: 150px; }
   .plan { padding: 28px 22px; }
   .price .b-disp { font-size: 52px; }
   .plan-ctas { flex-direction: column; align-items: stretch; }

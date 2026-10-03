@@ -154,14 +154,81 @@ export const FORMATS = [
 /** The planned launch price. Checkout isn't built yet; see pixl-playroom TODO.md. */
 export const PRICE = { amount: '$69.99', devices: 3, trialDays: 14 }
 
-// Competitor prices from vendor pages, gathered September 2026.
-// TODO before launch: re-check every figure and date the footnote.
-export const COST_3Y = [
-  { name: 'Pixl Playroom', model: 'Pay once', total: '$69.99', ours: true },
-  { name: 'Lightroom (Photography 20 GB)', model: '$9.99 a month', total: '$359.64' },
-  { name: 'Capture One Pro', model: '$349 one-time, or subscription', total: '$349' },
-  { name: 'Darkroom', model: '$39.99 a year, or $99.99 lifetime', total: '$99.99+' }
-]
+export type Mark = 'yes' | 'no' | 'part' | 'soon'
+
+export interface Compare {
+  apps: { name: string; sub?: string }[]
+  groups: { title: string; rows: { label: string; cells: { mark?: Mark; text: string }[] }[] }[]
+}
+
+/** One cell per app, in COMPARE.apps' order: [mark, text], or text alone. */
+const row = (label: string, ...cells: ([Mark, string] | string)[]) => ({
+  label,
+  cells: cells.map((c) => (typeof c === 'string' ? { text: c } : { mark: c[0], text: c[1] }))
+})
+
+// Checked 2026-10-02 against each vendor's own pages (pricing, help centre,
+// release notes): Lightroom Classic 15.6, Capture One Pro 16.8.6, Darkroom 7.4.
+// Playroom's column is what 0.2.0-beta does, with its price and trial from 1.0.
+// TODO before launch: check every row again and re-date the footnote.
+export const COMPARE: Compare = {
+  apps: [
+    { name: 'Pixl Playroom', sub: 'At 1.0' },
+    { name: 'Lightroom Classic', sub: 'Adobe Lightroom plan' },
+    { name: 'Capture One Pro', sub: 'Perpetual or subscription' },
+    { name: 'Darkroom', sub: 'Darkroom+' }
+  ],
+  groups: [
+    {
+      title: 'Price and ownership',
+      rows: [
+        row('Three years of use', ['yes', '$69.99, once'], ['no', '$431.64 ($11.99 a month)'], ['part', '$349 once, or $648 by subscription'], ['part', '$99.99 once, or $119.97 by the year']),
+        row('Buy it once, keep it', ['yes', 'Yes, with every 1.x update'], ['no', 'Subscription only'], ['part', 'Yes, but new features are paid upgrades'], ['yes', 'Yes, with future features']),
+        row('Computers', `${PRICE.devices} at a time`, 'Active on 2', '3 activations', 'Your Apple devices'),
+        row('Platforms', 'macOS and Windows', 'macOS and Windows', 'macOS and Windows', ['part', 'Apple only: Mac, iPhone, iPad']),
+        row('Free trial', `${PRICE.trialDays} days, no card. Free beta now`, '7 days', '7 days, card required', 'Edit free; export needs Darkroom+')
+      ]
+    },
+    {
+      title: 'Your files',
+      rows: [
+        row('Works on your folders, no import', ['yes', 'Yes, no catalog'], ['no', 'Imports into a catalog'], ['part', 'Yes in Sessions; Catalogs import'], ['no', 'Apple Photos library only']),
+        row('Where your edits live', 'One .pixl file beside each photo', 'A catalog database', 'Session sidecars or a catalog', 'Darkroom\'s database, on each device')
+      ]
+    },
+    {
+      title: 'Privacy',
+      rows: [
+        row('AI runs on your computer', ['yes', 'All of it'], ['part', 'Not Generative Remove or Firefly: cloud'], ['part', 'Masks yes; some add-ons are cloud'], ['yes', 'All of it']),
+        row('Usage analytics', ['yes', 'None. Crash reports only if you opt in'], ['part', 'Usage data, with an opt-out'], 'Not documented', ['part', 'Anonymous analytics']),
+        row('Account and sign-in', ['part', 'PIXL account; 30 days offline'], ['part', 'Adobe ID; 30 to 99 days offline'], ['part', 'Capture One account; checks every 30 days'], ['yes', 'No account'])
+      ]
+    },
+    {
+      title: 'AI and editing',
+      rows: [
+        row('AI masks', ['yes', 'Subject, background, objects, sky. People soon'], ['yes', 'Subject, sky, background, objects, people'], ['yes', 'Subject, background, objects, people. No sky'], ['part', 'Subject, background, depth; sky on some photos']),
+        row('Presets that make their own masks', ['yes', 'Smart looks, among 300+ looks'], ['yes', 'Adaptive presets'], ['yes', 'Styles with AI masks'], ['part', 'Presets can carry masks']),
+        row('AI noise reduction', ['yes', 'On your computer'], ['yes', 'On your computer'], ['yes', 'Bayer RAW files only'], ['no', 'No']),
+        row('AI upscaling', ['yes', '×2 and ×4, on your computer'], ['part', '×2 only'], ['no', 'No'], ['no', 'No']),
+        row('Generative remove', ['soon', 'Planned. Heal, clone and fill now'], ['yes', 'Yes, in the cloud'], ['no', 'No'], ['no', 'No']),
+        row('Automatic lens correction', ['yes', 'About 1,500 lenses, offline, and defish'], ['yes', 'Yes'], ['yes', 'Yes'], ['no', 'No']),
+        row('Colour grading wheels', ['yes', 'Yes'], ['yes', 'Yes'], ['yes', 'Yes'], ['yes', 'Yes']),
+        row('HDR editing and export', ['yes', 'Gain maps, PQ and HLG'], ['yes', 'Yes'], ['no', 'No'], ['no', 'No'])
+      ]
+    },
+    {
+      title: 'Beyond the edit',
+      rows: [
+        row('AI agents in control', ['soon', 'Planned before 1.0: any MCP agent, every control, on your own files'], ['no', 'Adobe\'s agents work in its cloud, not in Classic'], ['no', 'No. AppleScript, and cloud Actions on Studio'], ['no', 'No. Apple Shortcuts']),
+        row('Tethered shooting', ['no', 'No'], ['yes', 'Yes'], ['yes', 'Yes, 550+ cameras'], ['no', 'No']),
+        row('Layers beyond masks', ['no', 'Not yet'], ['no', 'No'], ['yes', 'Yes'], ['no', 'No']),
+        row('HDR and panorama merge', ['no', 'No'], ['yes', 'Yes'], ['yes', 'Yes'], ['no', 'No']),
+        row('Print', ['no', 'No'], ['yes', 'Print, book, slideshow and web'], ['yes', 'Print'], ['no', 'No'])
+      ]
+    }
+  ]
+}
 
 export const FAQ = [
   {

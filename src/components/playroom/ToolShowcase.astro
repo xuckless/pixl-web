@@ -1,6 +1,7 @@
 ---
 // The Develop panels as a tab list: pick one, see it in the real app. Arrow keys, Home and End move between tabs, as the WAI-ARIA tabs
 // pattern has it.
+import { fingerprint } from '../../lib/fingerprint'
 import { href } from '../../lib/links'
 import type { Tool } from '../../data/playroom'
 
@@ -9,7 +10,8 @@ interface Props {
 }
 
 const { tools } = Astro.props
-const src = (t: Tool, still = false) => href('playroom', `/shots/tools/${t.id}${still ? '-still' : ''}.webp`, 'playroom')
+const src = (t: Tool, still = false) =>
+  href('playroom', fingerprint('playroom', `/shots/tools/${t.id}${still ? '-still' : ''}.webp`), 'playroom')
 ---
 
 <div class="tools-show">
@@ -28,8 +30,8 @@ const src = (t: Tool, still = false) => href('playroom', `/shots/tools/${t.id}${
       tools.map((t, i) => (
         <section role="tabpanel" id={`panel-${t.id}`} aria-labelledby={`tab-${t.id}`} hidden={i !== 0}>
           <figure class="tool-shot">
-            {/* Screenshots are at 2×: shown no wider than their 1× size. */}
-            <picture style={`--w: ${t.size[0] / 2}px`}>
+            {/* Screenshots are at 2×: shown at most 1.5× density, so the short ones fill the stage. */}
+            <picture style={`--w: ${Math.round(t.size[0] / 1.5)}px`}>
               {t.still && <source media="(prefers-reduced-motion: reduce)" srcset={src(t, true)} />}
               <img src={src(t)} width={t.size[0]} height={t.size[1]} loading="lazy" decoding="async" alt={t.alt} />
             </picture>

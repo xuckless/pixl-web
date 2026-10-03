@@ -128,8 +128,17 @@ h1, h2, h3, p { margin: 0; }
 
 @media (max-width: 1100px) {
   :root { --gutter: 40px; }
+  .nav { gap: 24px; }
+  .nav-links { gap: 22px; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   .foot-about { grid-column: 1 / -1; }
+}
+
+/* A full menu and its button don't fit here; the menu's own links (and the page) carry the action. */
+@media (max-width: 960px) {
+  .nav .b-cta { display: none; }
+  .nav-links { gap: 18px; }
+  .nav-links a { font-size: 14px; }
 }
 
 @media (max-width: 760px) {

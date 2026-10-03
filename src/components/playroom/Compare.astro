@@ -1,0 +1,63 @@
+---
+// Playroom against the editors people pay for, row by row: price, workflow,
+// privacy and features. One table; on narrow screens it scrolls sideways in
+// its own box with the row names pinned.
+import type { Compare } from '../../data/playroom'
+
+interface Props {
+  compare: Compare
+}
+
+const { compare } = Astro.props
+const MARKS = {
+  yes: { d: 'M5 12.5l4.5 4.5L19 7.5', label: 'Yes' },
+  no: { d: 'M7 7l10 10M17 7L7 17', label: 'No' },
+  part: { d: 'M5 12h14', label: 'Partly' },
+  soon: { d: 'M12 7v5l3 2M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17z', label: 'Planned' },
+} as const
+---
+
+<div class="cmp-scroll" tabindex="0" role="region" aria-label="Comparison table; scrolls sideways">
+  <table class="cmp">
+    <caption class="sr-only">Pixl Playroom compared with {compare.apps.slice(1).map((a) => a.name).join(', ')}</caption>
+    <thead>
+      <tr>
+        <td></td>
+        {
+          compare.apps.map((a, i) => (
+            <th scope="col" class:list={{ ours: i === 0 }}>
+              <span class="app">{a.name}</span>
+              {a.sub && <span class="sub">{a.sub}</span>}
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    {
+      compare.groups.map((g) => (
+        <tbody>
+          <tr class="grp">
+            <th scope="colgroup" colspan={compare.apps.length + 1}>
+              <span class="b-micro">{g.title}</span>
+            </th>
+          </tr>
+          {g.rows.map((r) => (
+            <tr>
+              <th scope="row">{r.label}</th>
+              {r.cells.map((c, i) => (
+                <td class:list={[c.mark, { ours: i === 0 }]}>
+                  {c.mark && (
+                    <svg viewBox="0 0 24 24" role="img" aria-label={MARKS[c.mark].label}>
+                      <path d={MARKS[c.mark].d} />
+                    </svg>
+                  )}
+                  <span>{c.text}</span>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      ))
+    }
+  </table>
+</div>

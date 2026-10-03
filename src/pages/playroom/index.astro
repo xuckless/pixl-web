@@ -2,14 +2,18 @@
 import Base from '../../layouts/Base.astro'
 import '../../styles/playroom.css'
 import BeforeAfter from '../../components/playroom/BeforeAfter.astro'
+import Compare from '../../components/playroom/Compare.astro'
 import ToolShowcase from '../../components/playroom/ToolShowcase.astro'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
-import { COST_3Y, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
+import { COMPARE, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
+import { fingerprint } from '../../lib/fingerprint'
 import { href, media } from '../../lib/links'
 import { faqPage, softwareApp } from '../../lib/seo'
 
 const own = (p: string) => href('playroom', p, 'playroom')
+/** A screenshot, its URL changing with its content. */
+const shot = (p: string) => own(fingerprint('playroom', p))
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
 const beta = own('/beta/')
 const pixlFormat = 'https://github.com/xuckless/pixl-playroom/blob/main/docs/pixl-format.md'
@@ -38,9 +42,9 @@ const icon = {
   ogImageAlt="Pixl Playroom: Develop everything. Rent nothing. The Develop view editing a photo of rowan berries."
   nav={[
     { label: 'Features', to: '#features' },
-    { label: 'Examples', to: '#developed' },
     { label: 'Tools', to: '#tools' },
     { label: 'Next', to: '#next' },
+    { label: 'Compare', to: '#compare' },
     { label: 'Beta', to: '#beta' },
     { label: 'Pricing', to: '#pricing' },
     { label: 'FAQ', to: '#faq' },
@@ -101,7 +105,7 @@ const icon = {
         <span class="b-micro">Keep your workflow</span>
         <h3 class="b-disp">No import. No catalog.</h3>
         <p class="b-body">Point it at a folder and start. Each edited photo gets one <code>.pixl</code> project beside it, holding its edits, history, masks and copies, and by default a copy of the original. It's one documented SQLite file that any SQLite tool can read.</p>
-        <a class="pixl-file textlink b-body" href={pixlFormat} target="_blank" rel="noopener"><img src={own('/formats/pixl.png')} width="48" height="48" alt="" loading="lazy" />The .pixl format</a>
+        <a class="pixl-file textlink b-body" href={pixlFormat} target="_blank" rel="noopener"><img src={shot('/formats/pixl.png')} width="48" height="48" alt="" loading="lazy" />The .pixl format</a>
       </li>
       <li>
         <span class="b-micro">Private by design</span>
@@ -121,7 +125,7 @@ const icon = {
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/library.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The Library: folders, collections and a keyword tree in the sidebar, beside a grid of rated, labelled photos from one folder." />
+        <img src={shot('/shots/library.webp')} width="1600" height="1000" loading="lazy" decoding="async" alt="The Library: folders, collections and a keyword tree in the sidebar, beside a grid of rated, labelled photos from one folder." />
       </figure>
     </section>
 
@@ -133,7 +137,7 @@ const icon = {
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/develop.webp')} width="2000" height="1273" loading="lazy" decoding="async" alt="Develop in Split view: a sprig of yellow flowers, the untouched RAW on the left and the edit on the right, with the histogram, hue chart and adjustment panels beside it." />
+        <img src={shot('/shots/develop.webp')} width="2000" height="1226" loading="lazy" decoding="async" alt="Develop in Split view: a sprig of yellow flowers, the untouched RAW on the left and the edit on the right, with the histogram, hue chart and adjustment panels beside it." />
       </figure>
     </section>
 
@@ -145,7 +149,7 @@ const icon = {
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/looks.webp')} width="2000" height="1280" loading="lazy" decoding="async" alt="The Looks browser: 308 looks on shelves such as Camera colour, Cinema, Colour film and Smart looks, each previewed on a photo of yellow flowers." />
+        <img src={shot('/shots/looks.webp')} width="2000" height="1280" loading="lazy" decoding="async" alt="The Looks browser: 308 looks on shelves such as Camera colour, Cinema, Colour film and Smart looks, each previewed on a photo of yellow flowers." />
       </figure>
     </section>
 
@@ -157,7 +161,7 @@ const icon = {
         <div class="b-rule"></div>
       </div>
       <figure class="b-win shot">
-        <img src={own('/shots/develop-masks.webp')} width="2000" height="1275" loading="lazy" decoding="async" alt="The Masks window with a Subject mask outlining a man with long hair, while the panels on the right edit only that mask." />
+        <img src={shot('/shots/develop-masks.webp')} width="2000" height="1275" loading="lazy" decoding="async" alt="The Masks window with a Subject mask outlining a man with long hair, while the panels on the right edit only that mask." />
       </figure>
     </section>
   </div>
@@ -222,30 +226,14 @@ const icon = {
     </ul>
   </section>
 
-  <!-- ── cost ─────────────────────────────────────────────────── -->
-  <section class="wrap band cost" aria-labelledby="cost-title">
+  <!-- ── compare ──────────────────────────────────────────────── -->
+  <section class="wrap band compare" id="compare" aria-labelledby="compare-title">
     <div class="sec-head">
-      <h2 class="b-disp h2" id="cost-title">What three years of editing costs.</h2>
-      <p class="b-body">A subscription is never finished being paid for. Playroom is paid for once.</p>
+      <h2 class="b-disp h2" id="compare-title">Toe to toe<br /><span class="accent">with the big names.</span></h2>
+      <p class="b-body">Price, privacy and features, side by side. Where they're ahead, we say so.</p>
     </div>
-    <table class="cost-table">
-      <caption class="sr-only">Three-year cost of each app</caption>
-      <thead>
-        <tr><th scope="col">App</th><th scope="col">How you pay</th><th scope="col">3 years</th></tr>
-      </thead>
-      <tbody>
-        {
-          COST_3Y.map((c) => (
-            <tr class:list={{ ours: c.ours }}>
-              <th scope="row">{c.name}</th>
-              <td>{c.model}</td>
-              <td class="b-mono">{c.total}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
-    <p class="b-body fine">Prices as listed by each vendor in September 2026, in USD, before tax. Plans change, so check before you buy.</p>
+    <Compare compare={COMPARE} />
+    <p class="b-body fine">Checked on October 2, 2026 against each vendor's own pages: Lightroom Classic 15.6 on Adobe's Lightroom plan, Capture One Pro 16.8 and Darkroom 7.4. Prices in USD before tax. Playroom's price and trial start at 1.0; until then the beta is free. Plans and features change, so check before you buy. Lightroom is a trademark of Adobe, Capture One of Capture One A/S and Darkroom of Bergen Co.; PIXL is not affiliated with any of them.</p>
   </section>
 
   <!-- ── beta ─────────────────────────────────────────────────── -->
