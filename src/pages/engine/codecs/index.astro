@@ -344,6 +344,12 @@ const avifSeries: LineSeries[] = PHOTO_CURVES.map((c) => ({
       “lossless” means lossless of the decoded pixels.
     </p>
     <p>
+      The 19% here is one camera JPEG. The JPEG XL authors measured a set: for JPEGs a camera typically produces, “the
+      gains are around 20%”, with libjpeg-turbo output at quality 70–95 saving 19–21% and JPEGs from mozjpeg and jpegli,
+      which squeeze harder already, about 10–19% (Sneyers et al., 2025, Fig. 53). The engine runs the same libjxl
+      reconstruction.
+    </p>
+    <p>
       Lossless JPEG XL also holds IEEE single-precision floats. The engine’s master cache is one: the linear master in
       PixlRGB with alpha, read back bit for bit — negative zero, subnormals and the largest finite float included —
       and decoded identically at 1, 7 and 16 threads. A JXL’s own ICC profile is carried only when the file holds one; an
@@ -537,6 +543,7 @@ const avifSeries: LineSeries[] = PHOTO_CURVES.map((c) => ({
       <li>AVIF behaviour: <code>tests/avif.rs</code> — <code>the_thread_count_changes_no_byte_from_two_up</code>, <code>one_thread_is_another_encode_of_the_same_quality</code>, <code>a_grid_of_many_tiles_is_read_whole_or_refused_never_wrong</code>; <code>lossless_identity_round_trips_byte_exact</code>, <code>the_nclx_box_states_the_matrix_the_caller_named</code>.</li>
       <li>Interoperability: <code>ci/avif-interop/</code> (libavif 1.3.0, libheif 1.23.5, exiftool 13.50), run by hand; Apple devices checked by hand on macOS 27.</li>
       <li>HEIC chroma: <code>the_arithmetic_is_libheifs_but_for_the_sampling</code>, <code>the_rows_are_the_per_pixel_conversion_at_any_thread_count</code>; Apple’s renders via <code>tests/heic.rs</code> (by hand, <code>--ignored</code>).</li>
+      <li>Sneyers, Alakuijala, Versari, Szabadka et al., “The JPEG XL Image Coding System: History, Features, Coding Tools, Design Rationale, and Future”, <a href="https://arxiv.org/abs/2506.05987">arXiv 2506.05987</a> (2025), CC BY-SA 4.0: §10.1 and Fig. 53 (libjxl 0.11.1, the 8-bit colour photographs of imagecompression.info).</li>
       <li>JPEG XL repack and reconstruction, and the format matrix: <code>tests/conversions.rs</code>; float JXL: <code>tests/master_cache.rs</code>.</li>
       <li>RAW and DNG: <code>tests/libraw.rs</code>, <code>tests/dng.rs</code>, <code>tests/raw_memory.rs</code> (peak resident memory via <code>VmHWM</code>), <code>tests/raw_sensors.rs</code>; banding: <code>a_frame_run_in_small_bands_is_the_frame_run_whole</code>.</li>
       <li>Limits: <code>tests/limits.rs</code>. Fuzzing: <code>fuzz/</code> (13 targets) and CI’s <code>fuzz</code> job.</li>

@@ -25,6 +25,8 @@ const toc: [string, string][] = [
   ['sources', 'Sources and method'],
 ]
 const shown = SPACES.filter((s) => s.name !== 'ACES AP0')
+import DotStrip from '../../../components/engine/charts/DotStrip.astro'
+import { CAMERA_FITS } from '../../../data/cameras'
 ---
 
 <Article
@@ -194,6 +196,44 @@ const shown = SPACES.filter((s) => s.name !== 'ACES AP0')
       <li><span class="b-mono">−2.31</span><span class="b-body">ΔE2000, median gain under tungsten over the common Adobe-derived matrix</span></li>
       <li><span class="b-mono">−1.07</span><span class="b-body">ΔE2000, median gain under daylight</span></li>
     </ul>
+    <h3>Against the archive standards</h3>
+    <p>
+      No open study compares named raw converters on colour accuracy, so we hold PIXL's profiles to the public
+      standards that libraries and archives digitise to. The strictest, FADGI's four-star level, asks for a mean
+      ΔE2000 below 2 and a 90th percentile below 4; the Dutch national library's Metamorfoze asks for a mean of 3 or less.
+    </p>
+    <figure>
+      <DotStrip
+        desc="Held-out mean CIEDE2000 for each of the 46 cameras in PIXL's camera database v1. Under daylight (D65) from 0.80 to 1.40, median 0.99; under tungsten (A) from 1.04 to 1.80, median 1.32. Every camera is below FADGI four-star's mean of 2, Metamorfoze's 3 and FADGI three-star's 3.5."
+        rows={[
+          { label: 'Daylight', note: 'D65 · 46 cameras', values: CAMERA_FITS.map((c) => c.d65[0]) },
+          { label: 'Tungsten', note: 'A · 46 cameras', values: CAMERA_FITS.map((c) => c.a[0]) },
+        ]}
+        rules={[
+          { value: 2, label: 'FADGI ★★★★ mean < 2' },
+          { value: 3, label: 'Metamorfoze ≤ 3', tone: 'muted' },
+          { value: 3.5, label: 'FADGI ★★★ < 3.5', tone: 'muted' },
+        ]}
+        domain={[0, 4.5]}
+        ticks={[0, 1, 2, 3, 4]}
+        axis="mean ΔE2000 on 38 held-out patches, per camera"
+      />
+      <figcaption>
+        Each dot is one camera's profile in PIXL's camera database v1; the bright tick is the median. Every camera's
+        mean is below FADGI's four-star limit under daylight and under tungsten. On the 90th percentile, the daylight
+        profiles meet four-star too: every camera's 95th percentile is under 4 (at most 3.93), and the 90th is lower still. Under
+        tungsten, 26 of 46 have a 95th percentile above 4 and none above 7, the three-star limit; a 3 × 3 matrix
+        reaches its limit there, and a per-camera table is the work that follows.
+      </figcaption>
+    </figure>
+    <p class="note">
+      <strong>How to read this.</strong> The standards are written for a real chart photographed under studio light and
+      measured. These figures are a simulation: each camera's measured spectral sensitivities, 190 reflectances and the
+      CIE's illuminants, scored on the patches the fit never saw. They show what the profile can do, without the
+      lens, the light and the exposure that a real shot adds. For scale, the X-Rite reference data for a ColorChecker
+      SG, measured with a spectrophotometer alone, already sits 0.59 to 0.82 ΔE2000 from the chart's own values
+      (Kirchner et al., 2021).
+    </p>
     <p>
       The white a profile finds matters as much. On a chart under lights of known colour, PIXL's profiles find
       tungsten's and daylight's own white exactly; the Adobe-derived matrices miss by 0.014–0.025 in xy, 10–18% warm in
@@ -271,6 +311,9 @@ Linear Rec.2020 → linear PixlRGB (every entry positive)
       <li>rawtoaces-data (Academy Software Foundation), commit e9b8503, Apache-2.0: the cameras' spectral sensitivities and the 190 training reflectances.</li>
       <li>CIE daylight, LED and fluorescent illuminant tables (DOIs 10.25039/CIE.DS.w7zunnny, .vgssnyfg, .ukaymjdn), CC BY-SA 4.0.</li>
       <li>CIEDE2000 as Sharma, Wu and Dalal write it, held to their 34 published test pairs.</li>
+      <li>FADGI, <em>Technical Guidelines for Digitizing Cultural Heritage Materials</em>, 3rd edition, May 2023 (<a href="https://www.digitizationguidelines.gov/guidelines/digitize-technical.html">digitizationguidelines.gov</a>; Zenodo record 7929962, CC0): colour accuracy as mean and 90th-percentile ΔE2000, four stars &lt; 2 and &lt; 4, three stars &lt; 3.5 and &lt; 7.</li>
+      <li>Metamorfoze Preservation Imaging Guidelines 2.0 (KB, National Library of the Netherlands, April 2025; CC BY-ND 3.0): Metamorfoze level, mean ΔE2000 ≤ 3, maximum ≤ 7.</li>
+      <li>Kirchner, van Wijk, van Beek, Koster, “Exploring the limits of color accuracy in technical photography”, <em>Heritage Science</em> 9:57 (2021), <a href="https://doi.org/10.1186/s40494-021-00536-x">10.1186/s40494-021-00536-x</a>, CC BY 4.0.</li>
       <li>The figures are held by PIXL Engine's tests: <code>pixlrgb_candidates_are_the_charts</code>, <code>the_published_profiles_are_what_pixl_writes</code>, <code>the_guard_pulls_back_only_what_a_saturation_boost_pushed_out</code>, <code>every_body_fitted_under_a_and_d65</code>, and the gamut-compression suite.</li>
     </ul>
   </section>
