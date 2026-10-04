@@ -1,0 +1,17 @@
+PixlRGB, PIXL's working space (docs/pixlrgb/, compiled into the engine)
+Copyright (c) 2026 Syed Ali (xuckless), PixlFoundation
+
+PixlRGB's primaries, its ICC profiles and the visible range PIXL's master
+guards are licensed under the Creative Commons Attribution-ShareAlike 4.0
+International licence (CC BY-SA 4.0):
+https://creativecommons.org/licenses/by-sa/4.0/
+
+They are derived from the CIE 1931 standard colorimetric observer:
+- The International Commission on Illumination (CIE), Vienna, AT:
+  CIE 2019, Colour-matching functions of CIE 1931 standard colorimetric
+  observer, DOI: 10.25039/CIE.DS.xvudnb9b (CC BY 4.0).
+  The CIE's data points are used as measured facts, credited here by DOI
+  and licence; no CIE table is reproduced.
+
+A picture PIXL writes in PixlRGB carries PixlRGB's ICC profile, whose
+copyright tag states these terms.

@@ -1,0 +1,62 @@
+/* The engine site's technical articles (src/layouts/Article.astro). */
+
+.art { padding-top: 64px; padding-bottom: 120px; }
+.art-head { max-width: 900px; display: flex; flex-direction: column; gap: 20px; margin-bottom: 64px; }
+.art-back { color: var(--ink-3); text-decoration: none; }
+.art-back:hover { color: var(--ink); }
+.art-kicker { color: #bba9ff; }
+.art-head h1 { font-size: clamp(44px, 5.6vw, 84px); }
+.art-lede { font-size: clamp(18px, 1.5vw, 22px); color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.art-grid { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: 72px; align-items: start; }
+.art-toc { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 14px; }
+.art-toc ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; border-left: 1px solid var(--line); }
+.art-toc a { display: block; padding-left: 14px; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; color: var(--ink-3); text-decoration: none; }
+.art-toc a:hover { color: var(--ink); }
+
+.art-body { font-size: 17px; color: var(--ink-2); }
+.art-body > section { scroll-margin-top: 96px; padding-top: 8px; margin-bottom: 64px; }
+.art-body h2 { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 600; letter-spacing: -.02em; font-size: clamp(28px, 2.4vw, 36px); color: var(--ink); margin: 0 0 20px; line-height: 1.1; }
+.art-body h3 { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 600; font-size: 20px; color: var(--ink); margin: 32px 0 12px; }
+.art-body p { margin: 0 0 18px; }
+.art-body strong { color: var(--ink); font-weight: 600; }
+.art-body a { color: #d6ccff; text-underline-offset: 3px; }
+.art-body ul, .art-body ol { margin: 0 0 18px; padding-left: 22px; }
+.art-body li { margin-bottom: 8px; }
+.art-body code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .88em; color: #e6dfff; background: rgba(255, 255, 255, .05); padding: 1px 6px; }
+.art-body pre { margin: 0 0 22px; padding: 20px 22px; overflow-x: auto; border: 1px solid var(--line); background: #07060c; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13.5px; line-height: 1.65; color: var(--ink-2); }
+.art-body pre code { background: none; padding: 0; color: inherit; overflow-wrap: normal; }
+.art-body :not(pre) > code { overflow-wrap: anywhere; }
+.art-body figure { margin: 8px 0 30px; }
+.art-body figure img, .art-body figure svg { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #050507; }
+.art-body figcaption { margin-top: 10px; font-size: 14px; color: var(--ink-3); }
+
+.art-body table { width: 100%; border-collapse: collapse; margin: 0 0 26px; font-size: 15px; }
+.art-body th, .art-body td { padding: 11px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.art-body thead th { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.art-body td.num, .art-body th.num { text-align: right; font-family: 'JetBrains Mono', ui-monospace, monospace; white-space: nowrap; }
+.art-body .wide { overflow-x: auto; }
+
+/* a call-out: a key fact or a rule, set apart */
+.art-body .note { margin: 0 0 26px; padding: 18px 22px; border-left: 2px solid #bba9ff; background: rgba(187, 169, 255, .06); color: var(--ink-2); }
+.art-body .note strong { color: #e6dfff; }
+
+/* a row of big numbers inside an article */
+.art-figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0 0 30px; padding: 0; list-style: none; background: var(--line); border: 1px solid var(--line); }
+.art-figs li { background: #050507; padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.art-figs .b-mono { font-size: 26px; color: #fff; }
+.art-figs .b-body { font-size: 13px; color: var(--ink-3); }
+
+.art-sources { font-size: 14px; color: var(--ink-3); }
+.art-sources li { margin-bottom: 10px; }
+
+@media (max-width: 1100px) {
+  .art-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .art-toc { position: static; }
+}
+@media (max-width: 760px) {
+  .art-figs { grid-template-columns: minmax(0, 1fr); }
+  /* wide tables scroll inside the column, never the page */
+  .art-body table { display: block; overflow-x: auto; max-width: 100%; }
+  .art-body { font-size: 16px; }
+}

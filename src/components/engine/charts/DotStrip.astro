@@ -1,0 +1,81 @@
+---
+// One row of dots per series on a shared horizontal axis: every value shown,
+// the median marked, and reference lines (a standard's limit) drawn across all
+// rows and labelled at the top. Same panel and type as LineChart.
+import { CHART, TONE, type Tone } from './theme'
+
+interface Row {
+  label: string
+  /** A second, smaller line under the label. */
+  note?: string
+  values: number[]
+  tone?: Tone
+}
+interface Rule {
+  value: number
+  label: string
+  tone?: Tone
+}
+interface Props {
+  desc: string
+  rows: Row[]
+  rules?: Rule[]
+  domain: [number, number]
+  ticks: number[]
+  axis: string
+  width?: number
+}
+
+const { desc, rows, rules = [], domain, ticks, axis, width = 760 } = Astro.props
+const left = 168
+const right = 24
+const top = 30 + rules.length * 16
+const rowH = 64
+const bottom = 46
+const height = top + rows.length * rowH + bottom
+const x = (v: number) => left + ((v - domain[0]) / (domain[1] - domain[0])) * (width - left - right)
+const median = (v: number[]) => {
+  const s = [...v].sort((a, b) => a - b)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+// a fixed spread inside the row, so the picture is the same on every build
+const jitter = (i: number) => (((i * 0.618034) % 1) - 0.5) * 26
+---
+
+<div class="dotstrip-wrap"><svg class="dotstrip" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={desc} style={`background:${CHART.panel}`}>
+  {ticks.map((t) => (
+    <g>
+      <line x1={x(t)} x2={x(t)} y1={top - 6} y2={top + rows.length * rowH} stroke={CHART.grid} />
+      <text x={x(t)} y={top + rows.length * rowH + 20} fill={CHART.axis} font-family={CHART.number} font-size="12" text-anchor="middle">{t}</text>
+    </g>
+  ))}
+  <text x={(left + width - right) / 2} y={height - 8} fill={CHART.axis} font-family={CHART.label} font-size="12" text-anchor="middle">{axis}</text>
+  {rules.map((r, i) => (
+    <g>
+      <line x1={x(r.value)} x2={x(r.value)} y1={top - 10 - (rules.length - 1 - i) * 16} y2={top + rows.length * rowH} stroke={TONE[r.tone ?? 'light']} stroke-dasharray="4 4" />
+      <text x={x(r.value) + 6} y={top - 14 - (rules.length - 1 - i) * 16 + 10} fill={TONE[r.tone ?? 'light']} font-family={CHART.label} font-size="12">{r.label}</text>
+    </g>
+  ))}
+  {rows.map((row, ri) => {
+    const cy = top + ri * rowH + rowH / 2
+    const m = median(row.values)
+    const fill = TONE[row.tone ?? 'accent']
+    return (
+      <g>
+        <text x="0" y={cy - (row.note ? 4 : -4)} fill={CHART.value} font-family={CHART.label} font-size="14">{row.label}</text>
+        {row.note && <text x="0" y={cy + 14} fill={CHART.axis} font-family={CHART.caption} font-size="12">{row.note}</text>}
+        {row.values.map((v, i) => (
+          <circle cx={x(v)} cy={cy + jitter(i) * 0.6} r="3.6" fill={fill} fill-opacity="0.72" />
+        ))}
+        <line x1={x(m)} x2={x(m)} y1={cy - 20} y2={cy + 20} stroke={TONE.highlight} stroke-width="2" />
+        <text x={x(m) + 6} y={cy - 12} fill={TONE.highlight} font-family={CHART.number} font-size="12">{m.toFixed(2)}</text>
+      </g>
+    )
+  })}
+</svg></div>
+
+<style>
+  .dotstrip-wrap { overflow-x: auto; }
+  .dotstrip { display: block; width: 100%; min-width: 620px; height: auto; }
+</style>

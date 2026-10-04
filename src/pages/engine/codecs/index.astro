@@ -1,0 +1,571 @@
+---
+// /codecs: how PIXL Engine reads and writes every format it touches. Every
+// figure is from pixl-engine's own CLAUDE.md and docs/avif/ (the CSVs behind
+// the chart are copied into src/data/codecs.ts).
+import Article from '../../../layouts/Article.astro'
+import { PHOTO_CURVES } from '../../../data/codecs'
+import BarChart from '../../../components/engine/charts/BarChart.astro'
+import LineChart, { type LineSeries } from '../../../components/engine/charts/LineChart.astro'
+import { canonical, origin } from '../../../lib/links'
+
+const title = 'Encode and decode · PIXL Engine'
+const description =
+  'How PIXL Engine reads and writes JPEG, PNG, AVIF, HEIC, JPEG XL, TIFF, WebP, RAW and DNG: every encoder parameter the caller’s, AVIF measured over 800 encodes, HEIC read the way Apple reads it, a DNG 1.7.1 reader and writer of its own, and every parser fuzzed.'
+
+const toc: [string, string][] = [
+  ['matrix', 'The format matrix'],
+  ['parameters', 'Every parameter is the caller’s'],
+  ['avif', 'AVIF, measured'],
+  ['jxl', 'JPEG XL'],
+  ['heic', 'HEIC, read as Apple reads it'],
+  ['raw', 'RAW and DNG'],
+  ['metadata', 'Metadata, verbatim'],
+  ['hostile', 'Hostile input'],
+  ['determinism', 'The same bytes at any thread count'],
+  ['sources', 'Sources and method']
+]
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'Encode and decode: how PIXL Engine reads and writes images',
+    description,
+    url: canonical('engine', '/codecs/'),
+    inLanguage: 'en',
+    dateModified: '2026-10-04',
+    about: ['AVIF', 'JPEG XL', 'HEIC', 'DNG', 'RAW', 'image codecs'],
+    author: { '@id': `${origin('home')}/#organization` },
+    publisher: { '@id': `${origin('home')}/#organization` }
+  }
+]
+
+// ── the size-against-quality chart, from the CSV rows ─────────────────────
+const TONES = { psnr: 'dim', ssim: 'muted', iq: 'accent', x265: 'light' } as const
+const DASH: Record<string, string | undefined> = { ssim: '5 4', x265: '2 4' }
+const LABEL_AT: Record<string, LineSeries['labelAt']> = {
+  iq: { x: 2.4, y: 81, anchor: 'end' },
+  ssim: { x: 4.6, y: 74 },
+  psnr: { x: 4.6, y: 70 },
+  x265: undefined
+}
+const avifSeries: LineSeries[] = PHOTO_CURVES.map((c) => ({
+  label: c.label,
+  points: c.points.map((p) => [p[1] / 1e6, p[2]] as [number, number]),
+  tone: TONES[c.id],
+  dash: DASH[c.id],
+  dots: true,
+  labelAt: LABEL_AT[c.id]
+}))
+---
+
+<Article
+  title={title}
+  description={description}
+  path="/codecs/"
+  kicker="Deep dive · Codecs"
+  heading="Encode and decode"
+  lede="Nine input formats, eleven ways out, and not one default. PIXL Engine decodes with proven libraries and its own readers, encodes with exactly the parameters it is given, and reports what it wrote. Where the bytes and the request disagree, it says so instead of guessing."
+  toc={toc}
+  jsonLd={jsonLd}
+>
+  <section id="matrix">
+    <h2>The format matrix</h2>
+    <p>
+      Every pixel format converts to every other. RAW converts to all of them and to DNG. Nothing outputs RAW: a raw
+      DNG is written from a RAW source only, and a linear DNG from any rendered frame in linear light.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Source</th><th>Decoder</th><th>What it keeps</th></tr></thead>
+        <tbody>
+          <tr><td>JPEG</td><td>libjpeg-turbo (SIMD)</td><td>greyscale stays one channel</td></tr>
+          <tr><td>PNG</td><td><code>png</code> 0.18</td><td>native colour type, 8 or 16 bits, <code>cICP</code></td></tr>
+          <tr><td>HEIF / HEIC / AVIF</td><td>libheif; subsampled colour made by PIXL</td><td>8/10/12 bits, RGB/RGBA, the <code>nclx</code> box</td></tr>
+          <tr><td>JPEG XL</td><td>libjxl through PIXL’s own bindings</td><td>8/16-bit integer and 32-bit float, 1–4 channels</td></tr>
+          <tr><td>TIFF</td><td><code>tiff</code> 0.11</td><td>8/16-bit integer and 32-bit float; EXIF lifted out of the directory</td></tr>
+          <tr><td>WebP</td><td>libwebp</td><td>8 bits; an animation is refused, not cut to its first frame</td></tr>
+          <tr><td>RAW (CR2, CR3, ARW, NEF, RAF, RW2, ORF …)</td><td>LibRaw 0.22.2 with PIXL’s shim</td><td>the mosaic, or developed on request</td></tr>
+          <tr><td>DNG</td><td>PIXL’s own reader, DNG 1.7.1</td><td>every compression DNG defines</td></tr>
+          <tr><td>Master cache</td><td>the JPEG XL reader and a <code>pixl</code> box</td><td>a render resumed where it stopped (<a href="/hdr/#cache">HDR</a>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Sink</th><th>Encoder</th><th>Accepts</th></tr></thead>
+        <tbody>
+          <tr><td>JPEG XL lossy / lossless</td><td>libjxl</td><td>1–4 channels, 8 or 16 bits; lossless also 32-bit float, read back bit for bit</td></tr>
+          <tr><td>JPEG XL repack</td><td>libjxl JPEG reconstruction</td><td>a JPEG source, no pixel work</td></tr>
+          <tr><td>JPEG from JPEG XL</td><td>libjxl JPEG reconstruction</td><td>a JXL that carries reconstruction data</td></tr>
+          <tr><td>JPEG</td><td>libjpeg-turbo</td><td>8 bits, 1 or 3 channels</td></tr>
+          <tr><td>PNG</td><td><code>png</code> 0.18</td><td>8 or 16 bits, 1–4 channels</td></tr>
+          <tr><td>AVIF</td><td>libheif and aom</td><td>8/10/12 bits, 3 or 4 channels</td></tr>
+          <tr><td>TIFF</td><td><code>tiff</code> with LZW / Deflate</td><td>8 or 16 bits or 32-bit float, 1–4 channels, EXIF as a real sub-IFD</td></tr>
+          <tr><td>WebP</td><td>libwebp</td><td>8 bits, 3 or 4 channels, up to 16 383 px a side</td></tr>
+          <tr><td>DNG</td><td>PIXL’s own writer</td><td>a RAW source</td></tr>
+          <tr><td>Linear DNG</td><td>PIXL’s own writer</td><td>the rendered frame, 16-bit or float, in linear light</td></tr>
+          <tr><td>Raw pixels</td><td>none: little-endian samples, rows packed</td><td>U8, U16, F16 or F32, with the colour description in the report</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      HEIC is read, through libde265, and never written: AVIF is the one HEIF-family export, so no GPL encoder ships in
+      a host application. A buffer an encoder cannot take is refused with the <code>pixel</code> field that would fix
+      it. <strong>The engine will not drop an alpha channel or halve a bit depth to make a request succeed.</strong>
+    </p>
+  </section>
+
+  <section id="parameters">
+    <h2>Every parameter is the caller’s</h2>
+    <p>
+      The request names the input format, and the decoder it names is the one that runs. If the bytes say otherwise the
+      answer is a <code>FormatMismatch</code>, not a quiet reroute by file extension. On the way out, every encoder
+      parameter is stated by the caller, with no default and no “auto”. A missing or out-of-range value is refused with
+      the field’s name.
+    </p>
+    <p>
+      <strong>Quality and effort are different axes.</strong> Quality (or distance) decides how much detail survives;
+      effort and speed decide only how long the encoder works to reach that quality. The best detail is distance 0,
+      quality 100 or lossless — never effort 1.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Codec</th><th>Quality axis</th><th>Effort / speed axis</th></tr></thead>
+        <tbody>
+          <tr><td>JPEG XL</td><td><code>distance</code> 0–25 (0 lossless, about 1 visually lossless)</td><td><code>effort</code> 1–9</td></tr>
+          <tr><td>JPEG</td><td><code>quality</code> 1–100</td><td><code>optimize</code> (Huffman)</td></tr>
+          <tr><td>AVIF</td><td><code>quality</code> 1–100 under a named tune, or lossless</td><td><code>speed</code> 0–9, encoder <code>threads</code> 1–64</td></tr>
+          <tr><td>WebP</td><td><code>quality</code> 1–100, or lossless</td><td><code>method</code> 0–6</td></tr>
+          <tr><td>PNG, TIFF</td><td>lossless always</td><td><code>compression</code></td></tr>
+          <tr><td>DNG</td><td>lossless always</td><td>lossless-JPEG <code>predictor</code> 1–7</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Combinations that cannot be what they claim are refused rather than produced. Lossless AVIF with subsampled chroma
+      is refused, because subsampling discards chroma. Lossless AVIF is lossless of the decoded pixels only with the
+      identity matrix; under any other matrix RGB is rounded to Y/Cb/Cr before the codec, and the report’s
+      <code>loss.lossy_encoder</code> says <code>true</code>. Every report also counts how many times the pixels were
+      rounded between decode and encode.
+    </p>
+    <p>
+      Matching a source’s own encoding is a decision too, so it lives outside <code>convert</code>. A separate pure call,
+      <code>suggest_encode</code>, returns an ordinary encode request from what <code>probe</code> read. It matches
+      every parameter that affects the pixels and never invents one the file does not state. PNG and TIFF match exactly;
+      a JPEG matches when its quantisation tables are the standard tables scaled for some quality. HEIC, AVIF, lossy
+      WebP and lossy JPEG XL do not record their quality, so the call refuses, naming the field to set.
+    </p>
+  </section>
+
+  <section id="avif">
+    <h2>AVIF, measured</h2>
+    <p>
+      AVIF is written through libheif’s C API with the aom encoder. Every knob the AV1 encoder has is a required field:
+      quality or lossless, bit depth, chroma, speed, the YCbCr matrix, the encoder’s threads, the tune and the tiling.
+      The YCbCr matrix is the caller’s, and one structure is both the matrix libheif converts with and the
+      <code>nclx</code> box a decoder converts back with, so the two cannot disagree.
+    </p>
+
+    <h3>Three tunings, three scales</h3>
+    <p>
+      <code>Psnr</code>, <code>Ssim</code> and <code>Iq</code> (aom’s still-image tuning) put <code>quality</code> on
+      different scales, so a preset is a pair of tune and quality. The tunings were compared over 800 encodes, scored
+      with SSIMULACRA2 (higher is better) and Butteraugli’s 3-norm (lower is better). Two metrics are used because aom
+      tuned <code>Iq</code> against SSIMULACRA2 itself.
+    </p>
+    <figure>
+      <LineChart
+        title="Size for quality, 24 MP photograph, 4:2:0"
+        desc="File size against SSIMULACRA2 for AVIF's three tunings and x265 HEIC on the 24 MP photograph. AVIF Iq reaches each score up to about 88 with the smallest file; x265 HEIC reaches higher scores at larger sizes."
+        series={avifSeries}
+        x={{ domain: [0, 16], ticks: [0, 2, 4, 6, 8, 10, 12, 14, 16], label: 'file size, MB' }}
+        y={{ domain: [40, 95], ticks: [40, 50, 60, 70, 80, 90], label: 'SSIMULACRA2' }}
+      />
+      <figcaption>
+        Quality 30–95 in steps of 5 (points below a score of 40 left out). The 24 MP road photograph (6000 × 4000, P3,
+        8-bit JPEG source), 4:2:0, speed 6, 8 encoder threads; libheif 1.21.2 with aom 3.13.3, and x265 4.1 through the
+        same libheif (preset <code>slow</code>, tune <code>ssim</code>), measured before the HEIC sink was removed. Scores
+        from libjxl 0.11.2’s <code>ssimulacra2</code> on PIXL’s decode against the source PNG. i7-14700F, encodes pinned
+        to eight performance cores. Rows: <code>docs/avif/avif-quality.csv</code>, <code>heic-x265.csv</code>.
+      </figcaption>
+    </figure>
+
+    <p>Read at equal quality, the same rows give the size each encoder needs:</p>
+    <div class="wide">
+      <table>
+        <thead>
+          <tr><th>Input, SSIMULACRA2</th><th class="num">Psnr</th><th class="num">Ssim</th><th class="num">Iq</th><th class="num">x265 HEIC</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>24 MP photo, 70</td><td class="num">2.71 MB</td><td class="num">2.54 MB</td><td class="num">2.22 MB</td><td class="num">2.33 MB</td></tr>
+          <tr><td>24 MP photo, 80</td><td class="num">4.37 MB</td><td class="num">4.33 MB</td><td class="num">3.79 MB</td><td class="num">4.04 MB</td></tr>
+          <tr><td>24 MP photo, 85</td><td class="num">5.57 MB</td><td class="num">5.53 MB</td><td class="num">5.14 MB</td><td class="num">5.50 MB</td></tr>
+          <tr><td>24 MP, 16-bit → 10-bit, 85</td><td class="num">6.01 MB</td><td class="num">5.88 MB</td><td class="num">5.16 MB</td><td class="num">5.76 MB</td></tr>
+          <tr><td>4 MP screen capture, 85</td><td class="num">0.22 MB</td><td class="num">0.21 MB</td><td class="num">0.18 MB</td><td class="num">0.22 MB</td></tr>
+          <tr><td>PQ fixture, 80</td><td class="num">49 kB</td><td class="num">48 kB</td><td class="num">41 kB</td><td class="num">49 kB</td></tr>
+          <tr><td>HLG fixture, 80</td><td class="num">44 kB</td><td class="num">42 kB</td><td class="num">37 kB</td><td class="num">45 kB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="wide">
+      <table>
+        <thead>
+          <tr><th>Input, Butteraugli 3-norm</th><th class="num">Psnr</th><th class="num">Ssim</th><th class="num">Iq</th><th class="num">x265 HEIC</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>24 MP photo, 1.2</td><td class="num">2.64 MB</td><td class="num">2.47 MB</td><td class="num">2.40 MB</td><td class="num">2.25 MB</td></tr>
+          <tr><td>24 MP photo, 0.8</td><td class="num">4.34 MB</td><td class="num">4.27 MB</td><td class="num">3.98 MB</td><td class="num">3.85 MB</td></tr>
+          <tr><td>24 MP photo, 0.4</td><td class="num">7.11 MB</td><td class="num">6.90 MB</td><td class="num">6.61 MB</td><td class="num">6.65 MB</td></tr>
+          <tr><td>4 MP screen capture, 0.8</td><td class="num">0.10 MB</td><td class="num">92 kB</td><td class="num">96 kB</td><td class="num">0.12 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><code>Iq</code> is the smallest at a given quality on photographs, by 7–13% on SSIMULACRA2 or 3–7% on Butteraugli. <code>Psnr</code> is never the smallest.</li>
+      <li>
+        Against x265 HEIC the two metrics disagree on photographs. At equal SSIMULACRA2, AVIF <code>Iq</code> is 4–10%
+        smaller; at equal Butteraugli it is level, from 7% larger at low quality to 1% smaller at high. On the screen
+        capture and the HDR fixtures it is 10–20% smaller. The fair summary is “about the size of HEVC on photographs,
+        smaller on graphics”, in 1.3–2.3 s against 2.0–4.0 s and about 640 MB of memory against 820 MB.
+      </li>
+      <li>x265’s scale reaches higher: HEIC at quality 80–95 scores 90.4–91.5 in 9.7–15.6 MB; AVIF at 95 stops at 89.7 (90.7 at 4:4:4).</li>
+      <li>4:4:4 costs 2–3% more bytes and 44% more memory on the photograph for about one point.</li>
+    </ul>
+
+    <h3>Speed</h3>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Speed (<code>Iq</code>, quality 70)</th><th class="num">Size</th><th class="num">Encode</th><th class="num">SSIMULACRA2</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td class="num">4.15 MB</td><td class="num">71.49 s</td><td class="num">82.5</td></tr>
+          <tr><td>3</td><td class="num">4.16 MB</td><td class="num">18.56 s</td><td class="num">82.3</td></tr>
+          <tr><td>6</td><td class="num">4.30 MB</td><td class="num">1.90 s</td><td class="num">82.0</td></tr>
+          <tr><td>9</td><td class="num">4.50 MB</td><td class="num">0.45 s</td><td class="num">81.3</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      At equal score speed 9 is 9–10% larger than speed 6; speed 3 is 3–7% smaller for 5–10 times the time, and speeds
+      0–2 write nearly the same file as 3. The encoder’s own thread count changes no byte from 2 threads up. At 1 thread
+      libheif leaves aom’s row multithreading off, and the file is a different encode of the same quality.
+    </p>
+
+    <h3>Grids and 102 megapixels</h3>
+    <p>
+      <code>Grid</code> writes a HEIF grid item over square AV1 tiles — the layout an iPhone’s own HEIC uses, 8 × 6 tiles
+      of 512. Each tile gets an encoder of its own and drops it before the next: one encoder over every tile kept every
+      tile’s codec context alive, and a 24 MP grid then peaked at 914 MB, above the single image’s 650. A single image is
+      refused past 16 384² pixels or 32 768 a side, the limits AV1 readers apply by default. A grid needs an even width
+      (and height, at 4:2:0) under subsampled chroma, as MIAF requires, and the engine refuses to write one that readers
+      would reject.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>102 MP GFX100S frame, <code>Iq</code> q80</th><th class="num">Speed 6</th><th class="num">Speed 9</th></tr></thead>
+        <tbody>
+          <tr><td>one image, 4:4:4</td><td class="num">12.39 MB · 4.72 s · 3858 MB</td><td class="num">12.73 MB · 1.44 s · 3838 MB</td></tr>
+          <tr><td>one image, 4:2:0</td><td class="num">12.28 MB · 3.93 s · 2659 MB</td><td class="num">12.59 MB · 1.09 s · 2640 MB</td></tr>
+          <tr><td>tiles of 4096, 4:4:4 (9)</td><td class="num">12.69 MB · 6.46 s · 1196 MB</td><td class="num">13.17 MB · 2.22 s · 1202 MB</td></tr>
+          <tr><td>tiles of 2048, 4:4:4 (30)</td><td class="num">12.62 MB · 7.02 s · 775 MB</td><td class="num">12.98 MB · 2.13 s · 784 MB</td></tr>
+          <tr><td>tiles of 512, 4:4:4 (414)</td><td class="num">12.79 MB · 14.11 s · 692 MB</td><td class="num">12.93 MB · 2.29 s · 678 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <BarChart
+        title="Peak memory, 102 MP frame, by layout"
+        desc="Peak resident memory of the AVIF encode of the 102 MP GFX100S frame at 4:4:4, quality 80, speed 6: 3858 MB as one image, 1196 MB in tiles of 4096, 775 MB in tiles of 2048, 732 MB in tiles of 1024 and 692 MB in tiles of 512."
+        rows={[
+          { label: 'one image', bars: [{ value: 3858, tone: 'muted', text: '3858 MB' }] },
+          { label: 'tiles of 4096', sub: '9 tiles', bars: [{ value: 1196, tone: 'accent', text: '1196 MB' }] },
+          { label: 'tiles of 2048', sub: '30 tiles', bars: [{ value: 775, tone: 'accent', text: '775 MB' }] },
+          { label: 'tiles of 1024', sub: '108 tiles', bars: [{ value: 732, tone: 'accent', text: '732 MB' }] },
+          { label: 'tiles of 512', sub: '414 tiles', bars: [{ value: 692, tone: 'accent', text: '692 MB' }] }
+        ]}
+        domain={[0, 4000]}
+        ticks={[0, 1000, 2000, 3000, 4000]}
+        axisLabel="peak resident memory, MB"
+      />
+      <figcaption>
+        The 102 MP GFX100S frame (11 648 × 8735) from an 8-bit PNG, 4:4:4, <code>Iq</code> quality 80, speed 6, 8 encoder
+        threads; i7-14700F, pinned to eight performance cores. From <code>docs/avif/README.md</code>.
+      </figcaption>
+    </figure>
+    <p>
+      Size, encode time, peak memory; 11 648 × 8735 from an 8-bit PNG, 8 encoder threads. A grid is 0.2–2.5% larger and
+      slower, scores the same, and at tiles of 2048 takes a fifth of the memory. The frame’s odd height rules out a 4:2:0
+      grid, so it is written 4:4:4; as a grid of 4096 at quality 90, speed 9, it reads back at 44.2 dB.
+    </p>
+    <p>
+      Reading grids has a cost too. libheif keeps a decoder per tile, each starting a thread per core, and past the
+      process’s thread limit its default returns the missing tiles green. PIXL reads strictly: a grid it cannot decode
+      whole is a decode error naming the grid and its tile count, never a different picture.
+    </p>
+
+    <h3>Read by others</h3>
+    <p>
+      Every file kind the sink writes — sRGB, Display P3 by ICC and by <code>nclx</code> alone, 10 and 12 bits, 4:4:4 and
+      4:2:0, lossless identity, a grid, alpha, PQ, HLG, one- and three-channel gain maps, 102 MP, 16 384², 32 768 wide —
+      was read back by libavif 1.3.0, libheif 1.23.5 and exiftool 13.50:
+    </p>
+    <ul>
+      <li>every file opens in both libraries at their default limits;</li>
+      <li>libheif’s decode is PIXL’s sample for sample at 8 bits, within one code at 10 and 12;</li>
+      <li>libavif’s is within one code on 4:4:4 (on 4:2:0 its own chroma upsampling differs);</li>
+      <li>EXIF, XMP and a preserved ICC profile come out as the source’s bytes;</li>
+      <li>libavif tone maps PIXL’s gain maps as PIXL does: MaxCLL 795 against 797 cd/m² at 2 stops.</li>
+    </ul>
+    <p>
+      Two writer bugs were found this way and fixed, each with a test. On Apple’s devices (macOS 27 Preview, ImageIO and
+      Core Image on an M2 Pro; Safari, Chrome and an iPhone the same) every file opens at the size written, each colour
+      description reads as written, and Core Image’s SDR renders are PIXL’s decodes within 0.3 of an 8-bit code in every
+      channel mean.
+    </p>
+  </section>
+
+  <section id="jxl">
+    <h2>JPEG XL</h2>
+    <p>
+      The engine wraps libjxl’s C API directly, with bindings generated once and committed, because the order of calls
+      matters: libjxl wants distance 0 set before the lossless flag, and a box buffer must be released before it is
+      grown. Setting <code>uses_original_profile</code> only for lossless frames matters too: on a lossy frame it costs
+      roughly twice the file size.
+    </p>
+    <ul class="art-figs">
+      <li><span class="b-mono">8.0 → 6.5 MB</span><span class="b-body">a JPEG repacked into JPEG XL</span></li>
+      <li><span class="b-mono">byte for byte</span><span class="b-body">the original JPEG reconstructed from it</span></li>
+      <li><span class="b-mono">bit for bit</span><span class="b-body">32-bit float masters read back</span></li>
+    </ul>
+    <p>
+      The two bit-exact paths in the engine are inverses. A JPEG repacked into JPEG XL keeps its DCT coefficients and
+      every APP segment inside the reconstruction data, and comes back as the original file. The way back works only when
+      the JXL carries reconstruction data; otherwise it is refused, because re-encoding would be lossy. Everywhere else,
+      “lossless” means lossless of the decoded pixels.
+    </p>
+    <p>
+      The 19% here is one camera JPEG. The JPEG XL authors measured a set: for JPEGs a camera typically produces, “the
+      gains are around 20%”, with libjpeg-turbo output at quality 70–95 saving 19–21% and JPEGs from mozjpeg and jpegli,
+      which squeeze harder already, about 10–19% (Sneyers et al., 2025, Fig. 53). The engine runs the same libjxl
+      reconstruction.
+    </p>
+    <p>
+      Lossless JPEG XL also holds IEEE single-precision floats. The engine’s master cache is one: the linear master in
+      PixlRGB with alpha, read back bit for bit — negative zero, subnormals and the largest finite float included —
+      and decoded identically at 1, 7 and 16 threads. A JXL’s own ICC profile is carried only when the file holds one; an
+      enumerated colour encoding (every lossy JXL, every PQ or HLG one) is read as CICP code points, as a PNG’s
+      <code>cICP</code> is.
+    </p>
+  </section>
+
+  <section id="heic">
+    <h2>HEIC, read as Apple reads it</h2>
+    <p>
+      A phone’s HEIC is 4:2:0. By default libheif upsamples its chroma by nearest neighbour, and its bilinear option
+      indexes chroma at <code>cx / 2</code> in its border loops, up to 154 codes off on the iPhone corpus. Core Image
+      upsamples bilinearly from centre-sited chroma with the edge repeated. So PIXL asks libheif for the coded planes and
+      makes the colour itself:
+    </p>
+    <ul>
+      <li>
+        <strong>Siting</strong> is what the stream states (an HEVC VUI chroma location, AV1’s
+        <code>chroma_sample_position</code>), else the centre. On every iPhone file the centre lands within 1.27 codes of
+        Core Image; H.265’s default, left-sited, lands 13–28 codes away. <code>probe</code> reports which siting was used
+        and whether it was stated or assumed.
+      </li>
+      <li>
+        <strong>The arithmetic</strong> is libheif’s own: its matrix coefficients and range factors, rounded once at the
+        coded depth. Run with nearest sampling, PIXL matches libheif’s RGB decode within one code at 8 bits and exactly
+        at 10, full and limited range.
+      </li>
+      <li><strong>The transformations</strong> (<code>irot</code>, <code>imir</code>, <code>clap</code>) run in the file’s order with libheif’s rounding, alpha included.</li>
+    </ul>
+    <figure class="edge">
+      <div class="edge-row">
+        <div><img src="/shared/engine/codecs/edge-apple.webp" width="720" height="480" loading="lazy" decoding="async" alt="A tree against a sunset sky, cropped from an iPhone 17 HEIC as Apple's Core Image renders it." /><span class="b-micro">Core Image · the reference</span></div>
+        <div><img src="/shared/engine/codecs/edge-libheif.webp" width="720" height="480" loading="lazy" decoding="async" alt="libheif's default decode against Core Image's, amplified: bright outlines along every leaf and branch." /><span class="b-micro">libheif default · up to 25 codes</span></div>
+        <div><img src="/shared/engine/codecs/edge-pixl.webp" width="720" height="480" loading="lazy" decoding="async" alt="PIXL's decode against Core Image's, amplified: an even dark field, no edges." /><span class="b-micro em">PIXL · at most 1 code</span></div>
+      </div>
+      <figcaption>
+        An iPhone 17 HEIC (4:2:0) where branches cross a sunset. First, Apple's own render; then how far
+        libheif's default decode and PIXL's land from it, per pixel, the largest channel's difference ×10. libheif's
+        nearest-neighbour chroma misses along every colour edge, by up to 25 of 255; PIXL's centre-sited bilinear chroma
+        is never more than one code away. Over the whole 12 MP frame: libheif 2.0% of pixels more than one code off,
+        PIXL none. libheif 1.23.5's <code>heif-dec</code>; Core Image on macOS 27.0.
+      </figcaption>
+    </figure>
+    <p>
+      The cost is small. On a 48 MP file at 6 threads, the conversion takes 80 ms beside libheif’s 310 ms HEVC decode,
+      against 474 ms for libheif’s own RGB decode. It is bit-identical at any thread count.
+    </p>
+    <p>
+      Against Apple’s own renders of eleven iPhone HEICs (iPhone 17 and iPhone 13 Pro, iOS 17.5 to 27.0, 12 and 48 MP),
+      the base image is within 1.27 8-bit codes at most. The HDR reading of the same files is covered on the
+      <a href="/hdr/#iphone">HDR page</a>.
+    </p>
+  </section>
+
+  <section id="raw">
+    <h2>RAW and DNG</h2>
+    <p>
+      A sensor mosaic is not an image, so developing one is always explicit: <code>raw</code> is required whenever a RAW
+      source targets anything but DNG, and refused otherwise. Camera formats are read by LibRaw 0.22.2, built from its
+      unmodified source with PIXL’s own C++ shim. A DNG is read by PIXL’s own reader, written from Adobe’s DNG 1.7.1
+      specification. Both hand over one view of the sensor, and everything after the decode — scaling, white balance,
+      highlight handling, demosaic, colour — is PIXL’s, on the caller’s threads.
+    </p>
+    <ul class="art-figs">
+      <li><span class="b-mono">0.31 s</span><span class="b-body">CR2 35.6 MB → DNG 28.3 MB, whole sensor, mosaic bit-identical through two readers</span></li>
+      <li><span class="b-mono">1490 MB</span><span class="b-body">peak above the start for a 102 MP GFX100S develop, in 4.9 s</span></li>
+      <li><span class="b-mono">every sample</span><span class="b-body">equal to LibRaw’s on the five DNGs both read</span></li>
+    </ul>
+    <h3>Developing in bands</h3>
+    <p>
+      The develop never holds a second full frame. It works in bands of 256 rows, each read with the margin its demosaic
+      reaches, and writes every band straight to its upright place. The result is bit for bit the whole-frame develop.
+      Peak memory above the start, at 8 threads:
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>File</th><th class="num">Frame</th><th class="num">Scene develop</th><th class="num">Time</th></tr></thead>
+        <tbody>
+          <tr><td>Canon R5 CR3</td><td class="num">17.3 MP</td><td class="num">284 MB</td><td class="num">0.49 s</td></tr>
+          <tr><td>Sony A7R IV ARW</td><td class="num">60.2 MP</td><td class="num">920 MB</td><td class="num">1.0 s</td></tr>
+          <tr><td>Fujifilm GFX100S RAF</td><td class="num">101.7 MP</td><td class="num">1490 MB</td><td class="num">4.9 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The finished 102 MP frame alone is 1221 MB of 32-bit floats. The test holds every develop under 2 GB at 100 MP.</p>
+    <h3>DNG, both ways</h3>
+    <p>
+      The reader handles every compression DNG defines: uncompressed and bit-packed, lossless JPEG (all seven
+      predictors), deflate for integers and for 16-, 24- and 32-bit floats, lossy JPEG and JPEG XL tiles. Floats stay
+      floats. Levels, black-level deltas, up to three calibration illuminants, forward matrices and camera calibrations
+      follow the specification’s chapters 5 and 6. On the five DNGs LibRaw can also read, every sample is equal and the
+      matrices agree to LibRaw’s single precision. The reader is as fast or faster: an iPhone ProRAW decodes in 118 ms
+      against 405, because its 64 tiles decode in parallel.
+    </p>
+    <p>
+      The opcode lists run where the specification places them. OpcodeList1 and 2 run on the mosaic when the request says
+      <code>Apply</code>, and the plan for both lists is fixed before a sample moves. On a Pixel 6 Pro’s DNG, its four gain
+      maps lift the sky’s top corners from 0.36 of the top centre to 0.71–0.73; a CHDK Canon’s 9 591 dead photosites are
+      patched and no other sample moves. OpcodeList3 — the lens corrections — is never run by itself. The engine reports
+      it with its parameters and offers it, translated exactly, as a lens correction the caller can choose to apply.
+    </p>
+    <p>
+      The writer stores 256 × 256 tiles, uncompressed or lossless JPEG with the caller’s predictor. It writes the camera’s
+      matrices as exact rationals, carries the MakerNote as <code>DNGPrivateData</code>, and can embed the original file.
+      That original comes back byte for byte; its digest is the MD5 the specification defines. A Fujifilm X-E1 RAF
+      converted to DNG develops as the RAF does, within 1e-5. Everything the engine will not ask LibRaw to do is refused
+      by name: Foveon and SuperCCD layouts, multi-frame files (a dual-pixel CR3 is never reduced silently to its first
+      frame), and files cut short.
+    </p>
+  </section>
+
+  <section id="metadata">
+    <h2>Metadata, verbatim</h2>
+    <p>
+      EXIF, ICC, XMP and IPTC are normalised to their bare payloads and copied verbatim — never parsed, rewritten or
+      “fixed”. Container wrappers are added at each boundary: JPEG’s <code>Exif</code> header, the TIFF offset JPEG XL
+      prepends, the Photoshop resource block around IPTC.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Sink</th><th>EXIF</th><th>ICC</th><th>XMP</th><th>IPTC</th><th>CICP</th></tr></thead>
+        <tbody>
+          <tr><td>JPEG XL</td><td><code>Exif</code> box</td><td>profile</td><td><code>xml </code> box</td><td>—</td><td>colour encoding</td></tr>
+          <tr><td>JPEG</td><td>APP1</td><td>APP2, split</td><td>APP1</td><td>APP13</td><td>via ICC</td></tr>
+          <tr><td>PNG</td><td><code>eXIf</code></td><td><code>iCCP</code></td><td><code>iTXt</code></td><td>—</td><td><code>cICP</code> + <code>cLLI</code></td></tr>
+          <tr><td>AVIF</td><td>Exif item</td><td><code>colr</code></td><td>XMP item</td><td><code>iptc</code> item</td><td><code>nclx</code></td></tr>
+          <tr><td>TIFF</td><td>IFD0 + Exif/GPS sub-IFDs</td><td>tag 34675</td><td>tag 700</td><td>tag 33723</td><td>via ICC</td></tr>
+          <tr><td>WebP</td><td><code>EXIF</code></td><td><code>ICCP</code></td><td><code>XMP </code></td><td>—</td><td>via ICC</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      A sink with no place for a block reports it <code>false</code> in <code>metadata_written</code> rather than
+      pretending. TIFF is the one container where EXIF is the file’s own directory, so it is re-serialised; the bytes
+      differ but every value compares equal, type and bytes, and libtiff and exiv2 read the result. A RAW’s MakerNote stays
+      with the RAW, because its offsets point into that file; a developed frame’s EXIF carries no orientation tag, because
+      the pixels are already upright. Profiles the engine builds itself are reproducible: the creation time and
+      platform Little CMS stamps in are fixed, so the same conversion writes the same bytes on any run and any OS.
+    </p>
+  </section>
+
+  <section id="hostile">
+    <h2>Hostile input</h2>
+    <p>
+      Every parser runs inside the host’s process, on bytes the host did not write. Two measures keep a hostile file
+      from taking that process down.
+    </p>
+    <h3>Limits from the header</h3>
+    <p>
+      A PNG claiming 100 000 × 100 000 pixels asks for tens of gigabytes, and the operating system kills the host. A
+      request’s <code>limits</code> — a pixel count and a longest side — are checked from each format’s header before a
+      pixel buffer is allocated: libjpeg-turbo’s header, PNG’s IHDR, libheif’s handle, WebP’s bitstream features, TIFF’s
+      dimensions, JPEG XL’s basic info, a RAW’s dimensions before unpacking, a DNG’s raw directory and first tile.
+      Every other picture a request reads — a gain map, a mask, an overlay, a flat-field, a model’s grid — is checked
+      where its size is first known and refused by its own field.
+    </p>
+    <div class="note">
+      <strong>Measured:</strong> seven forged headers (PNG, JPEG, WebP, AVIF, JPEG XL, TIFF, DNG), each claiming
+      gigabytes, are refused through <code>convert</code> and <code>analyze</code> with the process’s peak resident memory
+      rising under 50 MB in every case. With no limit, a generous one, or one set exactly at the picture’s size, the
+      engine writes the same bytes.
+    </div>
+    <h3>Every parser fuzzed</h3>
+    <p>
+      Thirteen cargo-fuzz targets feed arbitrary bytes to every parser under AddressSanitizer, with libFuzzer’s coverage
+      compiled into the C and C++ as well as the Rust: LibRaw and its shim, libjpeg-turbo, libheif with libde265 and aom,
+      libjxl, libwebp, the PNG and TIFF readers, the gain-map and box readers, PIXL’s EXIF directory reader, Little CMS on
+      any ICC profile, the <code>.cube</code> parser, the prompt-embedding format and the JPEG reconstruction’s coefficient
+      reader. The two RAW targets run for five minutes each on every pull request; every target runs for about 30 minutes
+      before each release.
+    </p>
+  </section>
+
+  <section id="determinism">
+    <h2>The same bytes at any thread count</h2>
+    <p>
+      The engine owns no thread pool. Every request names its <code>threads</code> (1–1024), and the work is cut into
+      contiguous runs of whole pixels or rows on scoped threads that end before the call returns. The output is
+      bit-identical whatever the count. Per-element arithmetic never changes, integer counts are summed in any order, and
+      float reductions use a fixed chunking that does not depend on the count. Resampling is cut along the lines its
+      arithmetic already follows, so every output sample is one sum in tap order.
+    </p>
+    <p>
+      The codecs keep their own threads. The subsampled-HEIF conversion, the DNG tile decode and the JPEG XL decoder are
+      each bit-identical at any count. The AV1 encoder is byte-identical from 2 threads up; at 1 thread it is a different
+      encode of the same quality, and the documentation says so.
+    </p>
+  </section>
+
+  <section id="sources">
+    <h2>Sources and method</h2>
+    <p>
+      Unless stated, figures were measured on an Intel i7-14700F under Linux, with 8 threads. The AVIF encodes were
+      pinned to eight performance cores and run one at a time; the scorers ran one at a time in a container capped at
+      10 GB. Every claim is held by a test in the engine’s repository; the by-hand measurements are named as such.
+    </p>
+    <ul class="art-sources">
+      <li>AVIF tunings, speed and tiling: <code>ci/avif-measure.py</code> → <code>docs/avif/avif-quality.csv</code>, <code>avif-speed.csv</code>, <code>avif-tiling.csv</code>, <code>heic-x265.csv</code> (800 encodes); the 102 MP frame from <code>docs/avif/README.md</code>.</li>
+      <li>AVIF behaviour: <code>tests/avif.rs</code> — <code>the_thread_count_changes_no_byte_from_two_up</code>, <code>one_thread_is_another_encode_of_the_same_quality</code>, <code>a_grid_of_many_tiles_is_read_whole_or_refused_never_wrong</code>; <code>lossless_identity_round_trips_byte_exact</code>, <code>the_nclx_box_states_the_matrix_the_caller_named</code>.</li>
+      <li>Interoperability: <code>ci/avif-interop/</code> (libavif 1.3.0, libheif 1.23.5, exiftool 13.50), run by hand; Apple devices checked by hand on macOS 27.</li>
+      <li>HEIC chroma: <code>the_arithmetic_is_libheifs_but_for_the_sampling</code>, <code>the_rows_are_the_per_pixel_conversion_at_any_thread_count</code>; Apple’s renders via <code>tests/heic.rs</code> (by hand, <code>--ignored</code>).</li>
+      <li>Sneyers, Alakuijala, Versari, Szabadka et al., “The JPEG XL Image Coding System: History, Features, Coding Tools, Design Rationale, and Future”, <a href="https://arxiv.org/abs/2506.05987">arXiv 2506.05987</a> (2025), CC BY-SA 4.0: §10.1 and Fig. 53 (libjxl 0.11.1, the 8-bit colour photographs of imagecompression.info).</li>
+      <li>JPEG XL repack and reconstruction, and the format matrix: <code>tests/conversions.rs</code>; float JXL: <code>tests/master_cache.rs</code>.</li>
+      <li>RAW and DNG: <code>tests/libraw.rs</code>, <code>tests/dng.rs</code>, <code>tests/raw_memory.rs</code> (peak resident memory via <code>VmHWM</code>), <code>tests/raw_sensors.rs</code>; banding: <code>a_frame_run_in_small_bands_is_the_frame_run_whole</code>.</li>
+      <li>Limits: <code>tests/limits.rs</code>. Fuzzing: <code>fuzz/</code> (13 targets) and CI’s <code>fuzz</code> job.</li>
+      <li>Threads: <code>a_grade_is_byte_identical_whatever_the_thread_count</code>, <code>resize_f32_in_bands_is_the_single_call_bit_for_bit</code>.</li>
+    </ul>
+  </section>
+</Article>
+
+<style>
+  .edge-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .edge-row > div { background: #050507; display: flex; flex-direction: column; }
+  .art-body .edge-row img { border: 0; }
+  .edge-row .b-micro { padding: 10px 12px; color: var(--ink-3); }
+  .edge-row .em { color: #bba9ff; }
+  @media (max-width: 760px) { .edge-row { grid-template-columns: minmax(0, 1fr); } }
+</style>
