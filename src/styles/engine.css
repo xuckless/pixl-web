@@ -173,3 +173,7 @@
   .tri-row img { flex: none; aspect-ratio: 2 / 3; }
   .tri-row .b-micro { padding: 10px; font-size: 10px; }
 }
+.raw-fig { background: #050507; }
+.raw-fig figcaption { padding: 16px 18px; font-size: 14px; color: var(--ink-3); border-top: 1px solid var(--line); }
+.raw-fig figcaption strong { color: var(--ink); font-weight: 600; }
+.raw-fig .tri-row > div:last-child .b-micro { color: var(--ink-3); }

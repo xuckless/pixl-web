@@ -380,10 +380,19 @@ const avifSeries: LineSeries[] = PHOTO_CURVES.map((c) => ({
       </li>
       <li><strong>The transformations</strong> (<code>irot</code>, <code>imir</code>, <code>clap</code>) run in the file’s order with libheif’s rounding, alpha included.</li>
     </ul>
-    <!-- RENDER: a 400 % crop of an iPhone HEIC at a saturated colour edge (e.g. a red sign against sky), three panels: libheif's default nearest-neighbour chroma, PIXL's centre-sited bilinear chroma, and Apple Core Image's render -->
-    <figure class="ph">
-      <div class="ph-box" aria-hidden="true">Render to come: chroma at a colour edge, three readers</div>
-      <figcaption>An iPhone HEIC at a saturated edge, enlarged: libheif’s default chroma, PIXL’s, and Core Image’s.</figcaption>
+    <figure class="edge">
+      <div class="edge-row">
+        <div><img src="/shared/engine/codecs/edge-apple.webp" width="720" height="480" loading="lazy" decoding="async" alt="A tree against a sunset sky, cropped from an iPhone 17 HEIC as Apple's Core Image renders it." /><span class="b-micro">Core Image · the reference</span></div>
+        <div><img src="/shared/engine/codecs/edge-libheif.webp" width="720" height="480" loading="lazy" decoding="async" alt="libheif's default decode against Core Image's, amplified: bright outlines along every leaf and branch." /><span class="b-micro">libheif default · up to 25 codes</span></div>
+        <div><img src="/shared/engine/codecs/edge-pixl.webp" width="720" height="480" loading="lazy" decoding="async" alt="PIXL's decode against Core Image's, amplified: an even dark field, no edges." /><span class="b-micro em">PIXL · at most 1 code</span></div>
+      </div>
+      <figcaption>
+        An iPhone 17 HEIC (4:2:0) where branches cross a sunset. First, Apple's own render; then how far
+        libheif's default decode and PIXL's land from it, per pixel, the largest channel's difference ×10. libheif's
+        nearest-neighbour chroma misses along every colour edge, by up to 25 of 255; PIXL's centre-sited bilinear chroma
+        is never more than one code away. Over the whole 12 MP frame: libheif 2.0% of pixels more than one code off,
+        PIXL none. libheif 1.23.5's <code>heif-dec</code>; Core Image on macOS 27.0.
+      </figcaption>
     </figure>
     <p>
       The cost is small. On a 48 MP file at 6 threads, the conversion takes 80 ms beside libheif’s 310 ms HEVC decode,
@@ -553,5 +562,10 @@ const avifSeries: LineSeries[] = PHOTO_CURVES.map((c) => ({
 </Article>
 
 <style>
-  .ph-box { display: grid; place-items: center; aspect-ratio: 16 / 7; border: 1px dashed rgba(255, 255, 255, .14); background: #07060c; color: #8e8aa6; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; text-align: center; padding: 16px; }
+  .edge-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .edge-row > div { background: #050507; display: flex; flex-direction: column; }
+  .art-body .edge-row img { border: 0; }
+  .edge-row .b-micro { padding: 10px 12px; color: var(--ink-3); }
+  .edge-row .em { color: #bba9ff; }
+  @media (max-width: 760px) { .edge-row { grid-template-columns: minmax(0, 1fr); } }
 </style>
