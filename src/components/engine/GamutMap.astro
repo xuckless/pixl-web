@@ -1,0 +1,208 @@
+---
+// An interactive CIE 1976 u'v' chromaticity diagram: the visible range filled
+// with its colours (drawn in Display P3 where the browser can), the standard
+// RGB spaces and PixlRGB as triangles a reader turns on and off, the spectral
+// locus as three cameras record it, and a readout under the pointer saying
+// which spaces hold that colour. Data: src/data/colour.ts.
+import { CAMERAS, LOCUS, SPACES } from '../../data/colour'
+
+interface Props {
+  /** Which spaces start switched on. */
+  on?: string[]
+  /** Show the camera loci and the coverage table (the /pixlrgb page). */
+  full?: boolean
+  id?: string
+}
+const { on = ['sRGB', 'Display P3', 'Rec.2020', 'PixlRGB'], full = false, id = 'gamut' } = Astro.props
+
+// The plot's window in u'v' and its size in SVG units.
+const U0 = -0.12, U1 = 0.68, V0 = -0.08, V1 = 0.66
+const W = 800, H = Math.round((W * (V1 - V0)) / (U1 - U0))
+const px = (u: number) => ((u - U0) / (U1 - U0)) * W
+const py = (v: number) => H - ((v - V0) / (V1 - V0)) * H
+const path = (pts: [number, number][], close = true) => pts.map(([u, v], i) => `${i ? 'L' : 'M'}${px(u).toFixed(1)},${py(v).toFixed(1)}`).join('') + (close ? 'Z' : '')
+const locus: [number, number][] = LOCUS.map(([, u, v]) => [u, v])
+const TICKS = [460, 480, 490, 500, 510, 520, 540, 560, 580, 600, 620, 700]
+const grid = [-0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+const spaces = full ? SPACES : SPACES.filter((s) => !s.name.startsWith('ACES AP0'))
+const d65 = { u: 0.19784, v: 0.46832 }
+const data = JSON.stringify({ locus, spaces: spaces.map((s) => ({ name: s.name, uv: s.uv })), U0, U1, V0, V1, W, H })
+---
+
+<div class:list={['gm', { full }]} id={id} data-gamut={data}>
+  <div class="gm-plot">
+    <canvas class="gm-fill" width={W} height={H} aria-hidden="true"></canvas>
+    <svg class="gm-svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="CIE 1976 u'v' chromaticity diagram with the visible range, the triangles of standard RGB spaces and of PixlRGB.">
+      <g class="gm-grid">
+        {grid.map((g) => <line x1={px(g)} x2={px(g)} y1="0" y2={H} />)}
+        {grid.map((g) => <line y1={py(g)} y2={py(g)} x1="0" x2={W} />)}
+        {grid.map((g) => <text x={px(g) + 4} y={H - 6}>{g.toFixed(1)}</text>)}
+        {grid.filter((g) => g > -0.1).map((g) => <text x="6" y={py(g) - 4}>{g.toFixed(1)}</text>)}
+        <text class="axis" x={W - 8} y={H - 22} text-anchor="end">u′</text>
+        <text class="axis" x="10" y="20">v′</text>
+      </g>
+      <path class="gm-locus" d={path(locus)} />
+      {TICKS.map((nm) => {
+        const p = LOCUS.find((l) => l[0] === nm)
+        return p && <g class="gm-tick"><circle cx={px(p[1])} cy={py(p[2])} r="2.5" /><text x={px(p[1]) + (p[1] < 0.15 ? -10 : 8)} y={py(p[2]) + (nm > 560 ? 14 : 4)} text-anchor={p[1] < 0.15 ? 'end' : 'start'}>{nm}</text></g>
+      })}
+      {full && CAMERAS.map((c, i) => <path class="gm-cam" data-cam={c.name} d={path(c.locus.map(([, u, v]) => [u, v] as [number, number]), false)} style={`--i:${i}`} />)}
+      {spaces.map((s) => (
+        <g class:list={['gm-space', { off: !on.includes(s.name), pixl: s.name === 'PixlRGB' }]} data-space={s.name} style={`--c:${s.colour}`}>
+          <path d={path(s.uv)} />
+          {s.uv.map(([u, v]) => <circle cx={px(u)} cy={py(v)} r="3.5" />)}
+        </g>
+      ))}
+      <g class="gm-white"><circle cx={px(d65.u)} cy={py(d65.v)} r="4" /><text x={px(d65.u) + 8} y={py(d65.v) + 4}>D65</text></g>
+      <g class="gm-cursor" visibility="hidden"><line class="h" x1="0" x2={W} /><line class="v" y1="0" y2={H} /><circle r="5" /></g>
+    </svg>
+    <div class="gm-readout b-mono" aria-live="polite">Point at the diagram</div>
+  </div>
+  <div class="gm-side">
+    <span class="b-micro">Spaces</span>
+    <ul class="gm-keys">
+      {spaces.map((s) => (
+        <li>
+          <button type="button" class="gm-key" aria-pressed={on.includes(s.name) ? 'true' : 'false'} data-key={s.name} style={`--c:${s.colour}`}>
+            <i></i><span class="n">{s.name}</span><span class="b-mono pct">{s.visible.toFixed(1)}%</span>
+          </button>
+          {full && <p class="b-body k-note">{s.note}</p>}
+        </li>
+      ))}
+    </ul>
+    <p class="b-body gm-legend">% = share of the visible range (u′v′ area) inside the triangle.</p>
+    {full && (
+      <>
+        <span class="b-micro">Cameras</span>
+        <ul class="gm-keys">
+          {CAMERAS.map((c, i) => <li><button type="button" class="gm-key cam" aria-pressed="false" data-camkey={c.name} style={`--i:${i}`}><i></i><span class="n">{c.name}</span></button></li>)}
+        </ul>
+        <p class="b-body gm-legend">Each spectral light from 400 to 680 nm as the camera records it, through its fitted colour matrix (PIXL camera database v1). A 3 × 3 matrix can place a real light outside the visible range; PixlRGB keeps it as recorded.</p>
+      </>
+    )}
+  </div>
+</div>
+
+<script>
+  // Fill the visible range with its colours, and wire the keys and the readout.
+  function setup(root: HTMLElement) {
+    const d = JSON.parse(root.dataset.gamut!)
+    const { U0, U1, V0, V1, W, H } = d
+    const hull: [number, number][] = d.locus
+    const inPoly = (P: [number, number][], u: number, v: number) => {
+      let c = false
+      for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+        const [ui, vi] = P[i], [uj, vj] = P[j]
+        if (vi > v !== vj > v && u < ((uj - ui) * (v - vi)) / (vj - vi) + ui) c = !c
+      }
+      return c
+    }
+    // u'v' → xy → XYZ (Y = 1) → linear Display P3, desaturated into gamut, normalised, encoded.
+    const P3: number[][] = [[2.493497, -0.931384, -0.402711], [-0.829489, 1.762664, 0.023625], [0.035846, -0.076172, 0.956885]]
+    const SRGB: number[][] = [[3.240970, -1.537383, -0.498611], [-0.969244, 1.875968, 0.041555], [0.055630, -0.203977, 1.056972]]
+    const canvas = root.querySelector('canvas') as HTMLCanvasElement
+    let ctx: CanvasRenderingContext2D | null = null
+    let wide = false
+    try { ctx = canvas.getContext('2d', { colorSpace: 'display-p3' }) as CanvasRenderingContext2D; wide = !!ctx && (ctx.getContextAttributes?.().colorSpace === 'display-p3') } catch { ctx = null }
+    if (!ctx) ctx = canvas.getContext('2d')
+    if (ctx) {
+      const M = wide ? P3 : SRGB
+      const img = ctx.createImageData(W, H, wide ? { colorSpace: 'display-p3' } : undefined)
+      const enc = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055)
+      for (let j = 0; j < H; j++) {
+        const v = V1 - ((j + 0.5) / H) * (V1 - V0)
+        for (let i = 0; i < W; i++) {
+          const u = U0 + ((i + 0.5) / W) * (U1 - U0)
+          if (!inPoly(hull, u, v)) continue
+          const den = 6 * u - 16 * v + 12
+          const x = (9 * u) / den, y = (4 * v) / den
+          const X = x / y, Y = 1, Z = (1 - x - y) / y
+          let rgb = M.map((r) => r[0] * X + r[1] * Y + r[2] * Z)
+          const lo = Math.min(...rgb)
+          if (lo < 0) rgb = rgb.map((c) => c - lo)
+          const hi = Math.max(...rgb)
+          rgb = rgb.map((c) => enc(c / hi) * 0.92)
+          const k = (j * W + i) * 4
+          img.data[k] = rgb[0] * 255; img.data[k + 1] = rgb[1] * 255; img.data[k + 2] = rgb[2] * 255; img.data[k + 3] = 255
+        }
+      }
+      ctx.putImageData(img, 0, 0)
+    }
+    // keys
+    root.querySelectorAll<HTMLButtonElement>('.gm-key[data-key]').forEach((b) => b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-pressed') !== 'true'
+      b.setAttribute('aria-pressed', String(on))
+      root.querySelector(`.gm-space[data-space="${b.dataset.key}"]`)?.classList.toggle('off', !on)
+    }))
+    root.querySelectorAll<HTMLButtonElement>('.gm-key[data-camkey]').forEach((b) => b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-pressed') !== 'true'
+      b.setAttribute('aria-pressed', String(on))
+      root.querySelector(`.gm-cam[data-cam="${b.dataset.camkey}"]`)?.classList.toggle('show', on)
+    }))
+    // readout
+    const svg = root.querySelector('svg') as SVGSVGElement
+    const cur = root.querySelector('.gm-cursor') as SVGGElement
+    const out = root.querySelector('.gm-readout') as HTMLElement
+    const spaces: { name: string; uv: [number, number][] }[] = d.spaces
+    const move = (e: PointerEvent) => {
+      const r = svg.getBoundingClientRect()
+      const sx = ((e.clientX - r.left) / r.width) * W, sy = ((e.clientY - r.top) / r.height) * H
+      const u = U0 + (sx / W) * (U1 - U0), v = V1 - (sy / H) * (V1 - V0)
+      cur.setAttribute('visibility', 'visible')
+      cur.querySelector('.h')!.setAttribute('y1', String(sy)); cur.querySelector('.h')!.setAttribute('y2', String(sy))
+      cur.querySelector('.v')!.setAttribute('x1', String(sx)); cur.querySelector('.v')!.setAttribute('x2', String(sx))
+      cur.querySelector('circle')!.setAttribute('cx', String(sx)); cur.querySelector('circle')!.setAttribute('cy', String(sy))
+      const den = 6 * u - 16 * v + 12, x = (9 * u) / den, y = (4 * v) / den
+      const vis = inPoly(hull, u, v)
+      const held = spaces.filter((s) => inPoly(s.uv, u, v)).map((s) => s.name)
+      out.textContent = `u′ ${u.toFixed(3)} v′ ${v.toFixed(3)} · x ${x.toFixed(3)} y ${y.toFixed(3)} · ${vis ? 'a colour' : 'not a colour'} · in: ${held.length ? held.join(', ') : 'none'}`
+    }
+    svg.addEventListener('pointermove', move)
+    svg.addEventListener('pointerdown', move)
+    svg.addEventListener('pointerleave', () => cur.setAttribute('visibility', 'hidden'))
+  }
+  document.querySelectorAll<HTMLElement>('.gm[data-gamut]').forEach(setup)
+</script>
+
+<style>
+  .gm { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 36px; align-items: start; }
+  .gm-plot { position: relative; border: 1px solid var(--line); background: #050507; }
+  .gm-fill, .gm-svg { display: block; width: 100%; height: auto; }
+  .gm-svg { position: absolute; inset: 0; height: 100%; touch-action: none; cursor: crosshair; }
+  .gm-grid line { stroke: rgba(255, 255, 255, .06); stroke-width: 1; }
+  .gm-grid text { fill: #6e6a84; font: 11px 'JetBrains Mono', ui-monospace, monospace; }
+  .gm-grid .axis { fill: #b8b5c7; font-size: 14px; }
+  .gm-locus { fill: none; stroke: rgba(255, 255, 255, .55); stroke-width: 1.2; }
+  .gm-tick circle { fill: #ebe9f3; }
+  .gm-tick text { fill: #b8b5c7; font: 11px 'JetBrains Mono', ui-monospace, monospace; }
+  .gm-space path { fill: none; stroke: var(--c); stroke-width: 2; stroke-linejoin: round; filter: drop-shadow(0 0 2px rgba(0, 0, 0, .9)); transition: opacity .2s; }
+  .gm-space circle { fill: var(--c); stroke: #000; stroke-width: 1; }
+  .gm-space.pixl path { stroke-width: 2.6; stroke-dasharray: none; fill: rgba(255, 255, 255, .03); }
+  .gm-space.off { opacity: 0; pointer-events: none; }
+  .gm-cam { fill: none; stroke: hsl(calc(30 + var(--i) * 110) 90% 70%); stroke-width: 1.6; stroke-dasharray: 3 4; opacity: 0; transition: opacity .2s; }
+  .gm-cam.show { opacity: 1; }
+  .gm-white circle { fill: #fff; stroke: #000; }
+  .gm-white text { fill: #fff; font: 12px 'JetBrains Mono', ui-monospace, monospace; paint-order: stroke; stroke: #000; stroke-width: 3px; }
+  .gm-cursor line { stroke: rgba(255, 255, 255, .35); stroke-width: 1; }
+  .gm-cursor circle { fill: none; stroke: #fff; stroke-width: 1.5; }
+  .gm-readout { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 14px; font-size: 12.5px; color: #d6d2e6; background: linear-gradient(0deg, rgba(0, 0, 0, .85), rgba(0, 0, 0, .55)); pointer-events: none; }
+
+  .gm-side { display: flex; flex-direction: column; gap: 14px; }
+  .gm-side .b-micro { color: #bba9ff; }
+  .gm-keys { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .gm-key { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .02); color: var(--ink-3); font: 600 15px 'Space Grotesk', system-ui, sans-serif; text-align: left; cursor: pointer; }
+  .gm-key i { width: 14px; height: 3px; background: var(--c, hsl(calc(30 + var(--i) * 110) 90% 70%)); opacity: .35; }
+  .gm-key .pct { font-size: 12.5px; font-weight: 400; }
+  .gm-key[aria-pressed='true'] { color: var(--ink); border-color: rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .05); }
+  .gm-key[aria-pressed='true'] i { opacity: 1; }
+  .gm-key:focus-visible { outline: 2px solid #bba9ff; outline-offset: 2px; }
+  .k-note { margin: 4px 0 8px 26px; font-size: 13px; color: var(--ink-4); }
+  .gm-legend { margin: 0; font-size: 13px; color: var(--ink-4); }
+
+  @media (max-width: 1100px) {
+    .gm { grid-template-columns: minmax(0, 1fr); }
+    .gm-keys { flex-direction: row; flex-wrap: wrap; }
+    .gm-keys li { flex: 1 1 200px; }
+    .k-note { display: none; }
+  }
+</style>

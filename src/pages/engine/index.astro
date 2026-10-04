@@ -1,9 +1,13 @@
 ---
 // engine.pixlfoundation.com, after the Family Kit's EnWebsite board, with
-// every claim from pixl-engine's README (src/data/engine.ts).
+// every claim from pixl-engine's CLAUDE.md (src/data/engine.ts). The landing
+// page sells; /pixlrgb, /hdr and /codecs are the technical articles.
 import Base from '../../layouts/Base.astro'
 import '../../styles/engine.css'
 import Architecture from '../../components/engine/Architecture.astro'
+import GamutMap from '../../components/engine/GamutMap.astro'
+import LineChart, { type LineSeries } from '../../components/engine/charts/LineChart.astro'
+import { PHOTO_CURVES } from '../../data/codecs'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { BEYOND, BINDINGS, FORMATS, MEASURED, OPS, STATS } from '../../data/engine'
@@ -12,24 +16,34 @@ import { softwareApp } from '../../lib/seo'
 
 const contact = 'mailto:hello@pixlfoundation.com?subject=PIXL%20Engine'
 const fig = (f: string) => `/shared/engine/${f}`
+// Size for quality on the landing: AVIF's default tuning, its still-image
+// tuning (what PIXL recommends) and x265 HEIC, from docs/avif/*.csv.
+const codecSeries: LineSeries[] = PHOTO_CURVES.filter((c) => c.id !== 'psnr').map((c) => ({
+  label: c.id === 'iq' ? 'AVIF, Iq' : c.id === 'ssim' ? 'AVIF, default' : 'HEIC (x265)',
+  points: c.points.map((p) => [p[1] / 1e6, p[2]] as [number, number]),
+  tone: c.id === 'iq' ? 'accent' : c.id === 'ssim' ? 'muted' : 'light',
+  dash: c.id === 'x265' ? '5 4' : undefined,
+  labelAt: c.id === 'iq' ? { x: 3.2, y: 84, anchor: 'end' as const } : c.id === 'ssim' ? { x: 5.2, y: 76, anchor: 'start' as const } : undefined
+}))
 const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, '')
 ---
 
 <Base
   site="engine"
   title="PIXL Engine · One engine. Every pixel."
-  description="PIXL Engine is the Rust imaging core behind every PIXL app. It decodes, grades and re-encodes photographs, fast and colour-true, does exactly what it is asked, and reports what it did."
+  description="PIXL Engine is the Rust imaging core behind every PIXL app: its own open colour science (PixlRGB), one HDR master for every screen, and every modern format in and out, measured. It does exactly what it is asked, and reports what it did."
   nav={[
     { label: 'Architecture', to: '#architecture' },
-    { label: 'Apps', to: '#apps' },
-    { label: 'Badge', to: '#badge' },
+    { label: 'Colour', to: '#colour' },
+    { label: 'HDR', to: '#hdr' },
+    { label: 'Formats', to: '#formats' },
   ]}
   cta={{ label: 'Licensing', to: '#licensing' }}
   jsonLd={[
     softwareApp('engine', {
       category: 'DeveloperApplication',
       os: 'macOS, Windows',
-      description: 'PIXL Engine is a Rust imaging core that decodes, grades, corrects and re-encodes photographs, with on-device AI, and Node and Swift bindings.'
+      description: 'PIXL Engine is a Rust imaging core that develops, grades, corrects and re-encodes photographs in its own open working space, PixlRGB, renders one HDR master for every screen, and runs AI on the device, with Node bindings.'
     })
   ]}
 >
@@ -39,8 +53,8 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       <span class="b-chip">Imaging core · Rust</span>
       <h1 class="b-disp" id="hero-title">One engine.<br />Every pixel.</h1>
       <p class="b-body lede">
-        PIXL Engine decodes, grades and re-encodes photographs, fast and colour-true, with AI upscaling that runs on the
-        device. Every PIXL app is built on it.
+        PIXL Engine develops, grades and re-encodes photographs in its own colour science, carries HDR from the sensor
+        to every screen, and writes every modern format, measured against the standards. Every PIXL app is built on it.
       </p>
       <div class="ctas">
         <a class="b-cta en" href="#licensing">Talk about licensing</a>
@@ -64,8 +78,8 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
         <h2 class="b-disp h2" id="arch-title">Decoders in. One pipeline. Every app out.</h2>
       </div>
       <p class="b-body">
-        Proven open decoders at the edge, the engine's own grade pipeline in the middle, and each product a different
-        surface on the same core.
+        Proven decoders at the edge, read the way their makers render them. In the middle, PIXL's own pipeline: every
+        pixel in linear PixlRGB floats, one HDR master, one rounding. Each product is a different surface on the same core.
       </p>
     </div>
     <Architecture />
@@ -75,13 +89,13 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
     <ul class="pillars">
       <li>
         <div class="b-rule en"></div>
-        <h3 class="b-disp">Fast by construction</h3>
-        <p class="b-body">Rust on proven libraries: libjpeg-turbo, libjxl, libheif and rawler. A full live-preview render takes 75 ms on 28 cores.</p>
+        <h3 class="b-disp">Exact by construction</h3>
+        <p class="b-body">Rust, every parser fuzzed under AddressSanitizer, and the same bytes out at any thread count. A region of a photo renders as the whole photo, cut.</p>
       </li>
       <li>
         <div class="b-rule en"></div>
         <h3 class="b-disp">Colour you can trust</h3>
-        <p class="b-body">Real conversions through Little CMS, never a quiet re-label. RAW goes out as lossless DNG, so none of the sensor data is thrown away.</p>
+        <p class="b-body">Camera colour fitted from measured spectra, a working space that holds every colour, and real conversions, never a quiet re-label.</p>
       </li>
       <li>
         <div class="b-rule en"></div>
@@ -108,72 +122,184 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       </div>
       <figure class="receipt">
         <figcaption class="b-micro">convert() → report · abridged example</figcaption>
-        <pre class="b-mono"><span class="k">colour</span>  sRGB (source IccProfile, converted)
-        icc=true cicp=true
-<span class="k">loss</span>    16→8 bits, 1 rounding,
-        one float pass, dithered
+        <pre class="b-mono"><span class="k">master</span>  peak 575.7 cd/m² (+1.5 stops)
+        ceiling: peak · tone map v2
+<span class="k">colour</span>  Display P3 base + gain map
+        3 channels, −0.02..1.49 stops
 <span class="k">grade</span>   white balance 7000 K
         exposure +0.18 · highlights −0.5
+<span class="k">loss</span>    1 rounding, one float pass
 <span class="k">meta</span>    EXIF · ICC · XMP copied verbatim</pre>
-        <p class="b-mono refusal"><span class="k">refused</span> hdr → sdr: the source uses PQ. Name a tone-mapping operator and both peaks, or choose an HDR-capable format.</p>
+        <p class="b-mono refusal"><span class="k">refused</span> pixel.depth: 8-bit PixlRGB bands visibly. Write it at 10 bits or more, or convert to Display P3.</p>
       </figure>
     </div>
   </section>
 
-  <!-- ── what it does ─────────────────────────────────────────── -->
-  <div id="does">
-    <section class="wrap feature" aria-labelledby="d1">
-      <div class="copy">
-        <span class="b-micro">01 · Grading</span>
-        <h2 class="b-disp h2" id="d1">A colourist's toolkit, rounded once.</h2>
-        <p class="b-body">Each stage runs in the colour space it belongs in: white balance and exposure in linear light, the look on display values. However many operations you stack, the pixels are rounded once, at the end.</p>
-        <div class="b-rule en"></div>
+  <!-- ── 01 colour science ────────────────────────────────────── -->
+  <section class="wrap band show" id="colour" aria-labelledby="colour-title">
+    <div class="sec-head">
+      <div class="head-stack">
+        <span class="b-micro">01 · Colour science</span>
+        <h2 class="b-disp h2" id="colour-title">Colour, owned from the sensor to the screen.</h2>
       </div>
-      <figure class="figure"><img src={fig('grade.webp')} width="900" height="496" loading="lazy" decoding="async" alt="Before and after a colour grade: the same forest road, ungraded and then warmed with lifted shadows, pulled highlights, more contrast and more vibrance." /></figure>
-    </section>
-    <section class="wrap feature flip" aria-labelledby="d2">
+      <p class="b-body">
+        Most editors borrow their colour: a stock camera matrix, a working space built for something else. PIXL measured its
+        own, end to end, and published the space it works in as an open standard.
+      </p>
+    </div>
+    <div class="show-hero">
       <div class="copy">
-        <span class="b-micro">02 · Colour</span>
-        <h2 class="b-disp h2" id="d2">Converting isn't re-labelling.</h2>
-        <p class="b-body">A Display P3 photo can be tagged as sRGB or actually converted to it. They look alike until skin tones go grey. PIXL makes the caller say which, and reports which happened.</p>
-        <div class="b-rule en"></div>
+        <span class="b-micro">PixlRGB · open standard</span>
+        <h3 class="b-disp show-h3">A working space that holds every colour.</h3>
+        <p class="b-body">
+          PixlRGB is the smallest RGB triangle that encloses every colour the eye can see, and every colour of sRGB,
+          Display P3, Adobe RGB and Rec.2020. Every edit runs in it, so the saturated reds and cyans a camera records are
+          never clipped before you touch them. Point at the map to see which spaces hold a colour.
+        </p>
+        <ul class="show-facts">
+          <li><span class="b-mono">100%</span> of the visible range, in linear 32-bit float</li>
+          <li><span class="b-mono">6%</span> of its area spent on non-colours, against 33% for ACES AP0</li>
+          <li><span class="b-mono">CC BY-SA</span> specification and ICC profiles, free to implement</li>
+        </ul>
+        <a class="b-cta en" href="/pixlrgb/">Read the PixlRGB standard</a>
       </div>
-      <figure class="figure"><img src={fig('colour.webp')} width="900" height="366" loading="lazy" decoding="async" alt="A Display P3 photo written as sRGB two ways, re-tagged and properly converted, with the amplified difference between them." /></figure>
-    </section>
-    <section class="wrap feature" aria-labelledby="d3">
+      <GamutMap id="gamut-home" />
+    </div>
+    <ul class="show-cards">
+      <li>
+        <span class="b-mono big">46</span>
+        <h3 class="b-disp">Camera colour from measured spectra</h3>
+        <p class="b-body">Profiles fitted to each sensor's measured response under tungsten and daylight. Under tungsten they cut the colour error of the usual daylight matrix by a median 2.3 ΔE2000.</p>
+      </li>
+      <li>
+        <span class="b-mono big">0</span>
+        <h3 class="b-disp">Colours pushed off the map</h3>
+        <p class="b-body">Push saturation hard and a colour can leave the visible range. The guard brings it back to the edge with its hue and brightness kept, where a clip would turn it.</p>
+      </li>
+      <li>
+        <span class="b-mono big">1×</span>
+        <h3 class="b-disp">The same +30 in every hue</h3>
+        <p class="b-body">In classic HSL, +30 moves one hue 3.5 times as far as another. PIXL's perceptual HSL is calibrated per band in ICtCp, so +30 is the same visible step, red to magenta.</p>
+      </li>
+    </ul>
+    <div class="show-pair">
+      <figure class="figure"><img src={fig('grade.webp')} width="900" height="496" loading="lazy" decoding="async" alt="Before and after a colour grade: the same forest road, ungraded and then warmed with lifted shadows, pulled highlights, more contrast and more vibrance." />
+        <figcaption class="b-body"><strong>A colourist's toolkit, rounded once.</strong> Each stage runs in the space it belongs in, and however many you stack, the pixels are rounded once, at the end.</figcaption></figure>
+      <figure class="figure"><img src={fig('colour.webp')} width="900" height="366" loading="lazy" decoding="async" alt="A Display P3 photo written as sRGB two ways, re-tagged and properly converted, with the amplified difference between them." />
+        <figcaption class="b-body"><strong>Converting isn't re-labelling.</strong> A P3 photo can be tagged sRGB or converted to it. PIXL makes the app say which, and reports which happened.</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- ── 02 HDR ───────────────────────────────────────────────── -->
+  <section class="wrap band show" id="hdr" aria-labelledby="hdr-title">
+    <div class="sec-head">
+      <div class="head-stack">
+        <span class="b-micro">02 · HDR pipeline</span>
+        <h2 class="b-disp h2" id="hdr-title">One master. Every screen.</h2>
+      </div>
+      <p class="b-body">
+        One render in linear light keeps every highlight the photo holds. From it, PIXL writes HDR for screens that show it
+        and a matching picture for those that don't, from the same pixels.
+      </p>
+    </div>
+    <div class="show-hero flip">
+      <figure class="figure hdr-fig">
+        <picture>
+          <source srcset={fig('hdr/street-hdr.avif')} type="image/avif" />
+          <img src={fig('hdr/street-hdr.jpg')} width="1512" height="2016" loading="lazy" decoding="async" alt="A street at dusk under a pink sky, with a lit street lamp: an iPhone photo rendered by PIXL's master as a base picture with a gain map, so HDR displays show the sky and the lamp brighter than white." />
+        </picture>
+        <figcaption class="b-body">On an HDR display (Safari, Chrome, an iPhone) the highlights above glow brighter than the page's white: a gain-map AVIF written by PIXL's master. Elsewhere you see its standard picture.</figcaption>
+      </figure>
       <div class="copy">
-        <span class="b-micro">03 · RAW</span>
-        <h2 class="b-disp h2" id="d3">A sensor mosaic is not an image.</h2>
-        <p class="b-body">Turning a RAW into a picture is a series of choices, and PIXL leaves every one to the app. For archives, RAW to DNG is lossless and keeps the mosaic bit for bit.</p>
+        <span class="b-micro">Measured, not guessed</span>
+        <h3 class="b-disp show-h3">HDR that keeps its colour.</h3>
+        <p class="b-body">
+          The master measures each photo's own peak, holds it to the ceiling you choose, and tone maps for standard screens
+          along hue lines the eye agrees with: bright saturated colours roll gently toward white without turning.
+        </p>
+        <ul class="show-facts">
+          <li><span class="b-mono">≤ 0.18°</span> median hue shift in saturated highlights (a per-channel tone map: up to 19.8°)</li>
+          <li><span class="b-mono">0.04</span> stops: a gain-map file rebuilds the master, and never passes its ceiling</li>
+          <li><span class="b-mono">0.49 s</span> an HDR preview of a 24 MP edit, from the cached master</li>
+        </ul>
+        <a class="b-cta en" href="/hdr/">Inside the HDR pipeline</a>
+      </div>
+    </div>
+    <ul class="show-cards">
+      <li>
+        <span class="b-mono big">PQ · HLG</span>
+        <h3 class="b-disp">Every HDR format, from one flag</h3>
+        <p class="b-body">Rec.2100 PQ in JPEG XL and PNG, a base with an ISO 21496-1 gain map in AVIF and JPEG, or the 32-bit master itself. Switch headroom off and only the headroom goes.</p>
+      </li>
+      <li>
+        <span class="b-mono big">11 / 11</span>
+        <h3 class="b-disp">iPhone HDR, read like Apple</h3>
+        <p class="b-body">Held against Apple's own renders of eleven iPhone photos: the base within two 8-bit codes, the HDR within a mean of one 10-bit PQ code.</p>
+      </li>
+      <li>
+        <span class="b-mono big">1 : 1</span>
+        <h3 class="b-disp">The preview is the export</h3>
+        <p class="b-body">A render from the cached master is the render from the original, byte for byte, so an app can redraw a RAW edit without decoding it again.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── 03 encode / decode ───────────────────────────────────── -->
+  <section class="wrap band show" id="formats" aria-labelledby="fmt-title">
+    <div class="sec-head">
+      <div class="head-stack">
+        <span class="b-micro">03 · Encode and decode</span>
+        <h2 class="b-disp h2" id="fmt-title">Read exactly. Written smaller.</h2>
+      </div>
+      <p class="b-body">
+        Every file is decoded the way its makers render it, and written with every encoder setting stated. Sizes are
+        compared at equal measured quality, never at equal "quality numbers".
+      </p>
+    </div>
+    <div class="show-hero">
+      <div class="copy">
+        <span class="b-micro">AVIF · JPEG XL · RAW</span>
+        <h3 class="b-disp show-h3">Smaller isn't a guess.</h3>
+        <p class="b-body">
+          With AV1's still-image tuning, PIXL's AVIF is 7–13% smaller than the default tuning at the same perceived quality on
+          photographs, about the size of HEVC there, and 10–20% smaller than HEVC on graphics and HDR. JPEG XL repacks a JPEG
+          19% smaller and gives the original back to the byte.
+        </p>
+        <ul class="show-facts">
+          <li><span class="b-mono">−19%</span> JPEG → JPEG XL, reversible bit for bit</li>
+          <li><span class="b-mono">0.31 s</span> a CR2 to a lossless DNG, mosaic bit-identical</li>
+          <li><span class="b-mono">13</span> parsers fuzzed under AddressSanitizer</li>
+        </ul>
+        <a class="b-cta en" href="/codecs/">Inside the codecs</a>
+      </div>
+      <figure class="figure chart">
+        <LineChart
+          desc="File size against SSIMULACRA2 on a 24 MP photograph: AVIF with the still-image tuning reaches each score with a smaller file than AVIF's default tuning, about the size of x265 HEIC."
+          series={codecSeries}
+          x={{ domain: [0, 14], ticks: [0, 2, 4, 6, 8, 10, 12, 14], label: 'file size, MB' }}
+          y={{ domain: [55, 92], ticks: [60, 70, 80, 90], label: 'SSIMULACRA2 (higher is better)' }}
+          width={640}
+          height={420}
+        />
+        <figcaption class="b-body">A 24 MP photograph, 4:2:0, speed 6. Higher and further left is better. <a href="/codecs/#avif">How it was measured →</a></figcaption>
+      </figure>
+    </div>
+    <section class="feature flip" aria-labelledby="d3">
+      <div class="copy">
+        <span class="b-micro">RAW</span>
+        <h3 class="b-disp h2" id="d3">A sensor mosaic is not an image.</h3>
+        <p class="b-body">Turning a RAW into a picture is a series of choices, and PIXL leaves every one to the app: a scene-linear develop for editing into headroom, a display-ready one, or the camera's own preview. For archives, RAW to DNG is lossless and keeps the mosaic bit for bit, with PIXL's own DNG 1.7.1 reader and writer.</p>
         <div class="b-rule en"></div>
       </div>
       <figure class="figure"><img src={fig('raw.webp')} width="900" height="360" loading="lazy" decoding="async" alt="One Canon CR2 rendered three ways: developed in linear light, developed with the sRGB curve, and the camera's embedded preview." /></figure>
     </section>
-    <section class="wrap feature flip" aria-labelledby="d4">
-      <div class="copy">
-        <span class="b-micro">04 · Formats</span>
-        <h2 class="b-disp h2" id="d4">Smaller isn't a guess.</h2>
-        <p class="b-body">The same 8 MB JPEG is 68% smaller as AVIF and 20% bigger as HEIC. JPEG XL's repack is 19% smaller and reversible to the original byte.</p>
-        <div class="b-rule en"></div>
-      </div>
-      <figure class="figure chart"><img src={fig('sizes.svg')} width="900" height="452" loading="lazy" decoding="async" alt="One 8.04 MB JPEG re-encoded eight ways: AVIF 2.58 MB, WebP 3.26 MB, JPEG XL 5.53 MB, JPEG XL repack 6.55 MB, HEIC 9.66 MB, JPEG XL lossless 22.93 MB, PNG 38.70 MB, TIFF 56.06 MB." /></figure>
-    </section>
-    <section class="wrap feature" aria-labelledby="d5">
-      <div class="copy">
-        <span class="b-micro">05 · HDR</span>
-        <h2 class="b-disp h2" id="d5">HDR, handled on purpose.</h2>
-        <p class="b-body">HDR stays HDR in formats that can hold it. Bringing it down to a normal screen means naming a tone-mapping operator and both peaks. Nothing is a default, and nothing is invented.</p>
-        <div class="b-rule en"></div>
-      </div>
-      <figure class="figure chart"><img src={fig('tonemap.svg')} width="900" height="468" loading="lazy" decoding="async" alt="Measured transfer curves for four tone-mapping operators, Clip, BT.2390, Reinhard and Hable, plotting scene luminance against output code value." /></figure>
-    </section>
-  </div>
+  </section>
 
   <!-- ── capabilities + measured ──────────────────────────────── -->
   <section class="wrap band" aria-labelledby="cap-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="cap-title">Everything an editor needs.</h2>
-      <p class="b-body">Every modern format in and out, and a full grading toolkit, with metadata copied verbatim and never "fixed".</p>
+      <p class="b-body">Every modern format in and out, a full grading toolkit, lens and retouch tools and on-device AI, with metadata copied verbatim and never "fixed".</p>
     </div>
     <div class="caps">
       <div>
@@ -194,7 +320,7 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
   <section class="wrap band" id="measured" aria-labelledby="m-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="m-title">Measured, not claimed.</h2>
-      <p class="b-body">Real files, real conversions, on an Apple M2 Pro. Nothing here is copied from a datasheet.</p>
+      <p class="b-body">Real files, real conversions, on an Intel i7-14700F with 8 threads. Nothing here is copied from a datasheet.</p>
     </div>
     <table class="measured">
       <caption class="sr-only">Conversion times and sizes</caption>
@@ -214,7 +340,7 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
         <Mark kind="playroom" size={150} glow />
         <div>
           <Wordmark site="playroom" size={20} />
-          <p class="b-body">A RAW developer you buy once. Uses the whole engine: decode, grade, export, upscale.</p>
+          <p class="b-body">A RAW developer you buy once. Uses the whole engine: develop, grade, HDR export, AI tools.</p>
           <span class="b-mono">{domain('playroom')}</span>
         </div>
       </a>
@@ -259,13 +385,13 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       </li>
       <li>
         <h3 class="b-disp">App makers</h3>
-        <p class="b-body">Ship on a core that already carries two apps, from Swift, Kotlin or Node, and say so with the badge.</p>
+        <p class="b-body">Ship on a core that already carries two apps, from Rust or Node and Electron, and say so with the badge.</p>
         <a class="b-micro go" href="#badge">Get the badge →</a>
       </li>
       <li>
         <h3 class="b-disp">Engineers</h3>
-        <p class="b-body">Thirteen calls, one rounding, and a report for every conversion: how the pieces fit together.</p>
-        <a class="b-micro go" href="#architecture">Read the architecture →</a>
+        <p class="b-body">One working space, one master, one rounding, and a report for every conversion. The deep dives show the numbers.</p>
+        <a class="b-micro go" href="/pixlrgb/">Read the colour science →</a>
       </li>
     </ul>
   </section>

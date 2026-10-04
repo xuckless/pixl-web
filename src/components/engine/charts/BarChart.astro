@@ -1,0 +1,99 @@
+---
+// A horizontal bar chart on the engine site's theme. A bar is a value (from
+// zero) or a range (from–to, for a "between a and b" measurement); rows can
+// hold several bars, one per series, labelled inline.
+import { CHART, TONE, tickLabel, tickValue, type Tick, type Tone } from './theme'
+
+export interface Bar {
+  /** A bar from zero to `value` … */
+  value?: number
+  /** … or a range, `from` to `to`. */
+  from?: number
+  to?: number
+  tone: Tone
+  /** The label inside the row (e.g. the series name). */
+  name?: string
+  /** The number printed after the bar; defaults to the value or "from–to". */
+  text?: string
+}
+
+export interface BarRow {
+  label: string
+  /** A second line under the label, smaller. */
+  sub?: string
+  bars: Bar[]
+}
+
+interface Props {
+  title?: string
+  desc: string
+  rows: BarRow[]
+  domain: [number, number]
+  ticks: Tick[]
+  axisLabel?: string
+  width?: number
+  /** Space for the row labels on the left. */
+  labelWidth?: number
+  barHeight?: number
+}
+
+const { title, desc, rows, domain, ticks, axisLabel, width = 760, labelWidth = 170, barHeight = 14 } = Astro.props
+const gap = 6
+const rowGap = 22
+const top = title ? 58 : 26
+const M = { l: labelWidth, r: 96 }
+const px = (v: number) => M.l + ((v - domain[0]) / (domain[1] - domain[0])) * (width - M.l - M.r)
+let yAt = top
+const laid = rows.map((r) => {
+  const h = r.bars.length * barHeight + (r.bars.length - 1) * gap
+  const y0 = yAt
+  yAt += Math.max(h, r.sub ? 34 : 18) + rowGap
+  return {
+    ...r,
+    y0,
+    h,
+    bars: r.bars.map((b, i) => {
+      const a = b.value !== undefined ? domain[0] : (b.from ?? domain[0])
+      const z = b.value !== undefined ? b.value : (b.to ?? a)
+      const x0 = px(Math.max(a, domain[0]))
+      const x1 = Math.max(px(Math.min(z, domain[1])), x0 + 2)
+      const text = b.text ?? (b.value !== undefined ? String(b.value) : `${b.from}–${b.to}`)
+      return { ...b, x0, x1, y: y0 + i * (barHeight + gap), text, fill: TONE[b.tone] }
+    })
+  }
+})
+const plotBottom = yAt - rowGap + 8
+const height = plotBottom + (axisLabel ? 52 : 32)
+const id = `bc-${Math.abs([...desc].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)).toString(36)}`
+---
+
+<svg class="chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-t ${id}-d`}>
+  <title id={`${id}-t`}>{title ?? desc}</title>
+  <desc id={`${id}-d`}>{desc}</desc>
+  <rect width={width} height={height} fill={CHART.panel} />
+  {title && <text x="24" y="32" fill={CHART.value} font-family={CHART.label} font-size="15" font-weight="600">{title}</text>}
+  {ticks.map((t) => (
+    <g>
+      <line x1={px(tickValue(t))} x2={px(tickValue(t))} y1={top - 8} y2={plotBottom} stroke={CHART.grid} />
+      <text x={px(tickValue(t))} y={plotBottom + 18} fill={CHART.axis} font-family={CHART.number} font-size="11" text-anchor="middle">{tickLabel(t)}</text>
+    </g>
+  ))}
+  {axisLabel && <text x={(M.l + width - M.r) / 2} y={height - 14} fill={CHART.axis} font-family={CHART.label} font-size="12" text-anchor="middle">{axisLabel}</text>}
+  {laid.map((r) => (
+    <g>
+      <text x="24" y={r.y0 + 11} fill={CHART.value} font-family={CHART.label} font-size="13" font-weight="600">{r.label}</text>
+      {r.sub && <text x="24" y={r.y0 + 28} fill={CHART.axis} font-family={CHART.caption} font-size="11">{r.sub}</text>}
+      {r.bars.map((b) => (
+        <g>
+          <rect x={b.x0} y={b.y} width={b.x1 - b.x0} height={barHeight} fill={b.fill} />
+          {b.name && <text x={M.l - 10} y={b.y + barHeight - 3} fill={CHART.axis} font-family={CHART.label} font-size="11" text-anchor="end">{b.name}</text>}
+          <text x={b.x1 + 8} y={b.y + barHeight - 3} fill={b.tone === 'accent' || b.tone === 'highlight' ? b.fill : CHART.value} font-family={CHART.number} font-size="11">{b.text}</text>
+        </g>
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  svg.chart { display: block; width: 100%; height: auto; background: #050507; border: 1px solid rgba(255, 255, 255, .08); border-radius: 0; }
+</style>

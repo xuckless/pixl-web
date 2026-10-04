@@ -1,22 +1,23 @@
 ---
 // PIXL Engine's architecture, after the Family Kit's EnDiagram board: proven
-// decoders in, the engine's one pipeline in the middle, the apps out. Facts
-// from pixl-engine's README ("What it's built on", "The pipeline").
+// decoders in, the engine's one float pipeline in PixlRGB in the middle, the
+// apps out. Facts from pixl-engine's CLAUDE.md (format matrix, the master).
 import Mark from '../brand/Mark.astro'
 
 const INPUTS = [
-  { name: 'Camera RAW', lib: 'rawler' },
-  { name: 'JPEG XL', lib: 'libjxl' },
-  { name: 'HEIF / HEIC · AVIF', lib: 'libheif' }
+  { name: 'Camera RAW · DNG', lib: 'LibRaw 0.22 · PIXL DNG 1.7.1 reader' },
+  { name: 'HEIC · AVIF', lib: 'libheif · PIXL’s own chroma, Apple-exact' },
+  { name: 'JPEG XL · JPEG · PNG', lib: 'libjxl · libjpeg-turbo · TIFF, WebP' }
 ]
 const STAGES = [
-  { n: '1 · Decode', text: 'Formats in, into a working colour space' },
-  { n: '2 · Process', text: 'Lens, retouch, tone, colour, masks and layered grades' },
-  { n: '3 · Encode', text: 'DNG, TIFF, JPEG XL, AVIF, HEIC, WebP, PNG, JPEG' }
+  { n: '1 · Develop', text: 'Decode, PIXL camera colour, into linear PixlRGB floats' },
+  { n: '2 · Edit', text: 'Lens, retouch, layered grades and masks, guarded' },
+  { n: '3 · Master', text: 'One HDR master: peak, ceiling, tone map, gamut' },
+  { n: '4 · Encode', text: 'AVIF, JPEG XL, JPEG, PNG, TIFF, WebP, DNG' }
 ]
 ---
 
-<div class="arch" role="img" aria-label="Decoders for RAW, JPEG XL and HEIF feed PIXL Engine's decode, grade and encode pipeline, which Pixl Playroom and Space Pixl are built on.">
+<div class="arch" role="img" aria-label="Decoders for RAW and DNG, HEIC and AVIF, JPEG XL, JPEG and PNG feed PIXL Engine's pipeline: develop into linear PixlRGB, edit, one HDR master, encode. Pixl Playroom and Space Pixl are built on it.">
   <div class="arch-col">
     <span class="b-micro">In</span>
     {INPUTS.map((i) => <div class="arch-in"><span class="name">{i.name}</span><span class="b-mono">{i.lib}</span></div>)}
@@ -27,16 +28,17 @@ const STAGES = [
       <Mark kind="engine" size={64} glow />
       <div>
         <span class="b-wm en">PIXL <em>ENGINE</em></span>
-        <span class="b-mono">Rust · Node and Swift bindings</span>
+        <span class="b-mono">Rust · Node and Electron bindings</span>
       </div>
     </div>
     <div class="arch-stages">
-      {STAGES.map((s, i) => <div class:list={['stage', { hot: i === 1 }]}><span class="b-micro">{s.n}</span><span class="b-body">{s.text}</span></div>)}
+      {STAGES.map((s, i) => <div class:list={['stage', { hot: i === 0 || i === 2 }]}><span class="b-micro">{s.n}</span><span class="b-body">{s.text}</span></div>)}
     </div>
-    <p class="b-body arch-note">One convert() call runs the whole pipeline, and rounds the pixels to integers once, at the end.</p>
+    <p class="b-body arch-note">One convert() call runs the whole pipeline in 32-bit float, the same at any thread count, and rounds the pixels to integers once, at the end.</p>
     <div class="arch-extras">
-      <div><span class="name">On-device AI</span><span class="b-mono">ONNX Runtime · CPU, CoreML, CUDA, DirectML</span></div>
-      <div><span class="name">Colour management</span><span class="b-mono">Little CMS · ICC and CICP</span></div>
+      <div><span class="name">Colour</span><span class="b-mono">PixlRGB · ICtCp · Little CMS, ICC and CICP</span></div>
+      <div><span class="name">HDR</span><span class="b-mono">PQ · HLG · ISO 21496-1 gain maps</span></div>
+      <div><span class="name">AI</span><span class="b-mono">ONNX Runtime · CPU, CoreML, CUDA, DirectML</span></div>
     </div>
   </div>
   <div class="arch-links out" aria-hidden="true"><i></i><i></i><i class="dash"></i></div>
@@ -84,14 +86,16 @@ const STAGES = [
   .arch-head > div { display: flex; flex-direction: column; gap: 8px; }
   .arch-head .b-wm { font-size: 19px; }
   .arch-head .b-mono { font-size: 13px; color: var(--ink-3); }
-  .arch-stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .stage { padding: 16px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(0, 0, 0, .35); display: flex; flex-direction: column; gap: 8px; }
+  .arch-stages { display: flex; flex-direction: column; gap: 8px; }
+  .stage { padding: 13px 16px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(0, 0, 0, .35); display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+  .stage .b-micro { white-space: nowrap; }
   .stage.hot { border-color: rgba(187, 169, 255, .45); background: rgba(23, 18, 43, .6); }
   .stage .b-micro { color: #bba9ff; }
   .stage .b-body { font-size: 14px; color: var(--ink-2); }
   .arch-note { margin: -8px 0 0; font-size: 14px; color: var(--ink-3); }
-  .arch-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: auto; }
-  .arch-extras > div { padding: 14px 16px; border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 6px; }
+  .arch-extras { display: flex; flex-direction: column; gap: 0; margin-top: auto; border: 1px solid rgba(255, 255, 255, .1); }
+  .arch-extras > div { padding: 11px 16px; display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+  .arch-extras > div + div { border-top: 1px solid rgba(255, 255, 255, .08); }
   .arch-extras .name { font-size: 16px; }
   .arch-extras .b-mono { font-size: 12px; color: var(--ink-3); }
 
@@ -103,7 +107,8 @@ const STAGES = [
     .arch-in, .arch-app { min-height: 84px; }
   }
   @media (max-width: 760px) {
-    .arch-col, .arch-stages, .arch-extras { grid-template-columns: minmax(0, 1fr); }
+    .arch-col { grid-template-columns: minmax(0, 1fr); }
+    .stage, .arch-extras > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
     .arch-core { padding: 24px 20px; }
   }
 </style>

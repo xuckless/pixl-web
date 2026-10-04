@@ -1,0 +1,287 @@
+---
+// engine.pixlfoundation.com/pixlrgb: PixlRGB, PIXL's open working space, and
+// the colour science around it. Every figure is from pixl-engine's
+// docs/pixlrgb/README.md (the specification, CC BY-SA 4.0) and CLAUDE.md
+// (PixlRGB, the guard, the camera's colour, PIXL's camera database).
+import Article from '../../../layouts/Article.astro'
+import GamutMap from '../../../components/engine/GamutMap.astro'
+import { SPACES } from '../../../data/colour'
+import { origin } from '../../../lib/links'
+
+const page = `${origin('engine')}/pixlrgb/`
+const icc = (f: string) => `/pixlrgb/${f}`
+const toc: [string, string][] = [
+  ['what', 'What PixlRGB is'],
+  ['map', 'The gamut map'],
+  ['why', 'Why the working space matters'],
+  ['definition', 'The definition'],
+  ['chosen', 'How the primaries were chosen'],
+  ['bits', 'Ten bits or more'],
+  ['guard', 'Outside the visible range'],
+  ['cameras', 'From the sensor in'],
+  ['out', 'To every screen out'],
+  ['matrices', 'Matrices for implementers'],
+  ['use', 'Download and use'],
+  ['sources', 'Sources and method'],
+]
+const shown = SPACES.filter((s) => s.name !== 'ACES AP0')
+---
+
+<Article
+  title="PixlRGB · an open working space that holds every colour · PIXL Engine"
+  description="PixlRGB is PIXL's open RGB working space: the smallest triangle in CIE 1976 u′v′ that holds every visible colour and the primaries of sRGB, Display P3, Adobe RGB and Rec.2020. Specification, derivation and ICC profiles under CC BY-SA 4.0."
+  path="/pixlrgb/"
+  kicker="Colour science · Open standard"
+  heading="PixlRGB"
+  lede="A linear RGB working space whose primaries hold every colour there is. Every camera colour and every colour of every standard space is a positive number in it, so an edit sees all of a photograph, and nothing is clipped until PIXL says where. The specification and its ICC profiles are open, under CC BY-SA 4.0."
+  toc={toc}
+  jsonLd={[{ '@context': 'https://schema.org', '@type': 'TechArticle', headline: 'PixlRGB: an open working space that holds every colour', url: page, inLanguage: 'en', datePublished: '2026-10-04', license: 'https://creativecommons.org/licenses/by-sa/4.0/', author: { '@type': 'Organization', name: 'PIXL Foundation' }, about: ['color space', 'CIE 1976 UCS', 'ICC profile', 'wide gamut'] }]}
+>
+  <section id="what">
+    <h2>What PixlRGB is</h2>
+    <p>
+      Every image editor computes in some RGB space. Choose a small one (sRGB, Display P3) and the colours a camera
+      records beyond it are clipped the moment the file is opened. Choose a large one built for film (ACES AP0) and a
+      third of its codes describe light that cannot exist. PixlRGB is the answer PIXL measured its way to:
+      <strong>the smallest triangle that holds the whole visible range</strong>, with D65 white, in linear light.
+    </p>
+    <ul class="art-figs">
+      <li><span class="b-mono">100%</span><span class="b-body">of the visible range inside, and every primary of sRGB, Display P3, Adobe RGB and Rec.2020</span></li>
+      <li><span class="b-mono">6.17%</span><span class="b-body">of its u′v′ area is not a colour (ACES AP0: 32.7%; ProPhoto, which misses colours too: 11.9%)</span></li>
+      <li><span class="b-mono">32-bit float</span><span class="b-body">in PIXL's master, linear, 1.0 at 203 cd/m², light above white kept</span></li>
+    </ul>
+    <p>
+      PixlRGB is an open standard. Its primaries, its derivation and both ICC profiles are published under the
+      Creative Commons Attribution-ShareAlike 4.0 licence. Anyone can implement it, embed the profiles, or check
+      the numbers. PIXL Engine itself remains closed source.
+    </p>
+  </section>
+
+  <section id="map">
+    <h2>The gamut map</h2>
+    <p>
+      The CIE 1976 u′v′ diagram spaces colours so that equal distances are closer to equal differences to the eye
+      than the older xy diagram. The curved edge is the spectral locus, every pure wavelength from 380 to 700 nm; the
+      straight edge closing it is the purple line. Everything a human can see is inside. Turn spaces on and off, and
+      point anywhere to read the coordinates and which spaces hold that colour.
+    </p>
+    <GamutMap id="gamut-full" full on={['sRGB', 'Display P3', 'Rec.2020', 'ProPhoto RGB', 'PixlRGB']} />
+    <p class="gm-after">
+      PixlRGB's green and blue corners lie outside the diagram. That is not a defect: no three real colours can
+      enclose the curved locus, so any space that holds every colour needs at least two primaries that are not
+      colours themselves. What matters is how little room those take, and PixlRGB takes the least of any triangle
+      that does the job.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Space</th><th class="num">Visible range held</th><th class="num">Area that is not a colour</th><th>White</th><th>Used for</th></tr></thead>
+        <tbody>
+          {SPACES.map((s) => <tr><td><strong>{s.name}</strong></td><td class="num">{s.visible.toFixed(1)}%</td><td class="num">{s.notColour.toFixed(1)}%</td><td>{s.white}</td><td>{s.note}</td></tr>)}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="why">
+    <h2>Why the working space matters</h2>
+    <p>
+      For some edits it does not. White balance, exposure, saturation and contrast about a grey, done in linear light
+      with true luminance, give the same result in any linear space with the same white: PIXL measured PixlRGB against
+      its previous Rec.2020 working space and found these within one 16-bit code. Everything that acts on the channels
+      one at a time is different: per-channel curves and gamma, a red-only gain, CDL per channel, the channel mixer, HSL
+      bands. Those see "red", "green" and "blue", and which red, green and blue depends entirely on the primaries.
+    </p>
+    <p>
+      In a narrow space, a colour outside it arrives as a negative channel, and the first such operation clips it,
+      turning its hue. In PixlRGB a real colour never has a negative channel, so a per-channel edit works on the colour
+      the camera saw. The edges are also where the eye is least forgiving: the saturated reds of tail lights, the
+      cyans of tropical water, the violets of flowers.
+    </p>
+  </section>
+
+  <section id="definition">
+    <h2>The definition</h2>
+    <p>The primaries and the white, as CIE 1931 xy chromaticities, are the definition. Everything else is derived from them.</p>
+    <table>
+      <thead><tr><th></th><th class="num">x</th><th class="num">y</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Red</strong></td><td class="num">0.7360</td><td class="num">0.2644</td></tr>
+        <tr><td><strong>Green</strong></td><td class="num">−0.3256</td><td class="num">1.3204</td></tr>
+        <tr><td><strong>Blue</strong></td><td class="num">0.1414</td><td class="num">−0.0105</td></tr>
+        <tr><td><strong>White (D65)</strong></td><td class="num">0.3127</td><td class="num">0.3290</td></tr>
+      </tbody>
+    </table>
+    <h3>Two forms</h3>
+    <ul>
+      <li><strong>Linear.</strong> <code>R</code>, <code>G</code> and <code>B</code> are proportional to light; <code>(1, 1, 1)</code> is white, and values above 1 are light above white, kept. This is the form PIXL computes in, as 32-bit floats.</li>
+      <li><strong>Integer.</strong> <code>V = L^(1/γ)</code> for <code>0 ≤ L ≤ 1</code>, a pure power with no linear segment, with <code>γ = 144179/65536 = 2.19999695</code>, the s15.16 number nearest 2.2 that an ICC profile can hold. For standard-dynamic-range files at 10 bits or more. Light above white has no integer form; content with headroom is stored as linear floats.</li>
+    </ul>
+    <p>
+      <strong>Luminance</strong> is <code>Y = 0.33774 R + 0.67539 G − 0.01313 B</code>. Blue's weight is negative,
+      because the blue primary sits below the diagram. A real colour's luminance is never negative; a value pushed
+      outside the visible range can have one, which is one of the ways PIXL tells the two apart.
+    </p>
+  </section>
+
+  <section id="chosen">
+    <h2>How the primaries were chosen</h2>
+    <ol>
+      <li><strong>The visible range</strong> is the convex hull, in xy, of every wavelength of the CIE 1931 2° observer from 360 to 830 nm at 1 nm. Any mixture of spectral lights lies on a chord between two of them.</li>
+      <li><strong>The standard primaries join it.</strong> Display P3's red (0.680, 0.320) and Rec.2020's (0.708, 0.292) have <code>x + y = 1</code>, so <code>Z = 0</code>, which no light has: they sit just outside the visible range (by 1.15 × 10⁻⁴ and 3.9 × 10⁻⁵). Holding them anyway makes every colour of every standard space positive in PixlRGB.</li>
+      <li><strong>The triangle of least area</strong> that holds all of these, measured in u′v′, where equal areas are closer to equally many colours. Each side of such a triangle touches the hull, so a triangle is three directions: every triple on a 1° grid was scored, and the best eight refined by Nelder–Mead. They agree on the least area to 1.5 × 10⁻⁷ of it.</li>
+      <li><strong>Rounded outward</strong> to four decimals, keeping the smallest u′v′ area that still holds every point.</li>
+    </ol>
+    <p class="note">The result holds the visible range and the standard primaries with a margin of 4.5 × 10⁻⁶ in xy. Five candidate triangles were drawn and compared before this one was chosen; the derivation reproduces the numbers above from the CIE's data.</p>
+  </section>
+
+  <section id="bits">
+    <h2>Ten bits or more</h2>
+    <p>
+      A space this wide spends codes on colours no picture holds, so its integer steps are larger than a display
+      space's. PIXL measured the largest step between neighbouring codes on smooth ramps, in ΔE2000 (1 is roughly the
+      smallest difference an observer sees side by side):
+    </p>
+    <table>
+      <thead><tr><th>Bits</th><th class="num">Sky</th><th class="num">Skin</th><th class="num">Neutral</th><th class="num">Display P3 sky / skin</th></tr></thead>
+      <tbody>
+        <tr><td>8</td><td class="num">1.38</td><td class="num">1.39</td><td class="num">0.41</td><td class="num">0.71 / 0.78</td></tr>
+        <tr><td>10</td><td class="num">0.34</td><td class="num">0.34</td><td class="num">0.10</td><td class="num">0.18 / 0.19</td></tr>
+        <tr><td>12</td><td class="num">0.086</td><td class="num">0.086</td><td class="num">0.026</td><td class="num">0.044 / 0.048</td></tr>
+        <tr><td>16</td><td class="num">0.0054</td><td class="num">0.0054</td><td class="num">0.0027</td><td class="num">0.0028 / 0.0030</td></tr>
+      </tbody>
+    </table>
+    <p>
+      At 8 bits a gradient would band visibly, so PIXL refuses to write an 8-bit PixlRGB file it computed (the request
+      names <code>pixel.depth</code> as the field to change), and writes 10, 12 and 16-bit AVIF, PNG, TIFF and JPEG XL.
+      A file that is only copied keeps the bits it had.
+    </p>
+  </section>
+
+  <section id="guard">
+    <h2>Outside the visible range</h2>
+    <p>
+      A space that holds every colour also holds values that are not colours. A strong edit can push a pixel there:
+      double the saturation of a neon sign and its red may leave the locus. PIXL's master runs a <strong>guard</strong>
+      after every grade stage: a pixel that was a colour before the step and is not after it is pulled back onto the
+      edge of the visible range, along its line from white, so its dominant wavelength is kept, and with its luminance
+      kept. What was outside before a step (a camera's own estimate, below) is left exactly as it was.
+    </p>
+    <ul class="art-figs">
+      <li><span class="b-mono">29.8%</span><span class="b-body">of a photo pulled back after saturation ×2, where a plain clip would turn hues</span></li>
+      <li><span class="b-mono">0.86</span><span class="b-body">mean ΔE2000 of the result against no guard (p99 5.2); lightness moves at most 2.6</span></li>
+      <li><span class="b-mono">0</span><span class="b-body">pixels moved by saturation ×0.5, or by any edit that keeps colours inside</span></li>
+    </ul>
+    <p>
+      A pixel that is positive in Rec.2020 is accepted without a test (Rec.2020's primaries are among the range's
+      vertices), and real colours within 10⁻⁵ of the edge count as inside, so an unedited photograph keeps every bit.
+    </p>
+  </section>
+
+  <section id="cameras">
+    <h2>From the sensor in</h2>
+    <p>
+      A raw file holds what the sensor's three filters measured, which is not a colour space. Turning it into colour
+      takes a camera profile, and most software uses one 3 × 3 matrix per camera, made for daylight. PIXL fits its own,
+      from measured spectral sensitivities.
+    </p>
+    <ul>
+      <li><strong>The data.</strong> 52 cameras' sensitivities (rawtoaces-data, Academy Software Foundation), 190 training reflectances, and the CIE's daylight, LED and fluorescent illuminants.</li>
+      <li><strong>The fit.</strong> A forward matrix per light, minimising mean CIEDE2000 against the reflectances' true colours, with the white held exactly; the colour matrix is derived from it so the two agree at the light's white. Lights: tungsten (A) and daylight (D65), and for 24 cameras a third, fluorescent.</li>
+      <li><strong>The bar</strong> a camera must clear to be held: mean ΔE2000 ≤ 2 on held-out patches under tungsten and under daylight, p95 ≤ 4 under daylight, and never worse than the matrix it replaces under any of eight lights.</li>
+    </ul>
+    <ul class="art-figs">
+      <li><span class="b-mono">46 / 52</span><span class="b-body">cameras clear the bar and are in PIXL's camera database v1</span></li>
+      <li><span class="b-mono">−2.31</span><span class="b-body">ΔE2000, median gain under tungsten over the common Adobe-derived matrix</span></li>
+      <li><span class="b-mono">−1.07</span><span class="b-body">ΔE2000, median gain under daylight</span></li>
+    </ul>
+    <p>
+      The white a profile finds matters as much. On a chart under lights of known colour, PIXL's profiles find
+      tungsten's and daylight's own white exactly; the Adobe-derived matrices miss by 0.014–0.025 in xy, 10–18% warm in
+      kelvin. Every database version is frozen once published and checked by its hash, so a camera's colour never
+      changes under a user's feet.
+    </p>
+    <p>
+      A 3 × 3 matrix is an estimate: turn on a camera in <a href="#map">the map</a> and you can see each one record
+      some spectral lights outside the visible range. Measured through the fitted profiles, every training patch lies
+      inside under daylight; under tungsten one deep red lies outside on all 52 cameras, by up to 0.018 in xy. PixlRGB
+      keeps such a value exactly as the camera gave it; that is what a working space that is wide enough is for.
+    </p>
+  </section>
+
+  <section id="out">
+    <h2>To every screen out</h2>
+    <p>
+      Nothing leaves PixlRGB by accident. Outputs are made by a conversion PIXL states in its report: Display P3 for
+      standard pictures, Rec.2020 for PQ and HLG (whose signals are defined in Rec.2020's primaries), linear PixlRGB for
+      floating-point masters, or PixlRGB itself in its integer form.
+    </p>
+    <ul>
+      <li><strong>Gamut compression, in ICtCp.</strong> A colour beyond the output's primaries is eased toward its edge along its own hue line in ICtCp (a perceptual space made for HDR), only when the picture needs it, with a soft zone just inside the edge so nothing kinks. On a photo with saturation doubled, hue in ICtCp moved a median 0.00° (p95 0.01°) against a per-channel clip's 0.23° (p95 0.70°). Bright colours inside the gamut are left alone.</li>
+      <li><strong>A perceptual HSL.</strong> "+30 saturation" in classic HSL moves an sRGB red, a green and a blue by very different amounts: 2.3 to 7.9 ΔE2000, a 3.5× spread, and 6.3× in a linear space. PIXL's perceptual HSL works in ICtCp and is calibrated per band, so +30 is the same visual step, 4.19 ΔE2000, in every one of its eight bands. The classic HSL stays available for presets that depend on it.</li>
+    </ul>
+  </section>
+
+  <section id="matrices">
+    <h2>Matrices for implementers</h2>
+    <p>Computed from the definition in exact arithmetic, rounded to ten decimals. Where they and the chromaticities disagree in the last place, the chromaticities are right.</p>
+    <pre><code>Linear PixlRGB → CIE XYZ (D65, Y = 1)
+⎡ 0.9401642213  −0.1665451578   0.1768368635⎤
+⎢ 0.3377437773   0.6753876729  −0.0131314503⎥
+⎣−0.0005109588   0.0026598121   1.0869088975⎦
+
+CIE XYZ → linear PixlRGB
+⎡ 0.9768075112   0.2414872446  −0.1560061742⎤
+⎢−0.4884438167   1.3598071400   0.0958968251⎥
+⎣ 0.0016544875  −0.0032141070   0.9197322996⎦
+
+Linear Rec.2020 → linear PixlRGB (every entry positive)
+⎡ 0.6856241563   0.3006112504   0.0137645934⎤
+⎢ 0.0461034038   0.8540014684   0.0998951279⎥
+⎣ 0.0002094925   0.0238794711   0.9759110364⎦</code></pre>
+    <p>
+      <strong>The integer form uses its profile's numbers.</strong> Under a pure power the curve is steep near black,
+      and the s15.16 rounding of the colorants alone would move a dark channel by up to 30 16-bit codes. So an
+      implementation of the integer form computes with the colorants <code>PixlRGB.icc</code> states (listed in the
+      specification), and a reader of the profile lands on PIXL's samples exactly.
+    </p>
+  </section>
+
+  <section id="use">
+    <h2>Download and use</h2>
+    <ul>
+      <li><a href={icc('PixlRGB.icc')} download><strong>PixlRGB.icc</strong></a>, the integer form: ICC v4 matrix/TRC, pure power γ 144179/65536, D50 connection space with the Bradford adaptation from D65 in its <code>chad</code> tag. 948 bytes. SHA-256 <code class="hash">5fd7896a024c48b11d3c3a65ff1c81491efd44f7e53e4bda87f2dc116616641b</code>.</li>
+      <li><a href={icc('PixlRGB-linear.icc')} download><strong>PixlRGB-linear.icc</strong></a>, the linear form. 960 bytes. SHA-256 <code class="hash">bb166ac6637986ad306725ae490591b968d6623d1673c597cdc3ca34ddf7d344</code>.</li>
+      <li><a href={icc('NOTICE.txt')}>NOTICE.txt</a>, the attribution to carry.</li>
+    </ul>
+    <p>
+      Neither profile has a <code>chrm</code> tag: its numbers cannot be negative. No CICP code point names PixlRGB,
+      so a file in it is described by its profile, which any ICC v4 colour engine reads.
+    </p>
+    <p class="note">
+      <strong>Licence.</strong> The PixlRGB specification and profiles are © 2026 Syed Ali (xuckless), PIXL Foundation,
+      licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Use them in any product,
+      free or commercial; credit PixlRGB and PIXL Foundation, and share changed versions under the same licence.
+    </p>
+  </section>
+
+  <section id="sources">
+    <h2>Sources and method</h2>
+    <ul class="art-sources">
+      <li>CIE 2019, <em>Colour-matching functions of CIE 1931 standard colorimetric observer</em>, DOI <a href="https://doi.org/10.25039/CIE.DS.xvudnb9b">10.25039/CIE.DS.xvudnb9b</a>, CC BY 4.0. The diagram's locus and every coverage figure on this page are computed from it (380–700 nm at 5 nm for the drawing; 360–830 nm at 1 nm for the derivation).</li>
+      <li>rawtoaces-data (Academy Software Foundation), commit e9b8503, Apache-2.0: the cameras' spectral sensitivities and the 190 training reflectances.</li>
+      <li>CIE daylight, LED and fluorescent illuminant tables (DOIs 10.25039/CIE.DS.w7zunnny, .vgssnyfg, .ukaymjdn), CC BY-SA 4.0.</li>
+      <li>CIEDE2000 as Sharma, Wu and Dalal write it, held to their 34 published test pairs.</li>
+      <li>The figures are held by PIXL Engine's tests: <code>pixlrgb_candidates_are_the_charts</code>, <code>the_published_profiles_are_what_pixl_writes</code>, <code>the_guard_pulls_back_only_what_a_saturation_boost_pushed_out</code>, <code>every_body_fitted_under_a_and_d65</code>, and the gamut-compression suite.</li>
+    </ul>
+  </section>
+</Article>
+
+<style>
+  .gm-after { margin-top: 26px; }
+  .hash { word-break: break-all; }
+  /* the map in the reading column: plot on top, keys below */
+  :global(.art-body .gm) { grid-template-columns: minmax(0, 1fr); gap: 20px; margin: 8px 0 0; }
+  :global(.art-body .gm .gm-keys) { flex-direction: row; flex-wrap: wrap; }
+  :global(.art-body .gm .gm-keys li) { flex: 1 1 220px; }
+  :global(.art-body .gm .k-note) { margin-left: 2px; }
+</style>

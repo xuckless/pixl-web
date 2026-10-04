@@ -1,0 +1,454 @@
+---
+// /hdr: the master, PIXL Engine's one HDR path. Every figure is from
+// pixl-engine's CLAUDE.md (and, where the squashed text dropped a figure, its
+// full text at 2798da9); the charts are drawn from those numbers.
+import Article from '../../../layouts/Article.astro'
+import BarChart from '../../../components/engine/charts/BarChart.astro'
+import LineChart from '../../../components/engine/charts/LineChart.astro'
+import { CHART, TONE } from '../../../components/engine/charts/theme'
+import { canonical, origin } from '../../../lib/links'
+
+const title = 'The HDR pipeline · PIXL Engine'
+const description =
+  'How PIXL Engine handles HDR: one master in linear light with white at 203 cd/m², every source in (SDR, PQ, HLG, gain-map files, RAW), the peak measured, a display tone map that keeps hue, and one flag that decides between SDR, PQ, a base with a full-size gain map, or floats.'
+
+const toc: [string, string][] = [
+  ['master', 'One master'],
+  ['inputs', 'Every source in'],
+  ['peak', 'The peak and the ceiling'],
+  ['tonemap', 'The display tone map'],
+  ['gamut', 'Colours past the primaries'],
+  ['outputs', 'One flag, every sink'],
+  ['gainmaps', 'Gain maps, full size'],
+  ['iphone', 'iPhone HDR, read as Apple reads it'],
+  ['effects', 'Effects above white'],
+  ['cache', 'The master cache'],
+  ['verification', 'Verification'],
+  ['sources', 'Sources and method']
+]
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: 'The HDR pipeline in PIXL Engine',
+    description,
+    url: canonical('engine', '/hdr/'),
+    inLanguage: 'en',
+    dateModified: '2026-10-04',
+    about: ['HDR', 'PQ', 'HLG', 'gain maps', 'ISO 21496-1', 'tone mapping'],
+    author: { '@id': `${origin('home')}/#organization` },
+    publisher: { '@id': `${origin('home')}/#organization` }
+  }
+]
+
+// ── the ladder of luminances (a diagram, drawn on a log scale) ────────────
+const LW = 760
+const LH = 250
+const L = { l: 40, r: 40 }
+const lx = (nits: number) => L.l + (Math.log10(nits / 100) / Math.log10(10000 / 100)) * (LW - L.l - L.r)
+const stops = (nits: number) => Math.log2(nits / 203)
+const axisY = 150
+const marks = [
+  { nits: 203, top: 'white', sub: '1.0 in the master', tone: TONE.highlight, up: true },
+  { nits: 368, top: 'CR2 lifted a stop', sub: 'MaxCLL 368', tone: TONE.light, up: false },
+  { nits: 575.7, top: 'an iPhone HEIC’s peak', sub: '575.7, measured', tone: TONE.light, up: true },
+  { nits: 1000, top: 'HLG display · effects scale', sub: '1000', tone: TONE.muted, up: false },
+  { nits: 10000, top: 'PQ’s top', sub: '10 000', tone: TONE.muted, up: true }
+]
+const stopTicks = [0, 1, 2, 3, 4, 5].map((k) => ({ k, x: lx(203 * 2 ** k) }))
+---
+
+<Article
+  title={title}
+  description={description}
+  path="/hdr/"
+  kicker="Deep dive · HDR"
+  heading="The HDR pipeline"
+  lede="One master in linear light, with white at 203 cd/m². Every source enters it the same way, its peak is measured rather than assumed, and one flag decides whether the output carries headroom. PIXL Engine states every number it used, and refuses whatever it would have to guess."
+  toc={toc}
+  jsonLd={jsonLd}
+>
+  <section id="master">
+    <h2>One master</h2>
+    <p>
+      The engine has several HDR policies, and each one takes its numbers from the caller. Tone mapping a PQ file down
+      to SDR needs an operator, a mode, a source peak and a target white; placing an SDR file into PQ needs an operator
+      and a peak. None of them has a default. For hosts that want the engine’s own answer, there is one built-in path,
+      <code>ColorPolicy::Master</code>, and every number it uses is fixed in the engine and stated back in the report’s
+      <code>MasterReport</code>.
+    </p>
+    <p>
+      The master is linear light in <a href="/pixlrgb/">PixlRGB</a>, the engine’s working space, scaled so that
+      <strong>1.0 is 203 cd/m²</strong>. That is the graphics white of ITU-R BT.2408, the level a reference HDR display
+      shows diffuse white at, so SDR content placed in the master sits where an HDR display expects it. Everything above
+      1.0 is headroom, carried unclipped through every stage: the grade, framing, the resize and overlays. Nothing is
+      clipped until the output decides what it can hold.
+    </p>
+    <figure>
+      <svg class="ladder" viewBox={`0 0 ${LW} ${LH}`} role="img" aria-labelledby="ladder-t ladder-d">
+        <title id="ladder-t">Luminances in the master</title>
+        <desc id="ladder-d">A log scale of luminance from 100 to 10 000 cd/m². White sits at 203; the ceiling can be set anywhere from 203 to 10 000; HLG's nominal display and the effects scale are at 1000; PQ's top is 10 000, 5.6 stops above white.</desc>
+        <rect width={LW} height={LH} fill={CHART.panel} />
+        <text x={L.l} y="30" fill={CHART.value} font-family={CHART.label} font-size="15" font-weight="600">Luminances in the master, cd/m² (log scale)</text>
+        {stopTicks.map((t) => (
+          <g>
+            <line x1={t.x} x2={t.x} y1="58" y2={axisY} stroke={CHART.grid} />
+            <text x={t.x} y="54" fill={CHART.axis} font-family={CHART.number} font-size="10" text-anchor="middle">{t.k === 0 ? '0 stops' : `+${t.k}`}</text>
+          </g>
+        ))}
+        <rect x={lx(203)} y={axisY - 6} width={lx(10000) - lx(203)} height="12" fill="rgba(187,169,255,.14)" />
+        <line x1={L.l} x2={LW - L.r} y1={axisY} y2={axisY} stroke={CHART.axis} />
+        <text x={(lx(203) + lx(10000)) / 2} y={axisY - 12} fill={TONE.accent} font-family={CHART.label} font-size="11" text-anchor="middle" font-weight="600">the ceiling: any value from 203 to 10 000, or the measured peak</text>
+        {[100, 1000, 10000].map((n) => (
+          <text x={lx(n)} y={axisY + 24} fill={CHART.axis} font-family={CHART.number} font-size="10" text-anchor="middle">{n === 10000 ? '10 000' : n}</text>
+        ))}
+        {marks.map((m) => (
+          <g>
+            <rect x={lx(m.nits) - 1} y={m.up ? 70 : axisY + 34} width="2" height={m.up ? axisY - 76 : 30} fill={m.tone} />
+            <text x={lx(m.nits) + (m.nits === 10000 ? -6 : 6)} y={m.up ? 80 : axisY + 52} fill={m.tone} font-family={CHART.label} font-size="12" font-weight="600" text-anchor={m.nits === 10000 ? 'end' : 'start'}>{m.top}</text>
+            <text x={lx(m.nits) + (m.nits === 10000 ? -6 : 6)} y={m.up ? 95 : axisY + 67} fill={CHART.axis} font-family={CHART.number} font-size="10" text-anchor={m.nits === 10000 ? 'end' : 'start'}>{m.sub}{m.nits > 203 ? ` · +${stops(m.nits).toFixed(1)} st` : ''}</text>
+          </g>
+        ))}
+      </svg>
+      <figcaption>
+        White is 203 cd/m² (BT.2408). Stops are counted from white. The CR2 is the engine’s RAW fixture developed in
+        <code>Scene</code> and lifted a stop; the iPhone file is IMG_1318 from the test corpus, whose measured peak is
+        575.7 cd/m². HLG enters at a 1000 cd/m² display (BT.2100), and effects read tones on a scale to 1000 cd/m².
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="inputs">
+    <h2>Every source in</h2>
+    <p>Every source enters the master the same way, and each way in is a standard’s, not a guess:</p>
+    <ul>
+      <li><strong>SDR</strong> (JPEG, PNG, TIFF, WebP, AVIF, JPEG XL): through its own ICC profile or CICP code points into linear light, its white at 1.0.</li>
+      <li><strong>PQ</strong>: through the SMPTE ST 2084 EOTF to absolute luminance, then divided by 203.</li>
+      <li><strong>HLG</strong>: through the inverse OETF and the OOTF for a 1000 cd/m² display, as BT.2100 specifies.</li>
+      <li>
+        <strong>Gain-map files</strong>: ISO 21496-1 (a HEIF <code>tmap</code> item or a JPEG’s APP2), Adobe’s
+        <code>hdrgm</code> XMP, and Apple’s legacy maps in HEIC and JPEG. The map is applied at the file’s own alternate
+        headroom, so the base’s white is 1.0. A file whose map states no headroom is refused, not given one.
+      </li>
+      <li>
+        <strong>A RAW</strong> developed in <code>Scene</code>: the engine’s own develop delivers linear PixlRGB in 32-bit
+        floats, unclamped, highlights above sensor white included. It enters the master as it stands.
+      </li>
+    </ul>
+    <p>
+      Grey stays one channel throughout. The order of the stages is fixed: decode, gain map, orientation, lens
+      correction, retouching, the grade, framing, resize, output sharpening and overlays, then the egress. Every stage
+      sees headroom whatever the output will be.
+    </p>
+  </section>
+
+  <section id="peak">
+    <h2>The peak and the ceiling</h2>
+    <p>
+      HDR metadata in the wild rarely says what the pixels hold: most PQ files state no peak at all. So the master
+      measures its own. At the egress, after framing, the resize and overlays, the peak is the <strong>99.9th
+      percentile of luminance</strong>, by nearest rank. The histogram has 1/1024-stop bins from 2⁻⁸ of white to the
+      top, with integer counts, so the peak is the same at any thread count. Fully transparent pixels are left out. A
+      peak in the first bin above white counts as white, so a white that arrives a rounding error high rolls nothing
+      off.
+    </p>
+    <p>
+      A host can state the peak instead. A preview passes its measured figure back, so a region of the picture renders
+      exactly as the whole does. A region asked to measure its own peak is refused, because its peak would differ from
+      the picture’s.
+    </p>
+    <p>
+      With headroom on, the master is held to a <strong>ceiling</strong>: the measured peak, or any level from 203 to
+      10 000 cd/m². A peak above the ceiling rolls off with BT.2390’s Hermite curve, using the largest knee for which the
+      curve stays monotone; a peak below it is clipped at it. The report states the peak, the limit and how many samples
+      the limit changed.
+    </p>
+  </section>
+
+  <section id="tonemap">
+    <h2>The display tone map</h2>
+    <p>
+      Without headroom, everything above white has to fit under it. The first version, v0, was BT.2390 applied to each
+      channel separately. Rolling each channel off on its own turns hue: a saturated highlight’s strongest channel
+      flattens first, so orange drifts toward yellow and blue toward cyan. Version 1 rolled off luminance alone; that
+      kept hue, but near white a colour of white’s luminance can only be white, so it lost chroma.
+    </p>
+    <p>Version 2, the one the master runs, does two things:</p>
+    <ol>
+      <li>
+        <strong>The roll-off</strong> runs on <code>n = Y + 0.5 × (max(c, Y) − Y)</code>, half-way between luminance and
+        the largest channel, and every channel is scaled by the same factor. A saturated highlight keeps its colour by
+        ending a little below white; a grey one rolls off exactly as on luminance.
+      </li>
+      <li>
+        <strong>The path to white.</strong> Near the ceiling, bright saturated colours are drawn gently toward the
+        boundary of what the output can show, along their own hue line in ICtCp at their own intensity. A straight line
+        to white in linear light turns hue as the eye sees it; ICtCp keeps it. The boundary is found by the Illinois
+        method in about six evaluations a colour.
+      </li>
+    </ol>
+    <figure>
+      <BarChart
+        title="Hue shift of saturated highlights, by tone-map version"
+        desc="Median hue shift in ICtCp across the corpus files with saturated highlights: version 0 between 4.3 and 19.8 degrees (p95 9.5 to 29.3), version 1 between 0.05 and 0.11, version 2 between 0.07 and 0.18 (p95 at most 0.28)."
+        rows={[
+          { label: 'v0', sub: 'BT.2390 per channel', bars: [
+            { from: 4.3, to: 19.8, tone: 'muted', name: 'median', text: '4.3–19.8°' },
+            { from: 9.5, to: 29.3, tone: 'dim', name: 'p95', text: '9.5–29.3°' }
+          ] },
+          { label: 'v1', sub: 'luminance alone', bars: [{ from: 0.05, to: 0.11, tone: 'light', name: 'median', text: '0.05–0.11°' }] },
+          { label: 'v2', sub: 'mix + path to white', bars: [
+            { from: 0.07, to: 0.18, tone: 'accent', name: 'median', text: '0.07–0.18°' },
+            { value: 0.28, tone: 'highlight', name: 'p95', text: '≤ 0.28°' }
+          ] }
+        ]}
+        domain={[0, 30]}
+        ticks={[0, 5, 10, 15, 20, 25, 30]}
+        axisLabel="hue shift in ICtCp, degrees (range across files)"
+        labelWidth={230}
+      />
+      <figcaption>
+        Each bar is the range, across the iPhone corpus files with saturated highlights, of that file’s median (or
+        95th-percentile) hue shift in ICtCp. On the engine’s photograph lifted a stop: v0 3.0°, v1 0.03°, v2 0.04°.
+        <code>tests/tone_map_hue.rs</code>.
+      </figcaption>
+    </figure>
+    <figure>
+      <BarChart
+        title="Chroma kept in those highlights"
+        desc="Median share of chroma kept in saturated highlights across the corpus files: version 0 0.19 to 0.65, version 1 0.13 to 0.48, version 2 0.50 to 0.83."
+        rows={[
+          { label: 'v0', bars: [{ from: 0.19, to: 0.65, tone: 'muted', text: '0.19–0.65' }] },
+          { label: 'v1', bars: [{ from: 0.13, to: 0.48, tone: 'light', text: '0.13–0.48' }] },
+          { label: 'v2', bars: [{ from: 0.5, to: 0.83, tone: 'accent', text: '0.50–0.83' }] }
+        ]}
+        domain={[0, 1]}
+        ticks={[0, 0.25, 0.5, 0.75, 1]}
+        axisLabel="median share of chroma kept (range across files)"
+        labelWidth={230}
+      />
+      <figcaption>The same files. On the photograph lifted a stop, v2 keeps 0.98 of the chroma.</figcaption>
+    </figure>
+    <p>
+      A pixel below the knee with every channel inside keeps its exact bits, and with nothing above white no tone map runs
+      at all. An unedited photograph through the master is its conversion to Display P3, sample for sample. On the
+      photograph lifted a stop, the tone map leaves under a tenth of a plain clip’s pixels at pure white, keeps 7.5 times
+      as many distinct colours where the clip flattens a highlight, and leaves every pixel below a quarter of white
+      exactly as the clip does. The path to white costs about 1.3 s on a 24 MP frame at 8 threads, about 0.15 s at a
+      2048-pixel preview.
+    </p>
+    <figure>
+      <img src="/shared/engine/hdr/lift-compare.webp" width="1612" height="520" loading="lazy" decoding="async" alt="Two crops of the same forest road lifted one stop. On the left the sky and the brightest leaves clip to flat white; on the right the display tone map keeps the sky's tone and the leaves' colour." />
+      <figcaption>The 24 MP road photograph lifted one stop, headroom off, in Display P3. Left: converted and clipped at white. Right: PIXL's display tone map v2, from the measured peak (381.7 cd/m²) to white. Rendered by the engine; a crop at a quarter size.</figcaption>
+    </figure>
+  </section>
+
+  <section id="gamut">
+    <h2>Colours past the primaries</h2>
+    <p>
+      An edit can push colours outside the output’s gamut: Display P3 without headroom, Rec.2020 for PQ. Version 2 of the
+      gamut compression moves only those colours. Along each pixel’s ICtCp hue line, it finds where the line leaves the
+      target’s primaries. The 99.9th percentile of how far past the boundary the picture reaches sets a soft knee, and
+      colours above the knee are eased onto the boundary with hue kept. A picture that already fits moves no pixel and
+      keeps its bytes. One step per output, never chained.
+    </p>
+    <p>
+      Measured on the P3 photograph at a quarter size with saturation doubled (reach 1.47, knee 0.82): over the 71 000
+      pixels past P3, the hue shift is 0.00° median and 0.01° at the 95th percentile, against a plain clip’s 0.23° and
+      0.70°. Bright colours inside P3’s sides keep the clip’s bits. A region rendered with the preview’s stated peak and
+      reach is the full render, cut.
+    </p>
+  </section>
+
+  <section id="outputs">
+    <h2>One flag, every sink</h2>
+    <p>
+      The master has one switch, <code>headroom</code>. What each sink receives follows from what it can hold:
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Sink</th><th>Headroom off</th><th>Headroom on</th></tr></thead>
+        <tbody>
+          <tr><td>JPEG XL, PNG</td><td>Display P3, display tone map</td><td>Rec.2100 PQ at the encode’s depth (8-bit PQ refused)</td></tr>
+          <tr><td>AVIF, JPEG</td><td>Display P3, display tone map</td><td>the same base, plus a full-size gain map</td></tr>
+          <tr><td>Float TIFF, raw floats</td><td>Display P3, display tone map</td><td>the held master, unrounded, linear PixlRGB with its ICC profile</td></tr>
+          <tr><td>WebP, integer TIFF</td><td>Display P3, display tone map</td><td>the base, with a note in the report</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      With headroom on, a gain-map file’s base is the headroom-off rendition. Flipping the flag changes only the headroom;
+      an SDR viewer sees the same picture either way. Every HDR output measures MaxCLL and MaxFALL on the pixels it
+      produced and writes them where the format has a place: JPEG XL’s <code>intensity_target</code>, PNG’s
+      <code>cLLI</code>, HEIF’s <code>clli</code>. A source’s own light-level metadata never survives a transform: it
+      described other pixels.
+    </p>
+    <ul class="art-figs">
+      <li><span class="b-mono">4 ms</span><span class="b-body">an unedited P3 photo, proven exact at plan time and copied</span></li>
+      <li><span class="b-mono">0.88 s</span><span class="b-body">lifted a stop, into 16-bit PQ JPEG XL</span></li>
+      <li><span class="b-mono">2.98 s</span><span class="b-body">lifted a stop, into JPEG with its gain map</span></li>
+    </ul>
+    <p class="b-micro">The colour stage on the 24 MP JPEG, 8 threads, i7-14700F.</p>
+  </section>
+
+  <section id="gainmaps">
+    <h2>Gain maps, full size</h2>
+    <p>
+      A gain map is computed where both renditions exist: the master after its ceiling, and the SDR base after it has
+      been rounded. Gains are taken per channel in the base’s primaries (one channel for grey), with gamma 1 and offsets
+      of 1/64. Each channel’s range is what its pixels need over the colours the base can hold.
+    </p>
+    <p>
+      <strong>The map is written at full size.</strong> The base is tone mapped pixel by pixel, so the gain changes as
+      sharply as the picture’s edges. At half size, a reader’s rebuild of even a lossless file missed the held master by up
+      to 1.3 stops at fine detail. At full size the rebuild is within 0.04 stops, and files are 23–39% larger.
+    </p>
+    <p>
+      <strong>The rebuild never passes the ceiling.</strong> Lossy coding moves both base and map: without a cap, a white
+      base’s map code pushed to the top of a widened range rebuilt 0.49 stops past the ceiling. A safety margin of that
+      size would have dimmed every highlight by 30%. Instead, each channel’s top gain is capped at the gain that takes a
+      white base to the ceiling, so no code a lossy codec produces can rebuild above it.
+    </p>
+    <div class="note">
+      <strong>Measured</strong> on four pictures, JPEG at quality 50–100 and AVIF <code>Iq</code> at quality 40–100 and
+      lossless: rebuilt MaxCLL within 0.4 cd/m² of the stated ceiling, no pixel past it by more than 1%. libultrahdr
+      2.0.2 and libavif 1.3.0 rebuild the files the same way.
+    </div>
+    <p>
+      Read back against the PQ export of the same master, in 10-bit PQ codes (mean / p99): a lossless AVIF is within 0.13
+      / 0.38, a JPEG at quality 100, 4:4:4, within 0.93 / 5.07, and MaxCLL within 0.3%. The JPEG is an UltraHDR file
+      (ISO 21496-1 with <code>hdrgm</code> XMP and an MPF index); the AVIF carries an ISO <code>tmap</code> item.
+    </p>
+  </section>
+
+  <section id="iphone">
+    <h2>iPhone HDR, read as Apple reads it</h2>
+    <p>
+      An iPhone 17 writes an ISO 21496-1 map beside Apple’s older one; an iPhone 13 Pro writes only the older one. When
+      both are present the engine reads the ISO map. The older map is applied the way Core Image applies it. The headroom
+      comes from MakerNote tags 33 and 48 by Apple’s published formula, and the gain is
+      <code>1 + (min(H, h) − 1) · map^2.2</code> — a pure 2.2 gamma on the map, even where it is tagged linear, rather
+      than the Rec.709 curve Apple’s document gives. The map’s headroom tag is a ratio, not stops; the file’s three
+      statements of its headroom agree only read that way.
+    </p>
+    <p>
+      The test corpus is eleven HEICs from two iPhones: iOS 17.5 to 27.0, 12 and 48 MP, ultra wide, tele, the front
+      camera (rotated and mirrored), a Live Photo and an edited crop. Against Apple’s own renders on macOS 27.0, within
+      the bounds set before the comparison:
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Measure</th><th class="num">Bound</th><th class="num">All eleven files</th></tr></thead>
+        <tbody>
+          <tr><td>SDR base, largest difference (8-bit codes)</td><td class="num">2</td><td class="num">0.69–1.27</td></tr>
+          <tr><td>HDR rendition, luminance mean (10-bit PQ codes)</td><td class="num">1.0</td><td class="num">0.31–0.85</td></tr>
+          <tr><td>HDR rendition, luminance p99 (10-bit PQ codes)</td><td class="num">4.0</td><td class="num">1.17–3.80</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      HDR is compared over the pixels where Apple’s render has no negative channel. Core Image keeps a float YCbCr
+      conversion’s out-of-range values; the engine clips at the integer decode. On files carrying both maps, the ISO and
+      legacy readings agree to a median of 0.032 stops at most. The base matches partly because the engine also
+      upsamples HEIC chroma as Core Image does (<a href="/codecs/#heic">see Codecs</a>).
+    </p>
+  </section>
+
+  <section id="effects">
+    <h2>Effects above white</h2>
+    <p>
+      Grain, clarity, the colour wheels and a vignette’s highlight protection all weigh their effect by tone. In SDR the
+      tone is clamped at white, so a highlight lifted into headroom would lose its grain the moment it passed 1.0. In an
+      HDR pipeline with headroom the tone is read on PQ’s perceptual scale, up to 1000 cd/m² in the master (BT.2408’s
+      reference display), where white sits at 0.77. The weight is a function of the pixel alone, so a region is still the
+      full render cut, and the headroom flag never changes it.
+    </p>
+    <figure>
+      <LineChart
+        title="Grain and clarity weight by tone"
+        desc="The weight grain and clarity give a pixel, by its tone as a multiple of white: in an SDR stage 0.36, 0.99, 0.78, 0, 0, 0 at 1%, 18%, 50%, white, twice and four times white; in the master 0.75, 0.99, 0.87, 0.70, 0.45, 0.12."
+        series={[
+          { label: 'SDR stage', points: [[0.01, 0.36], [0.18, 0.99], [0.5, 0.78], [1, 0], [2, 0], [4, 0]], tone: 'muted', dots: true, labelDy: 4 },
+          { label: 'the master', points: [[0.01, 0.75], [0.18, 0.99], [0.5, 0.87], [1, 0.7], [2, 0.45], [4, 0.12]], tone: 'accent', dots: true, labelDy: -6 }
+        ]}
+        x={{ domain: [0.01, 4], log: true, label: 'tone, multiple of white (log)', ticks: [{ value: 0.01, label: '1%' }, { value: 0.18, label: '18%' }, { value: 0.5, label: '50%' }, { value: 1, label: 'white' }, { value: 2, label: '2×' }, { value: 4, label: '4×' }] }}
+        y={{ domain: [0, 1], ticks: [0, 0.25, 0.5, 0.75, 1], label: 'weight' }}
+        height={380}
+      />
+      <figcaption>
+        The tonal weight of grain and clarity at six tones, in an sRGB stage of an SDR pipeline and in the master. Lines
+        join the six stated points. Measured: grain in an sRGB stage of the master on the PQ fixture lifted 1.5 stops
+        raises the pixels between 1.2× and 2× white by 3.93 ten-bit PQ codes, where before it added none.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="cache">
+    <h2>The master cache</h2>
+    <p>
+      A host renders an edited photo many times, and everything before the grade — the decode, a gain map applied,
+      orientation, enhancement, the lens correction — is the same every time. On a RAW or a 48 MP HEIC it is also the
+      expensive part. The master cache keeps the master at that point, the seam, as a lossless float JPEG XL with a
+      <code>pixl</code> box, and <strong>a render from it is the render from the original, byte for byte.</strong>
+    </p>
+    <p>
+      The box records the engine version, the source’s SHA-256, and a digest of every request field that acts before the
+      seam: the RAW develop, enhancement, the lens, orientation, the channel count. A render whose fields differ, or a
+      cache made by another engine version, is refused with <code>StaleCache</code> naming the field, and the host makes
+      the cache again. A plain JPEG XL reader sees the master’s floats as linear PixlRGB, alpha included.
+    </p>
+    <div class="wide">
+      <table>
+        <thead><tr><th>Source</th><th class="num">Cache</th><th class="num">Encode</th><th class="num">Decode</th></tr></thead>
+        <tbody>
+          <tr><td>24 MP road JPEG (288 MB of floats)</td><td class="num">187 MB</td><td class="num">0.64 s</td><td class="num">0.13 s</td></tr>
+          <tr><td>48 MP HEIC (585 MB of floats)</td><td class="num">346 MB</td><td class="num">1.29 s</td><td class="num">0.28 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Effort 1, 8 threads. A 2048-pixel PQ preview of the road photograph takes 0.49 s from the cache against 0.68 s
+      from the original; a RAW or a 48 MP HEIC also saves its decode. Tested byte for byte, both ways, on an RGBA PNG
+      through a lens, the PQ HEIC, an UltraHDR JPEG, an iPhone HEIC with Apple’s map, and a CR2 in <code>Scene</code>,
+      each rendered as a graded, straightened, cropped, resized PQ PNG, the master’s floats, a region, an SDR JPEG and a
+      gain-map JPEG.
+    </p>
+  </section>
+
+  <section id="verification">
+    <h2>Verification</h2>
+    <p>The claims on this page are held by tests in the engine’s repository, and by other readers:</p>
+    <ul>
+      <li><strong>Identity where nothing happens.</strong> An unedited photograph through the master is its conversion to Display P3, sample for sample, and the 24 MP JPEG at quality 90 through the command line, byte for byte.</li>
+      <li><strong>Headroom into PQ</strong> equals a plain linear expansion at 203 cd/m² on over 99% of pixels (all below the ceiling in every channel); MaxCLL is the ceiling within 0.5 cd/m², and a ceiling of 400 is never passed.</li>
+      <li><strong>Every source kind</strong> — JPEG, PNG, JPEG XL, HEIC, TIFF, WebP, PQ, HLG, gain-map files and a <code>Scene</code> CR2 — comes out as PQ JPEG XL and as a base with a three-channel map in AVIF and JPEG.</li>
+      <li><strong>Threads.</strong> 1 thread and 7 give the same bytes on every HDR path.</li>
+      <li><strong>SDR previews.</strong> An SDR rendition of an HDR master equals a separate tone map of its PQ export to one code at most, mean ≤ 0.005.</li>
+      <li><strong>Other readers.</strong> libavif tone maps the engine’s gain maps as the engine does (MaxCLL 795 against 797 cd/m² at 2 stops). On a Mac, Preview shows the PQ and HLG files in HDR, and Core Image renders them as the engine reads them (0.017 stops apart for PQ, 0.055 for HLG) and applies the ISO gain maps as the engine does (0.017 stops).</li>
+    </ul>
+  </section>
+
+  <section id="sources">
+    <h2>Sources and method</h2>
+    <p>
+      Times are on an Intel i7-14700F under Linux at 8 threads unless stated. The Apple comparisons ran once on the
+      owner’s MacBook Pro (M2 Pro, macOS 27.0); the renders are pinned by SHA-256 and the tests that read them run by
+      hand.
+    </p>
+    <ul class="art-sources">
+      <li>The master: <code>tests/master.rs</code> — <code>an_unedited_photo_is_its_conversion_to_display_p3</code>, <code>a_rebuilt_lossy_file_never_passes_the_ceiling</code>, <code>with_headroom_a_float_sink_gets_the_master_in_linear_pixlrgb</code>, <code>grain_carries_on_above_white_in_the_master</code>.</li>
+      <li>Hue and chroma: <code>tests/tone_map_hue.rs</code> (ICtCp; the photograph held, the corpus by hand); <code>the_boundary_is_where_a_bisection_puts_it</code>.</li>
+      <li>Gamut compression: <code>tests/gamut.rs</code>.</li>
+      <li>HDR paths and threads: <code>tests/hdr.rs</code> — <code>every_hdr_path_is_byte_identical_whatever_the_thread_count</code>; RAW into headroom: <code>tests/raw_hdr.rs</code>, <code>a_scene_raw_graded_above_white_reaches_headroom_in_pq</code>.</li>
+      <li>Gain maps: <code>tests/gainmap.rs</code>; the iPhone corpus and Apple’s renders: <code>tests/heic.rs</code>, <code>tests/heic/pixl-heic-reference.swift</code>.</li>
+      <li>The cache: <code>tests/master_cache.rs</code>; timings from <code>the_cache_codec_measured</code> and <code>preview_times_at_2048_measured</code> (by hand).</li>
+      <li>Interoperability: <code>ci/avif-interop/</code> (libavif 1.3.0, libheif 1.23.5), and the device check on macOS 27.</li>
+    </ul>
+  </section>
+</Article>
+
+<style>
+  .ladder { display: block; width: 100%; height: auto; background: #050507; border: 1px solid rgba(255, 255, 255, .08); }
+  .ph-box { display: grid; place-items: center; aspect-ratio: 16 / 7; border: 1px dashed rgba(255, 255, 255, .14); background: #07060c; color: #8e8aa6; font-family: 'Manrope', system-ui, sans-serif; font-size: 14px; text-align: center; padding: 16px; }
+</style>

@@ -1,20 +1,24 @@
 # PIXL Engine
 
-> PIXL Engine is a closed-source Rust imaging library that decodes, processes and re-encodes photos, and is the core of the PIXL apps (Pixl Playroom, Space Pixl). It has no user interface and no hidden defaults: every request states everything, impossible requests are refused with an error naming the field, and every call returns a report of what was done (including how many times pixels were rounded). Made by Syed Ali, trading as PIXL Foundation (Ontario, Canada).
+> PIXL Engine is a closed-source Rust imaging library that develops, grades and re-encodes photos, and is the core of the PIXL apps (Pixl Playroom, Space Pixl). It has no user interface and no hidden defaults: every request states everything, impossible requests are refused with an error naming the field, and every call returns a report of what was done (including how many times pixels were rounded). Made by Syed Ali, trading as PIXL Foundation (Ontario, Canada).
 
-This file is for AI assistants and other tools answering questions about PIXL Engine. The full description (pipeline, operations, formats, interfaces, measured performance, limitations) is at https://engine.pixlfoundation.com/llms-full.txt. Anything marked "planned" does not exist yet.
+This file is for AI assistants and other tools answering questions about PIXL Engine. The full description (pipeline, colour science, HDR, formats, interfaces, measured performance, limitations) is at https://engine.pixlfoundation.com/llms-full.txt. Anything marked "planned" does not exist yet.
 
 ## Key facts
 
-- Language: Rust. Bindings: Node.js (native addon, macOS arm64/x64 and Windows x64) and Swift via UniFFI. Not open source; not sold as a public SDK (licensing and partnerships by request: hello@pixlfoundation.com).
-- Pipeline: float (f32) processing in scene-linear Rec.2020, colour-managed with Little CMS; pixels are rounded to integers exactly once.
-- Does: RAW development, colour grading with layers and masks, lens corrections, Upright perspective, healing/clone/fill, HDR (PQ/HLG, gain maps), format conversion, on-device AI (super resolution, denoise, JPEG restore, deblur, subject segmentation) via ONNX Runtime.
-- Formats in: camera RAW and DNG, JPEG, PNG, HEIF/HEIC/AVIF, JPEG XL, TIFF, WebP. Out: JPEG, PNG, TIFF (to 32-bit float), WebP, AVIF, JPEG XL (including bit-exact JPEG repack), DNG from RAW.
+- Language: Rust. Binding: Node.js / Electron native addon (macOS arm64 and x64, Windows x64). Not open source; not sold as a public SDK (licensing and partnerships by request: hello@pixlfoundation.com).
+- Working space: PixlRGB, PIXL's own open RGB space (CC BY-SA 4.0), linear 32-bit float. It holds every visible colour; pixels are rounded to integers exactly once.
+- Colour science: camera colour fitted by PIXL from measured spectral sensitivities (46 cameras), a guard that keeps edited colours inside the visible range, gamut compression in ICtCp, a perceptual HSL.
+- HDR: one master render in linear light, written as Rec.2100 PQ/HLG, as an SDR base with an ISO 21496-1 gain map (AVIF, JPEG), or as 32-bit float.
+- Formats in: camera RAW (LibRaw 0.22) and DNG (PIXL's own DNG 1.7.1 reader), JPEG, PNG, HEIC/AVIF, JPEG XL, TIFF, WebP. Out: JPEG, PNG, TIFF (to 32-bit float), WebP, AVIF, JPEG XL (including bit-exact JPEG repack), DNG. HEIC is read, not written.
 - Deterministic: the same request gives the same output at any thread count.
 
 ## Links
 
 - [Full description for AI assistants](https://engine.pixlfoundation.com/llms-full.txt)
 - [Engine page](https://engine.pixlfoundation.com/)
+- [PixlRGB, the open working space](https://engine.pixlfoundation.com/pixlrgb/)
+- [The HDR pipeline](https://engine.pixlfoundation.com/hdr/)
+- [Codecs](https://engine.pixlfoundation.com/codecs/)
 - [Pixl Playroom](https://playroom.pixlfoundation.com/llms.txt): the photo editor built on it
 - [Who we are](https://pixlfoundation.com/legal/)

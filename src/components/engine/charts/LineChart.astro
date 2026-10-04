@@ -1,0 +1,97 @@
+---
+// A line chart on the engine site's theme: series labelled at their ends
+// (no legend box), linear or base-10 log axes, square panel.
+import { CHART, TONE, tickLabel, tickValue, type Tick, type Tone } from './theme'
+
+export interface LineSeries {
+  label: string
+  points: [number, number][]
+  tone: Tone
+  dash?: string
+  /** Stroke width; PIXL's series default to 2.5, others to 1.5. */
+  width?: number
+  /** Show a dot at every point. */
+  dots?: boolean
+  /** Move the end label up (negative) or down, in pixels, where labels would collide. */
+  labelDy?: number
+  /** Put the label at this point instead (data coordinates), anchored at its start or end. */
+  labelAt?: { x: number; y: number; anchor?: 'start' | 'end' }
+}
+
+interface Props {
+  title?: string
+  /** Read by screen readers: what the chart shows. */
+  desc: string
+  series: LineSeries[]
+  x: { domain: [number, number]; ticks: Tick[]; label?: string; log?: boolean }
+  y: { domain: [number, number]; ticks: Tick[]; label?: string; log?: boolean }
+  width?: number
+  height?: number
+  /** Right margin for the end labels. */
+  labelRoom?: number
+}
+
+const { title, desc, series, x, y, width = 760, height = 460, labelRoom = 120 } = Astro.props
+const M = { l: 60, r: labelRoom, t: title ? 54 : 24, b: x.label ? 60 : 40 }
+const scale = (d: [number, number], log: boolean | undefined, a: number, b: number) => {
+  const f = log ? Math.log10 : (v: number) => v
+  const [d0, d1] = [f(d[0]), f(d[1])]
+  return (v: number) => a + ((f(v) - d0) / (d1 - d0)) * (b - a)
+}
+const px = scale(x.domain, x.log, M.l, width - M.r)
+const py = scale(y.domain, y.log, height - M.b, M.t)
+const inside = ([a, b]: [number, number]) =>
+  a >= Math.min(...x.domain) && a <= Math.max(...x.domain) && b >= Math.min(...y.domain) && b <= Math.max(...y.domain)
+const lines = series.map((s) => {
+  const pts = s.points.filter(inside).map(([a, b]) => [px(a), py(b)] as [number, number])
+  const end = pts[pts.length - 1] ?? [M.l, M.t]
+  const isPixl = s.tone === 'accent' || s.tone === 'highlight'
+  return {
+    ...s,
+    pts,
+    end,
+    stroke: TONE[s.tone],
+    w: s.width ?? (isPixl ? 2.5 : 1.5),
+    weight: isPixl ? 600 : 500,
+    lx: s.labelAt ? px(s.labelAt.x) : end[0] + 10,
+    ly: (s.labelAt ? py(s.labelAt.y) : end[1]) + 4 + (s.labelDy ?? 0),
+    anchor: s.labelAt?.anchor ?? 'start',
+    d: pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')
+  }
+})
+const id = `lc-${Math.abs([...desc].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)).toString(36)}`
+---
+
+<svg class="chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${id}-t ${id}-d`}>
+  <title id={`${id}-t`}>{title ?? desc}</title>
+  <desc id={`${id}-d`}>{desc}</desc>
+  <rect width={width} height={height} fill={CHART.panel} />
+  {title && <text x={M.l} y="32" fill={CHART.value} font-family={CHART.label} font-size="15" font-weight="600">{title}</text>}
+  {y.ticks.map((t) => (
+    <g>
+      <line x1={M.l} x2={width - M.r} y1={py(tickValue(t))} y2={py(tickValue(t))} stroke={CHART.grid} />
+      <text x={M.l - 10} y={py(tickValue(t)) + 4} fill={CHART.axis} font-family={CHART.number} font-size="11" text-anchor="end">{tickLabel(t)}</text>
+    </g>
+  ))}
+  {x.ticks.map((t) => (
+    <g>
+      <line x1={px(tickValue(t))} x2={px(tickValue(t))} y1={M.t} y2={height - M.b} stroke={CHART.grid} />
+      <text x={px(tickValue(t))} y={height - M.b + 18} fill={CHART.axis} font-family={CHART.number} font-size="11" text-anchor="middle">{tickLabel(t)}</text>
+    </g>
+  ))}
+  {x.label && <text x={(M.l + width - M.r) / 2} y={height - 16} fill={CHART.axis} font-family={CHART.label} font-size="12" text-anchor="middle">{x.label}</text>}
+  {y.label && (
+    <text x="18" y={(M.t + height - M.b) / 2} fill={CHART.axis} font-family={CHART.label} font-size="12" text-anchor="middle" transform={`rotate(-90 18 ${(M.t + height - M.b) / 2})`}>{y.label}</text>
+  )}
+  {lines.map((s) => (
+    <g>
+      <path d={s.d} fill="none" stroke={s.stroke} stroke-width={s.w} stroke-dasharray={s.dash} stroke-linejoin="round" stroke-linecap="square" />
+      {s.dots && s.pts.map((p) => <rect x={p[0] - 2} y={p[1] - 2} width="4" height="4" fill={s.stroke} />)}
+      <text x={s.lx} y={s.ly} text-anchor={s.anchor} fill={s.stroke} font-family={CHART.label} font-size="12" font-weight={s.weight}>{s.label}</text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  svg.chart { display: block; width: 100%; height: auto; background: #050507; border: 1px solid rgba(255, 255, 255, .08); border-radius: 0; }
+</style>
