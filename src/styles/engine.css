@@ -145,3 +145,31 @@
   .show-cards, .show-pair { grid-template-columns: minmax(0, 1fr); }
 }
 .figure.chart figcaption a { color: #d6ccff; }
+
+/* the grade's before/after: one frame, a draggable split */
+.ba-frame { position: relative; background: #050507; aspect-ratio: 3 / 2; overflow: hidden; }
+.ba-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
+.ba-after { clip-path: inset(0 0 0 var(--ba)); }
+.ba-line { position: absolute; top: 0; bottom: 0; left: var(--ba); width: 1px; background: #e6dfff; box-shadow: 0 0 0 1px rgba(5, 5, 7, .35); pointer-events: none; }
+.ba-line::after { content: ''; position: absolute; top: 50%; left: -9px; width: 18px; height: 18px; margin-top: -9px; background: #050507; border: 1px solid #e6dfff; }
+.ba-tag { position: absolute; top: 14px; padding: 5px 9px; background: rgba(5, 5, 7, .78); color: #ebe9f3; pointer-events: none; }
+.ba-tag-l { left: 14px; }
+.ba-tag-r { right: 14px; color: #bba9ff; }
+.ba-range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.ba-range:focus-visible + * , .ba-frame:focus-within .ba-line { background: #bba9ff; }
+
+/* the P3 triptych: three panels on the page's own ground */
+.tri-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); }
+.tri-row > div { background: #050507; display: flex; flex-direction: column; }
+.tri-row img { display: block; width: 100%; height: auto; border: 0; }
+.tri-row .b-micro { padding: 12px 14px; color: var(--ink-3); }
+.tri-row > div:last-child .b-micro { color: #bba9ff; }
+.show-pair .figure { background: #050507; }
+.tri { display: flex; flex-direction: column; }
+.tri-row { flex: 1; }
+.tri-row > div { min-height: 0; }
+.tri-row img { flex: 1; min-height: 0; object-fit: cover; }
+@media (max-width: 760px) {
+  .tri-row img { flex: none; aspect-ratio: 2 / 3; }
+  .tri-row .b-micro { padding: 10px; font-size: 10px; }
+}

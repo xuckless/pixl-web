@@ -183,9 +183,21 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       </li>
     </ul>
     <div class="show-pair">
-      <figure class="figure"><img src={fig('grade.webp')} width="900" height="496" loading="lazy" decoding="async" alt="Before and after a colour grade: the same forest road, ungraded and then warmed with lifted shadows, pulled highlights, more contrast and more vibrance." />
-        <figcaption class="b-body"><strong>A colourist's toolkit, rounded once.</strong> Each stage runs in the space it belongs in, and however many you stack, the pixels are rounded once, at the end.</figcaption></figure>
-      <figure class="figure"><img src={fig('colour.webp')} width="900" height="366" loading="lazy" decoding="async" alt="A Display P3 photo written as sRGB two ways, re-tagged and properly converted, with the amplified difference between them." />
+      <figure class="figure ba" data-ba>
+        <div class="ba-frame" style="--ba: 50%">
+          <img src={fig('colour/grade-before.webp')} width="1200" height="800" loading="lazy" decoding="async" alt="The forest road ungraded." />
+          <img class="ba-after" src={fig('colour/grade-after.webp')} width="1200" height="800" loading="lazy" decoding="async" alt="The same road graded: warmer, shadows lifted, highlights pulled, more contrast and vibrance." />
+          <span class="ba-line" aria-hidden="true"></span>
+          <span class="b-micro ba-tag ba-tag-l">Before</span><span class="b-micro ba-tag ba-tag-r">Graded</span>
+          <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Before and after: drag to compare" />
+        </div>
+        <figcaption class="b-body"><strong>A colourist's toolkit, rounded once.</strong> White balance, exposure, tone, contrast and vibrance, each in the space it belongs in. However many you stack, the pixels are rounded once, at the end.</figcaption></figure>
+      <figure class="figure tri">
+        <div class="tri-row">
+          <div><img src={fig('colour/p3-assign.webp')} width="480" height="720" loading="lazy" decoding="async" alt="The Display P3 photo re-tagged as sRGB: duller greens." /><span class="b-micro">Re-tagged sRGB</span></div>
+          <div><img src={fig('colour/p3-convert.webp')} width="480" height="720" loading="lazy" decoding="async" alt="The same photo converted to sRGB: the colours as shot." /><span class="b-micro">Converted</span></div>
+          <div><img src={fig('colour/p3-diff.webp')} width="480" height="720" loading="lazy" decoding="async" alt="The difference between the two, amplified eight times: brightest in the saturated foliage." /><span class="b-micro">Difference ×8</span></div>
+        </div>
         <figcaption class="b-body"><strong>Converting isn't re-labelling.</strong> A P3 photo can be tagged sRGB or converted to it. PIXL makes the app say which, and reports which happened.</figcaption></figure>
     </div>
   </section>
@@ -406,4 +418,11 @@ const domain = (s: 'playroom' | 'space') => origin(s).replace(/^https?:\/\//, ''
       <a class="b-cta en" href={contact}>Get in touch</a>
     </div>
   </section>
+<script>
+  for (const f of document.querySelectorAll<HTMLElement>('[data-ba]')) {
+    const frame = f.querySelector<HTMLElement>('.ba-frame')!
+    const range = f.querySelector<HTMLInputElement>('.ba-range')!
+    range.addEventListener('input', () => frame.style.setProperty('--ba', `${range.value}%`))
+  }
+</script>
 </Base>
