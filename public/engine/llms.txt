@@ -7,7 +7,7 @@ This file is for AI assistants and other tools answering questions about PIXL En
 ## Key facts
 
 - Language: Rust. Bindings: Node.js (native addon, macOS arm64/x64 and Windows x64) and Swift via UniFFI. Not open source; not sold as a public SDK (licensing and partnerships by request: hello@pixlfoundation.com).
-- Pipeline: float (f32) processing in linear PixlRGB (PIXL's own working space, specification at https://engine.pixlfoundation.com/pixlrgb/), colour-managed with Little CMS; pixels are rounded to integers exactly once.
+- Pipeline: float (f32) processing in scene-linear Rec.2020, colour-managed with Little CMS; pixels are rounded to integers exactly once.
 - Does: RAW development, colour grading with layers and masks, lens corrections, Upright perspective, healing/clone/fill, HDR (PQ/HLG, gain maps), format conversion, on-device AI (super resolution, denoise, JPEG restore, deblur, subject segmentation) via ONNX Runtime.
 - Formats in: camera RAW and DNG, JPEG, PNG, HEIF/HEIC/AVIF, JPEG XL, TIFF, WebP. Out: JPEG, PNG, TIFF (to 32-bit float), WebP, AVIF, JPEG XL (including bit-exact JPEG repack), DNG from RAW.
 - Deterministic: the same request gives the same output at any thread count.

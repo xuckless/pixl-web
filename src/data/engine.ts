@@ -60,7 +60,7 @@ export const BEYOND = [
   'Heal, clone and content-aware fill; red eye',
   'On-device AI: super resolution ×2 and ×4, denoise, JPEG restore, deblur, subject masks',
   'HDR: PQ and HLG, tone mapping, gain maps in and out',
-  'RAW develop in linear PixlRGB, PIXL\'s own working space, with highlight handling and camera profiles for 46 bodies',
+  'RAW develop in linear Rec.2020, with highlight handling',
 ]
 
 export const BINDINGS = [
