@@ -5,7 +5,7 @@ import BeforeAfter from '../../components/playroom/BeforeAfter.astro'
 import Compare from '../../components/playroom/Compare.astro'
 import ToolShowcase from '../../components/playroom/ToolShowcase.astro'
 import EngineBadge from '../../components/EngineBadge.astro'
-import GamutChart from '../../components/GamutChart.astro'
+import GamutMap from '../../components/engine/GamutMap.astro'
 import StickyCta from '../../components/playroom/StickyCta.astro'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
@@ -125,7 +125,10 @@ const icon = {
           <a class="b-cta sec" href={pixlrgb}>Read the PixlRGB spec</a>
         </div>
       </div>
-      <GamutChart />
+      <div class="colour-map">
+        <GamutMap id="gamut-playroom" />
+        <p class="b-body fine">The curve is every pure wavelength of light, 380 to 700 nm, on the CIE 1976 u′v′ diagram. Each triangle is the set of colours a space can make. PixlRGB's triangle holds the whole visible range, so a camera's colours are never clipped by the space the edit runs in. Point at the diagram to see which spaces hold a colour.</p>
+      </div>
     </div>
 
     <div class="wrap colour-cards">
