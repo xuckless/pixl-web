@@ -6,9 +6,14 @@ import type { Pair } from '../../data/playroom'
 
 interface Props {
   pairs: Pair[]
+  /** Above the fold: load the first pair now, not when it scrolls near. */
+  eager?: boolean
 }
 
-const { pairs } = Astro.props
+const { pairs, eager = false } = Astro.props
+const load = eager
+  ? ({ loading: 'eager', fetchpriority: 'high' } as const)
+  : ({ loading: 'lazy' } as const)
 const base = href('playroom', '/pairs/', 'playroom')
 const first = pairs[0]
 const set = (id: number, side: string, ext: string) =>
@@ -20,11 +25,11 @@ const sizes = '(min-width: 1200px) 1120px, calc(100vw - 32px)'
   <div class="ba b-win">
     <picture class="ba-after">
       <source type="image/webp" srcset={set(first.id, 'after', 'webp')} sizes={sizes} />
-      <img src={`${base}${first.id}-after-1200.jpg`} srcset={set(first.id, 'after', 'jpg')} sizes={sizes} width="2400" height="1600" loading="lazy" decoding="async" alt={`After: ${first.alt}`} draggable="false" />
+      <img src={`${base}${first.id}-after-1200.jpg`} srcset={set(first.id, 'after', 'jpg')} sizes={sizes} width="2400" height="1600" {...load} decoding="async" alt={`After: ${first.alt}`} draggable="false" />
     </picture>
     <picture class="ba-before">
       <source type="image/webp" srcset={set(first.id, 'before', 'webp')} sizes={sizes} />
-      <img src={`${base}${first.id}-before-1200.jpg`} srcset={set(first.id, 'before', 'jpg')} sizes={sizes} width="2400" height="1600" loading="lazy" decoding="async" alt={`Before: ${first.alt}`} draggable="false" />
+      <img src={`${base}${first.id}-before-1200.jpg`} srcset={set(first.id, 'before', 'jpg')} sizes={sizes} width="2400" height="1600" {...load} decoding="async" alt={`Before: ${first.alt}`} draggable="false" />
     </picture>
     <span class="ba-tag l" aria-hidden="true">Before</span>
     <span class="ba-tag r" aria-hidden="true">After</span>

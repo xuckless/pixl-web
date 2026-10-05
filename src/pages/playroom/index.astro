@@ -9,7 +9,7 @@ import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
 import { BETA, FAQ, FORMATS, NAV, PAIRS, PRICE, TOOLS } from '../../data/playroom'
 import { fingerprint } from '../../lib/fingerprint'
-import { href, media } from '../../lib/links'
+import { href } from '../../lib/links'
 import { faqPage, softwareApp } from '../../lib/seo'
 
 const own = (p: string) => href('playroom', p, 'playroom')
@@ -24,7 +24,6 @@ const icon = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
-  play: 'M8 5v14l11-7z',
 }
 ---
 
@@ -32,7 +31,6 @@ const icon = {
   site="playroom"
   title="Pixl Playroom · Develop everything. Rent nothing."
   description="A RAW photo editor for macOS and Windows with PIXL's own colour science, on-device AI masks, 300+ looks and RAW-to-HDR export, working on your own folders. Free beta now; $69.99 once at 1.0, no subscription."
-  preload={[{ href: own('/media/hero-poster.webp'), as: 'image', type: 'image/webp' }]}
   jsonLd={[
     softwareApp('playroom', {
       category: 'MultimediaApplication',
@@ -56,7 +54,7 @@ const icon = {
     </p>
     <div class="ctas">
       <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the free beta</a>
-      <a class="b-cta sec" href="#developed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.play}></path></svg>See before and after</a>
+      <a class="b-cta sec" href="#developed">Compare before and after</a>
     </div>
     <p class="b-body fine cta-note">Free PIXL account, 18 or older. Then download for macOS (Apple silicon or Intel) or Windows 64-bit.</p>
     <ul class="proof b-body" aria-label="At a glance">
@@ -66,17 +64,9 @@ const icon = {
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>No import, no catalog</li>
     </ul>
     <EngineBadge />
-    <div class="b-win hero-win">
-      <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
-        <!-- MP4 first: WebKit picks the WebM, reads its header and never plays a frame. -->
-        <source src={media('playroom/hero.mp4')} type="video/mp4" />
-        <source src={media('playroom/hero.webm')} type="video/webm" />
-      </video>
-      <button class="vid-toggle" type="button" aria-pressed="false" hidden>
-        <svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"></path></svg>
-        <svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"></path></svg>
-        <span class="label">Pause</span>
-      </button>
+    <div class="hero-ba" id="developed">
+      <BeforeAfter pairs={PAIRS} eager />
+      <p class="b-body fine">Real RAW files from an entry-level camera, straight off the card and finished in Playroom. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
     </div>
   </section>
 
@@ -87,15 +77,6 @@ const icon = {
         {FORMATS.map((f) => <li><img class="fmt-icon" src={own(`/formats/${f.id}.png`)} width="48" height="48" alt="" loading="lazy" />{f.label}</li>)}
       </ul>
     </div>
-  </section>
-
-  <!-- ── before / after ────────────────────────────────────── -->
-  <section class="wrap band developed" id="developed" aria-labelledby="dev-title">
-    <div class="sec-head">
-      <h2 class="b-disp h2" id="dev-title">Straight off the card.<br /><span class="accent">Finished in Playroom.</span></h2>
-      <p class="b-body">Real RAW files from an entry-level camera. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
-    </div>
-    <BeforeAfter pairs={PAIRS} />
   </section>
 
   <!-- ── colour ───────────────────────────────────────────────── -->
@@ -441,42 +422,4 @@ const icon = {
   document.querySelectorAll('.b-cta[aria-disabled="true"]').forEach((b) =>
     b.addEventListener('click', (e) => e.preventDefault())
   )
-
-  // The hero video plays only while on screen, and not under reduced motion unless asked.
-  const video = document.querySelector<HTMLVideoElement>('.hero-win video')
-  const btn = document.querySelector<HTMLButtonElement>('.vid-toggle')
-  if (video) {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    video.muted = true
-    let visible = false
-    let userPaused = reduced.matches
-    const sync = () => {
-      const want = visible && !userPaused && !document.hidden
-      if (want && video.paused) video.play().catch(() => {})
-      else if (!want && !video.paused) video.pause()
-      if (btn) {
-        btn.setAttribute('aria-pressed', String(userPaused))
-        btn.querySelector('.label')!.textContent = userPaused ? 'Play' : 'Pause'
-      }
-    }
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver((entries) => {
-        visible = entries[0].isIntersecting
-        sync()
-      }, { threshold: 0.05 }).observe(video)
-    } else visible = true
-    document.addEventListener('visibilitychange', sync)
-    reduced.addEventListener('change', () => {
-      userPaused = reduced.matches
-      sync()
-    })
-    if (btn) {
-      btn.hidden = false
-      btn.addEventListener('click', () => {
-        userPaused = !userPaused
-        sync()
-      })
-    }
-    sync()
-  }
 </script>
