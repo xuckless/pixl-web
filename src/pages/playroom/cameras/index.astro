@@ -1,0 +1,87 @@
+---
+// Which cameras and lenses Playroom handles. The camera list is PIXL's camera
+// colour database v1 (src/data/cameras.ts, generated from the engine); the
+// formats and counts are from the app (pixl-playroom README and llms-full.txt).
+import Base from '../../../layouts/Base.astro'
+import '../../../styles/playroom.css'
+import { CAMERA_FITS } from '../../../data/cameras'
+import { BETA, NAV } from '../../../data/playroom'
+import { href } from '../../../lib/links'
+import { breadcrumbs } from '../../../lib/seo'
+
+const beta = href('playroom', '/beta/', 'playroom')
+const pixlrgb = href('engine', '/pixlrgb/', 'playroom')
+const icon = { download: 'M12 4v11M7 10l5 5 5-5M5 20h14' }
+
+const RAW_FORMATS = ['CR2', 'CR3', 'CRW', 'ARW', 'SRF', 'SR2', 'NEF', 'NRW', 'DNG', 'RAF', 'RW2', 'ORF', 'PEF', 'SRW', 'MRW', '3FR', 'IIQ', 'ERF', 'KDC', 'X3F']
+
+// The first word of a body's name is its maker (Arashi Vision is "Arashi").
+const makers = new Map<string, { camera: string; d65: number }[]>()
+for (const c of CAMERA_FITS) {
+  const maker = c.camera.split(' ')[0]
+  makers.set(maker, [...(makers.get(maker) ?? []), { camera: c.camera.slice(maker.length + 1), d65: c.d65[0] }])
+}
+const groups = [...makers.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+const label: Record<string, string> = { Arashi: 'Arashi Vision (Insta360)' }
+---
+
+<Base
+  site="playroom"
+  path="/cameras/"
+  title="Supported cameras, RAW formats and lenses · Pixl Playroom"
+  description={`The RAW formats Pixl Playroom opens, the ${CAMERA_FITS.length} camera bodies with PIXL's own colour profile, and the lens profiles it corrects offline.`}
+  nav={NAV}
+  cta={{ label: 'Join the beta', to: '/beta/' }}
+  jsonLd={[breadcrumbs('playroom', [{ name: 'Pixl Playroom', path: '/' }, { name: 'Cameras and lenses', path: '/cameras/' }])]}
+>
+  <section class="wrap band page-top cameras" aria-labelledby="cam-title">
+    <div class="sec-head">
+      <h1 class="b-disp page-h1" id="cam-title">Will it open<br /><span class="accent">my RAW files?</span></h1>
+      <p class="b-body">What Playroom {BETA.version} opens, which camera bodies have a colour profile PIXL fitted itself, and how lenses are corrected. It's a beta, so tell us when a file doesn't open: Help → Report a Problem.</p>
+    </div>
+
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Opens</span>
+        <h3 class="b-disp">Camera RAW and more.</h3>
+        <p class="b-body">Camera RAW through LibRaw, DNG, JPEG, PNG, HEIC, AVIF, JPEG XL, TIFF and WebP. The RAW extensions are listed below. Nothing is imported: point Playroom at a folder.</p>
+      </li>
+      <li>
+        <span class="b-micro">Colour</span>
+        <h3 class="b-disp">{CAMERA_FITS.length} bodies with PIXL's own profile.</h3>
+        <p class="b-body">For each of these, PIXL fitted a colour profile from the camera's measured spectral sensitivity. Any other camera is developed with the colour its file carries, and you can switch any photo between the two.</p>
+      </li>
+      <li>
+        <span class="b-micro">Optics</span>
+        <h3 class="b-disp">About 1,500 lenses, offline.</h3>
+        <p class="b-body">Distortion and vignetting profiles for about 1,500 lenses come from the Lensfun database, matched from the photo's metadata, with fisheye defishing. The catalogue updates from our models server.</p>
+      </li>
+    </ul>
+
+    <div class="cam-block">
+      <h2 class="b-disp h2">RAW extensions it reads</h2>
+      <ul class="chips b-mono" aria-label="RAW file extensions">{RAW_FORMATS.map((f) => <li>.{f.toLowerCase()}</li>)}</ul>
+      <p class="b-body fine">Decoding is LibRaw's, so a camera LibRaw can't read yet can't be opened. Playroom's RAW engine changed in an earlier beta, and files that didn't open before were tried again (see <a class="textlink" href={href('playroom', '/whats-new/', 'playroom')}>What's new</a>).</p>
+    </div>
+
+    <div class="cam-block">
+      <h2 class="b-disp h2">The {CAMERA_FITS.length} camera bodies with a PIXL profile</h2>
+      <p class="b-body">The figure beside each name is the mean colour error, in CIEDE2000, on 38 colour patches held back from the fit, in daylight. Lower is closer; around 1 is hard to see. How the profiles are made, and their tungsten figures, are in the <a class="textlink" href={pixlrgb}>PixlRGB specification</a>.</p>
+      <div class="makers">
+        {
+          groups.map(([maker, bodies]) => (
+            <section aria-labelledby={`m-${maker}`}>
+              <h3 class="b-micro" id={`m-${maker}`}>{label[maker] ?? maker} · {bodies.length}</h3>
+              <ul class="b-body">{bodies.map((b) => <li><span>{b.camera}</span><span class="b-mono">{b.d65.toFixed(2)}</span></li>)}</ul>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="ctas">
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try your own files in the beta</a>
+      <a class="b-cta sec" href={href('playroom', '/', 'playroom')}>Back to Playroom</a>
+    </div>
+  </section>
+</Base>

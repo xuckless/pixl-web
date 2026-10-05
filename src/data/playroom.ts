@@ -152,6 +152,16 @@ export const FORMATS = [
   { id: 'tiff', label: 'TIFF' }
 ]
 
+/** The main navigation, the same on every Playroom page (paths from the site's root). */
+export const NAV = [
+  { label: 'Colour', to: '/#colour' },
+  { label: 'Features', to: '/#features' },
+  { label: 'Tools', to: '/tools/' },
+  { label: 'Pricing', to: '/#pricing' },
+  { label: 'Compare', to: '/compare/' },
+  { label: 'FAQ', to: '/#faq' }
+]
+
 /** The current beta build. */
 export const BETA = { version: '0.3.0-beta', date: 'October 4, 2026', engine: '0.17.0' }
 

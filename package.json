@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "check": "astro check && tsc -p worker",
+    "check": "astro check && tsc -p worker && node scripts/check-facts.mts",
     "preview": "PUBLIC_ROOT_DOMAIN=localhost:8787 astro build && wrangler dev --env local --port 8787",
     "deploy": "astro build && wrangler deploy"
   },

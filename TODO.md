@@ -539,7 +539,27 @@ reports are kept.
       manifests, link cards and press kits (`node scripts/brand-assets.mts`,
       from `src/lib/marks.ts`). Rerun after any change to the marks.
 
+## Playroom: attach a review (stashed idea, 2026-10-05)
+
+A way for a tester to attach a review from inside the app, so real words can
+back the site's claims. Nothing here is built.
+
+- [ ] In the app (pixl-playroom's TODO): an optional "Leave a review" in the
+      Help menu or the What's new popup, never a nag. Free text, a star
+      rating, and a clear opt-in: whether the review may be shown on the
+      site, with the tester's first name or none. Sent with the PIXL account,
+      not the photos.
+- [ ] A table and an endpoint for reviews in the Worker (`worker/api.ts`) and
+      `supabase/migrations/`, with RLS so a user reads and deletes only
+      their own, and an admin view to approve one for display.
+- [ ] A "What testers say" section on the Playroom page that shows approved
+      reviews only, with their real star count and number; until there are
+      some, the page shows none (no invented proof). Rework the page's
+      "Made by one developer, in the open" strip around it when it lands.
+- [ ] Say in the privacy policy what a review stores and how to delete it.
+
 ## Search
+
 
 - [x] Per-host `robots.txt` and `sitemap.xml`, canonical links (Playroom's
       legal copies point at the company site's), JSON-LD (Organization,
