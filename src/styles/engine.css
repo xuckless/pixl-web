@@ -118,3 +118,64 @@
   .app-card svg { width: 96px; height: 96px; }
   .licensing { margin-top: 96px; padding: 36px 22px; flex-direction: column; align-items: flex-start; }
 }
+
+/* ── showcases (01 colour, 02 HDR, 03 formats) ──────────────── */
+.show .sec-head p { max-width: 520px; }
+.show-hero { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 64px; align-items: center; }
+.show-hero.flip { grid-template-columns: minmax(0, 1fr) minmax(0, 440px); }
+.show-hero .copy .b-cta { align-self: flex-start; }
+.show-h3 { font-size: clamp(30px, 2.8vw, 42px); }
+.show-facts { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 18px; }
+.show-facts li { font-family: 'Manrope', system-ui, sans-serif; font-size: 15px; color: var(--ink-3); display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: baseline; }
+.show-facts .b-mono { font-size: 17px; color: #fff; }
+.show-cards { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.show-cards li { background: #050507; padding: 30px 30px 32px; display: flex; flex-direction: column; gap: 12px; }
+.show-cards .big { font-size: clamp(30px, 2.6vw, 40px); color: #e6dfff; }
+.show-cards h3 { font-size: 21px; }
+.show-cards p { margin: 0; font-size: 15px; color: var(--ink-3); }
+.show-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.show-pair figcaption, .hdr-fig figcaption, .figure.chart figcaption { padding: 16px 18px; font-size: 14px; color: var(--ink-3); border-top: 1px solid var(--line); background: #050507; }
+.show-pair figcaption strong { color: var(--ink); font-weight: 600; }
+.show .feature { padding-top: 40px; }
+.hdr-fig img { display: block; width: 100%; height: auto; max-height: 720px; object-fit: cover; }
+
+@media (max-width: 1100px) {
+  .show-hero, .show-hero.flip { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .show-hero.flip .copy { order: -1; }
+  .show-cards, .show-pair { grid-template-columns: minmax(0, 1fr); }
+}
+.figure.chart figcaption a { color: #d6ccff; }
+
+/* the grade's before/after: one frame, a draggable split */
+.ba-frame { position: relative; background: #050507; aspect-ratio: 3 / 2; overflow: hidden; }
+.ba-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
+.ba-after { clip-path: inset(0 0 0 var(--ba)); }
+.ba-line { position: absolute; top: 0; bottom: 0; left: var(--ba); width: 1px; background: #e6dfff; box-shadow: 0 0 0 1px rgba(5, 5, 7, .35); pointer-events: none; }
+.ba-line::after { content: ''; position: absolute; top: 50%; left: -9px; width: 18px; height: 18px; margin-top: -9px; background: #050507; border: 1px solid #e6dfff; }
+.ba-tag { position: absolute; top: 14px; padding: 5px 9px; background: rgba(5, 5, 7, .78); color: #ebe9f3; pointer-events: none; }
+.ba-tag-l { left: 14px; }
+.ba-tag-r { right: 14px; color: #bba9ff; }
+.ba-range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.ba-range:focus-visible + * , .ba-frame:focus-within .ba-line { background: #bba9ff; }
+
+/* the P3 triptych: three panels on the page's own ground */
+.tri-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); }
+.tri-row > div { background: #050507; display: flex; flex-direction: column; }
+.tri-row img { display: block; width: 100%; height: auto; border: 0; }
+.tri-row .b-micro { padding: 12px 14px; color: var(--ink-3); }
+.tri-row > div:last-child .b-micro { color: #bba9ff; }
+.show-pair .figure { background: #050507; }
+.tri { display: flex; flex-direction: column; }
+.tri-row { flex: 1; }
+.tri-row > div { min-height: 0; }
+.tri-row img { flex: 1; min-height: 0; object-fit: cover; }
+@media (max-width: 760px) {
+  .tri-row img { flex: none; aspect-ratio: 2 / 3; }
+  .tri-row .b-micro { padding: 10px; font-size: 10px; }
+}
+.raw-fig { background: #050507; }
+.raw-fig figcaption { padding: 16px 18px; font-size: 14px; color: var(--ink-3); border-top: 1px solid var(--line); }
+.raw-fig figcaption strong { color: var(--ink); font-weight: 600; }
+.raw-fig .tri-row > div:last-child .b-micro { color: var(--ink-3); }
+.raw-fig .tri-row img { flex: none; aspect-ratio: 3 / 2; object-fit: cover; }
+.raw-fig .tri-row .b-micro, .tri .tri-row .b-micro { font-size: 10px; letter-spacing: .14em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
