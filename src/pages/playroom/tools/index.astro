@@ -1,0 +1,34 @@
+---
+// Every Develop tool, panel by panel. The landing page teases four of them.
+import Base from '../../../layouts/Base.astro'
+import '../../../styles/playroom.css'
+import ToolShowcase from '../../../components/playroom/ToolShowcase.astro'
+import { NAV, TOOLS } from '../../../data/playroom'
+import { href } from '../../../lib/links'
+import { breadcrumbs } from '../../../lib/seo'
+
+const beta = href('playroom', '/beta/', 'playroom')
+const icon = { download: 'M12 4v11M7 10l5 5 5-5M5 20h14' }
+---
+
+<Base
+  site="playroom"
+  path="/tools/"
+  title="Every tool · Pixl Playroom"
+  description="Every Develop panel in Pixl Playroom, shown in the app: light, colour mixer, colour grading, tone curve, detail and AI noise reduction, optics, geometry, Enhance, masks and the histogram."
+  nav={NAV}
+  cta={{ label: 'Join the beta', to: '/beta/' }}
+  jsonLd={[breadcrumbs('playroom', [{ name: 'Pixl Playroom', path: '/' }, { name: 'Tools', path: '/tools/' }])]}
+>
+  <section class="wrap band page-top tools" id="tools" aria-labelledby="tools-title">
+    <div class="sec-head">
+      <h1 class="b-disp page-h1" id="tools-title">Every tool you reach for.<br /><span class="accent">Right where you expect it.</span></h1>
+      <p class="b-body">Crop, Heal and Masks are one click away, and every adjustment folds into one column. Every slider updates the picture and the histogram as you drag. Pick a panel to see it in the app. Heal clones, fills and fixes red eye too, and View ▸ Engine Report shows every step of the last render.</p>
+    </div>
+    <ToolShowcase tools={TOOLS} />
+    <div class="ctas">
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the free beta</a>
+      <a class="b-cta sec" href={href('playroom', '/', 'playroom')}>Back to Playroom</a>
+    </div>
+  </section>
+</Base>

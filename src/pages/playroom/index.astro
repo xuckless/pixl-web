@@ -2,13 +2,14 @@
 import Base from '../../layouts/Base.astro'
 import '../../styles/playroom.css'
 import BeforeAfter from '../../components/playroom/BeforeAfter.astro'
-import Compare from '../../components/playroom/Compare.astro'
-import ToolShowcase from '../../components/playroom/ToolShowcase.astro'
+import EngineBadge from '../../components/EngineBadge.astro'
+import GamutMap from '../../components/engine/GamutMap.astro'
+import StickyCta from '../../components/playroom/StickyCta.astro'
 import Mark from '../../components/brand/Mark.astro'
 import Wordmark from '../../components/Wordmark.astro'
-import { COMPARE, FAQ, FORMATS, PAIRS, PRICE, TOOLS } from '../../data/playroom'
+import { BETA, FAQ, FORMATS, NAV, PAIRS, PRICE, TOOLS } from '../../data/playroom'
 import { fingerprint } from '../../lib/fingerprint'
-import { href, media } from '../../lib/links'
+import { href } from '../../lib/links'
 import { faqPage, softwareApp } from '../../lib/seo'
 
 const own = (p: string) => href('playroom', p, 'playroom')
@@ -16,70 +17,56 @@ const own = (p: string) => href('playroom', p, 'playroom')
 const shot = (p: string) => own(fingerprint('playroom', p))
 const notify = 'mailto:hello@pixlfoundation.com?subject=Tell%20me%20when%20Playroom%20launches'
 const beta = own('/beta/')
+const pixlrgb = href('engine', '/pixlrgb/', 'playroom')
+const spotlight = ['light', 'grade', 'masks', 'optics'].map((id) => TOOLS.find((t) => t.id === id)!)
 const pixlFormat = 'https://github.com/xuckless/pixl-playroom/blob/main/docs/pixl-format.md'
 const icon = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   mail: 'M4 6h16v12H4zM4 7l8 6 8-6',
-  play: 'M8 5v14l11-7z',
 }
 ---
 
 <Base
   site="playroom"
   title="Pixl Playroom · Develop everything. Rent nothing."
-  description="A professional RAW photo editor for macOS and Windows. AI masks, 300+ looks, colour grading, AI noise reduction and Super Resolution, on your own folders. Pay once, keep it forever."
-  preload={[{ href: own('/media/hero-poster.webp'), as: 'image', type: 'image/webp' }]}
+  description="A RAW photo editor for macOS and Windows with PIXL's own colour science, on-device AI masks, 300+ looks and RAW-to-HDR export, working on your own folders. Free beta now; $69.99 once at 1.0, no subscription."
   jsonLd={[
     softwareApp('playroom', {
       category: 'MultimediaApplication',
       os: 'macOS, Windows',
       description: 'A professional RAW photo editor you pay for once: AI masks, looks, colour grading, noise reduction and AI Super Resolution, on the folders you already have.',
-      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'Automatic lens correction from built-in profiles', 'AI masks for the subject, objects and sky, plus brush, gradient and range masks', 'Over 300 looks, with smart looks that adjust just the subject or sky', 'Colour grading wheels', 'On-device AI noise reduction, JPEG repair, deblur and Super Resolution', 'No import, no catalog: each photo\'s edits in one .pixl project file beside it']
+      features: ['RAW, DNG, JPEG XL, HEIC, JPEG and TIFF', 'PIXL\'s own colour science from the demosaic onward: PixlRGB working space and camera profiles for 46 bodies', 'RAW to HDR export with a chosen white level and peak brightness', 'Automatic lens correction from built-in profiles', 'AI masks for the subject, objects and sky, plus brush, gradient and range masks', 'Over 300 looks, with smart looks that adjust just the subject or sky', 'Colour grading wheels', 'On-device AI noise reduction, JPEG repair, deblur and Super Resolution', 'No import, no catalog: each photo\'s edits in one .pixl project file beside it']
     }),
     faqPage(FAQ)
   ]}
   ogImageAlt="Pixl Playroom: Develop everything. Rent nothing. The Develop view editing a photo of rowan berries."
-  nav={[
-    { label: 'Features', to: '#features' },
-    { label: 'Tools', to: '#tools' },
-    { label: 'Next', to: '#next' },
-    { label: 'Compare', to: '#compare' },
-    { label: 'Beta', to: '#beta' },
-    { label: 'Pricing', to: '#pricing' },
-    { label: 'FAQ', to: '#faq' },
-  ]}
+  nav={NAV}
   cta={{ label: 'Join the beta', to: '/beta/' }}
 >
   <!-- ── hero ─────────────────────────────────────────────────── -->
   <section class="wrap hero" aria-labelledby="hero-title">
-    <span class="b-chip">The RAW editor you own · macOS &amp; Windows</span>
+    <span class="b-chip">Free beta {BETA.version} · macOS &amp; Windows</span>
     <h1 class="b-disp" id="hero-title">Develop everything.<br /><span class="accent">Rent nothing.</span></h1>
     <p class="b-body lede">
-      Professional photo editing without the monthly bill. AI masks, over 300 looks, colour grading, noise reduction
-      and AI upscaling, working straight on the folders you already have. Pay once, and it's yours.
+      A RAW editor with PIXL's own colour science, AI masks and over 300 looks that run on your computer, and RAW to
+      HDR export. It works on the folders you already have, with no catalog and no subscription.
     </p>
     <div class="ctas">
-      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try the free beta</a>
-      <a class="b-cta sec" href="#developed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.play}></path></svg>See the results</a>
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the free beta</a>
+      <a class="b-cta sec" href="#developed">Compare before and after</a>
     </div>
+    <p class="b-body fine cta-note">Free PIXL account, 18 or older. Then download for macOS (Apple silicon or Intel) or Windows 64-bit.</p>
     <ul class="proof b-body" aria-label="At a glance">
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.amount} once, no subscription</li>
       <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>{PRICE.devices} computers per licence</li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Edits never leave your machine</li>
-      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Free during the beta</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>Your photos never leave your machine</li>
+      <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.check}></path></svg>No import, no catalog</li>
     </ul>
-    <div class="b-win hero-win">
-      <video muted loop playsinline preload="metadata" poster={own('/media/hero-poster.webp')} width="1600" height="1064" aria-label="Playroom's Develop view wiping from the untouched RAW to the edit, on three photos">
-        <!-- MP4 first: WebKit picks the WebM, reads its header and never plays a frame. -->
-        <source src={media('playroom/hero.mp4')} type="video/mp4" />
-        <source src={media('playroom/hero.webm')} type="video/webm" />
-      </video>
-      <button class="vid-toggle" type="button" aria-pressed="false" hidden>
-        <svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3v10H2zM7 1h3v10H7z"></path></svg>
-        <svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"></path></svg>
-        <span class="label">Pause</span>
-      </button>
+    <EngineBadge />
+    <div class="hero-ba" id="developed">
+      <BeforeAfter pairs={PAIRS} eager />
+      <p class="b-body fine">Real RAW files from an entry-level camera, straight off the card and finished in Playroom. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
     </div>
   </section>
 
@@ -92,30 +79,66 @@ const icon = {
     </div>
   </section>
 
-  <!-- ── why ──────────────────────────────────────────────────── -->
-  <section class="wrap why" aria-labelledby="why-title">
-    <h2 class="sr-only" id="why-title">Why Playroom</h2>
-    <ul class="cards">
-      <li>
-        <span class="b-micro">Own it</span>
-        <h3 class="b-disp">One price. No renewals.</h3>
-        <p class="b-body">Buy Playroom once and keep it. Every 1.x update is included, and it never stops working because a card expired.</p>
-      </li>
-      <li>
-        <span class="b-micro">Keep your workflow</span>
-        <h3 class="b-disp">No import. No catalog.</h3>
-        <p class="b-body">Point it at a folder and start. Each edited photo gets one <code>.pixl</code> project beside it, holding its edits, history, masks and copies, and by default a copy of the original. It's one documented SQLite file that any SQLite tool can read.</p>
-        <a class="pixl-file textlink b-body" href={pixlFormat} target="_blank" rel="noopener"><img src={shot('/formats/pixl.png')} width="48" height="48" alt="" loading="lazy" />The .pixl format</a>
-      </li>
-      <li>
-        <span class="b-micro">Private by design</span>
-        <h3 class="b-disp">Your photos stay yours.</h3>
-        <p class="b-body">Every edit, preview and AI tool runs on your own computer. Nothing is uploaded, and editing works offline.</p>
-      </li>
-    </ul>
+  <!-- ── colour ───────────────────────────────────────────────── -->
+  <section class="colour" id="colour" aria-labelledby="colour-title">
+    <div class="wrap colour-in">
+      <div class="colour-head">
+        <span class="b-micro">Colour science</span>
+        <h2 class="b-disp h2" id="colour-title">Your camera's colour,<br /><span class="accent">kept whole.</span></h2>
+        <p class="b-body">
+          What makes one RAW editor look different from another is mostly what happens to colour between the sensor and
+          the screen. From the demosaic onward, that part of Playroom is PIXL's own. LibRaw decodes the file; then
+          PIXL's camera profile, working space, gamut handling and output conversion take over.
+        </p>
+        <p class="b-body">
+          Open <strong>Scopes</strong> in Develop and the same geometry is on screen: a CIE chart of your photo with
+          PixlRGB and the standard spaces drawn over it, and the metrics before and after.
+        </p>
+        <div class="ctas">
+          <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try it in the beta</a>
+          <a class="b-cta sec" href={pixlrgb}>Read the PixlRGB spec</a>
+        </div>
+      </div>
+      <div class="colour-map">
+        <GamutMap id="gamut-playroom" />
+        <p class="b-body fine">The curve is every pure wavelength of light, 380 to 700 nm, on the CIE 1976 u′v′ diagram. Each triangle is the set of colours a space can make. PixlRGB's triangle holds the whole visible range, so a camera's colours are never clipped by the space the edit runs in. Point at the diagram to see which spaces hold a colour.</p>
+      </div>
+    </div>
+
+    <div class="wrap colour-cards">
+      <ul class="cards four">
+        <li>
+          <span class="b-micro">Working space</span>
+          <h3 class="b-disp">PixlRGB holds every colour.</h3>
+          <p class="b-body">Edits run in PixlRGB, a 32-bit float space we designed so that every colour a camera records, and every colour in sRGB, Display P3, Adobe RGB and Rec.2020, is a positive number. The space your edit runs in never clips a colour. It's an open specification.</p>
+        </li>
+        <li>
+          <span class="b-micro">Camera colour</span>
+          <h3 class="b-disp">A profile for your camera body.</h3>
+          <p class="b-body">PIXL fitted a colour profile for 46 camera bodies from each camera's measured spectral sensitivity. Any other camera uses the colour its file carries, and you can switch any photo between the two under Colour in Develop.</p>
+        </li>
+        <li>
+          <span class="b-micro">Out of range</span>
+          <h3 class="b-disp">Pulled back, not clipped.</h3>
+          <p class="b-body">When an edit pushes a colour past what the eye can see, PIXL brings it back to the edge of the visible range with its brightness and hue kept, instead of clipping a channel and shifting the colour.</p>
+        </li>
+        <li>
+          <span class="b-micro">HDR</span>
+          <h3 class="b-disp">RAW to HDR, on your terms.</h3>
+          <p class="b-body">Grade a RAW above white and export it as HDR, choosing the white level and the peak brightness in nits. Write PQ or HLG, or an SDR picture with a gain map. Playroom measures the brightness of the pixels it wrote.</p>
+        </li>
+      </ul>
+      <ul class="stats colour-stats" aria-label="Colour in numbers">
+        <li><span class="b-disp">46</span><span class="b-body">camera bodies with a PIXL-fitted profile</span></li>
+        <li><span class="b-disp">4</span><span class="b-body">standard colour spaces held whole: sRGB, Display P3, Adobe RGB and Rec.2020</span></li>
+        <li><span class="b-disp">203 nits</span><span class="b-body">reference white for HDR, per ITU-R BT.2408, with your own peak above it</span></li>
+        <li><span class="b-disp">CC BY-SA</span><span class="b-body">PixlRGB's specification and ICC profiles, free to read and use</span></li>
+      </ul>
+      <p class="b-body fine">Photos you edited in 0.2 can shift a little in {BETA.version}, because curves, the colour mixer and HSL now act in PixlRGB. Playroom keeps the old preview so you can compare, and any photo can go back to the file's own camera colour. Today LibRaw still demosaics the RAW; HEIC export is replaced by AVIF.</p>
+    </div>
   </section>
 
-  <!-- ── features ─────────────────────────────────────────────── -->
+  <!-- ── features ──────────────────────────────────────────── -->
   <div id="features">
     <section class="wrap feature" aria-labelledby="f1">
       <div class="copy">
@@ -166,7 +189,7 @@ const icon = {
     </section>
   </div>
 
-  <!-- ── smart, automatic ─────────────────────────────────────── -->
+  <!-- ── smart, automatic ──────────────────────────────────── -->
   <section class="wrap band smart" aria-labelledby="smart-title">
     <h2 class="sr-only" id="smart-title">Lens correction and smart looks</h2>
     <ul class="cards two">
@@ -183,64 +206,61 @@ const icon = {
     </ul>
   </section>
 
-  <!-- ── before / after ───────────────────────────────────────── -->
-  <section class="wrap band developed" id="developed" aria-labelledby="dev-title">
-    <div class="sec-head">
-      <h2 class="b-disp h2" id="dev-title">Straight off the card.<br /><span class="accent">Finished in Playroom.</span></h2>
-      <p class="b-body">Real RAW files from an entry-level camera. Drag across the picture, or use the arrow keys, to compare the untouched file with the edit.</p>
-    </div>
-    <BeforeAfter pairs={PAIRS} />
-  </section>
-
-  <!-- ── tools ────────────────────────────────────────────────── -->
+  <!-- ── tools ─────────────────────────────────────────────── -->
   <section class="wrap band tools" id="tools" aria-labelledby="tools-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="tools-title">Every tool you reach for.<br /><span class="accent">Right where you expect it.</span></h2>
-      <p class="b-body">Crop, Heal and Masks are one click away, and every adjustment folds into one column. Every slider updates the picture and the histogram as you drag. Pick a panel to see it in the app. Heal clones, fills and fixes red eye too, and View ▸ Engine Report shows every step of the last render.</p>
+      <p class="b-body">Crop, Heal and Masks are one click away, and every adjustment folds into one column. Every slider updates the picture and the histogram as you drag.</p>
     </div>
-    <ToolShowcase tools={TOOLS} />
+    <ul class="cards four">
+      {
+        spotlight.map((t) => (
+          <li>
+            <span class="b-micro">{t.name}</span>
+            <h3 class="b-disp">{t.pitch}</h3>
+            <p class="b-body">{t.detail}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="ctas ctas-left">
+      <a class="b-cta sec" href={own('/tools/')}>See all {TOOLS.length} panels in the app</a>
+    </div>
   </section>
 
-  <!-- ── next ─────────────────────────────────────────────────── -->
-  <section class="wrap band next" id="next" aria-labelledby="next-title">
+
+  <!-- ── why switch ───────────────────────────────────────────── -->
+  <section class="wrap band switch" id="switch" aria-labelledby="switch-title">
     <div class="sec-head">
-      <h2 class="b-disp h2" id="next-title">Coming before 1.0.<br /><span class="accent">Planned, not shipped yet.</span></h2>
-      <p class="b-body">What we're building now, for the first full release. We'll say here and in the app's What's new when each one lands.</p>
+      <h2 class="b-disp h2" id="switch-title">What changes when you<br /><span class="accent">stop renting.</span></h2>
+      <p class="b-body">Three things that are different from Lightroom Classic and Capture One, with the numbers.</p>
     </div>
     <ul class="cards">
       <li>
-        <span class="b-micro">Colour science</span>
-        <h3 class="b-disp">Our own colour, from the sensor up.</h3>
-        <p class="b-body">Today LibRaw demosaics a RAW and the camera's own matrix sets its colour. We're building PIXL's own path for every stage after demosaicing, in PIXL Engine: white balance, the colour transforms from the camera into a wide working space, highlight recovery and the base rendering. Then Playroom switches over to it, and the colour is ours from the sensor to your screen.</p>
+        <span class="b-micro">Cost over three years</span>
+        <h3 class="b-disp">{PRICE.amount}, once.</h3>
+        <p class="b-body">Lightroom Classic on Adobe's Lightroom plan is $431.64 over three years. Capture One Pro is $349 once, with new features as paid upgrades, or $648 by subscription. Playroom is {PRICE.amount} at 1.0, with every 1.x update, and it keeps working if you stop paying anything else.</p>
       </li>
       <li>
-        <span class="b-micro">Agents, over MCP</span>
-        <h3 class="b-disp">Any agent. Every control.</h3>
-        <p class="b-body">Playroom will open itself to AI agents through MCP, so any agent that speaks it can find photos in your library, use every slider, mask and look, and work through a whole shoot. Edit by conversation, or hand an agent the idea and let it run. Every change is a history step marked with the agent that made it, for you to review or undo.</p>
+        <span class="b-micro">Your files</span>
+        <h3 class="b-disp">No import. No catalog.</h3>
+        <p class="b-body">Point it at a folder and start. Each edited photo gets one <code>.pixl</code> project beside it, holding its edits, history, masks and copies, and by default a copy of the original. It's one documented SQLite file that any SQLite tool can read.</p>
+        <a class="pixl-file textlink b-body" href={pixlFormat} target="_blank" rel="noopener"><img src={shot('/formats/pixl.png')} width="48" height="48" alt="" loading="lazy" />The .pixl format</a>
       </li>
       <li>
-        <span class="b-micro">Better models</span>
-        <h3 class="b-disp">People, sky and sharper selections.</h3>
-        <p class="b-body">Masks for a person's face, skin, hair, eyes, lips, teeth and clothes, a dedicated sky model, and cleaner edges on every AI selection, all running on your own computer.</p>
+        <span class="b-micro">Privacy</span>
+        <h3 class="b-disp">Your photos stay yours.</h3>
+        <p class="b-body">Masks, noise reduction and Super Resolution all run on your own computer. Nothing is uploaded, there are no analytics, and editing works offline for up to 30 days between account checks.</p>
       </li>
     </ul>
+    <p class="b-body switch-note">Lightroom and Capture One are ahead on tethering, layers, HDR and panorama merge, print, generative remove and people masks. <a class="textlink" href={own('/compare/')}>The full comparison</a> says so row by row, with prices and features checked on October 2, 2026.</p>
   </section>
 
-  <!-- ── compare ──────────────────────────────────────────────── -->
-  <section class="wrap band compare" id="compare" aria-labelledby="compare-title">
-    <div class="sec-head">
-      <h2 class="b-disp h2" id="compare-title">Toe to toe<br /><span class="accent">with the big names.</span></h2>
-      <p class="b-body">Price, privacy and features, side by side. Where they're ahead, we say so.</p>
-    </div>
-    <Compare compare={COMPARE} />
-    <p class="b-body fine">Checked on October 2, 2026 against each vendor's own pages: Lightroom Classic 15.6 on Adobe's Lightroom plan, Capture One Pro 16.8 and Darkroom 7.4. Prices in USD before tax. Playroom's price and trial start at 1.0; until then the beta is free. Plans and features change, so check before you buy. Lightroom is a trademark of Adobe, Capture One of Capture One A/S and Darkroom of Bergen Co.; PIXL is not affiliated with any of them.</p>
-  </section>
-
-  <!-- ── beta ─────────────────────────────────────────────────── -->
+  <!-- ── beta ──────────────────────────────────────────────── -->
   <section class="wrap band beta" id="beta" aria-labelledby="beta-title">
     <div class="sec-head">
       <h2 class="b-disp h2" id="beta-title">Try it now, free.<br /><span class="accent">The beta is open.</span></h2>
-      <p class="b-body">Anyone 18 or older with a free PIXL account can join and use Playroom before 1.0. Tell us what breaks and what you'd change, and help shape the release.</p>
+      <p class="b-body">Anyone 18 or older with a free PIXL account can use Playroom {BETA.version} before 1.0. Tell us what breaks and what you'd change, and help shape the release.</p>
     </div>
     <ul class="cards">
       <li>
@@ -265,7 +285,7 @@ const icon = {
     </div>
   </section>
 
-  <!-- ── pricing ──────────────────────────────────────────────── -->
+  <!-- ── pricing ───────────────────────────────────────────── -->
   <section class="wrap band pricing" id="pricing" aria-labelledby="price-title">
     <div class="price-head">
       <Mark kind="playroom" glow size={96} class="price-mark" />
@@ -309,7 +329,32 @@ const icon = {
     </div>
   </section>
 
-  <!-- ── faq ──────────────────────────────────────────────────── -->
+  <!-- ── next ─────────────────────────────────────────────────── -->
+  <section class="wrap band next" id="next" aria-labelledby="next-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="next-title">What we're building next.<br /><span class="accent">Planned, not shipped yet.</span></h2>
+      <p class="b-body">Playroom is in beta, so this list moves with what testers tell us. We'll say here, and in the app's What's new, when each one lands.</p>
+    </div>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Smarter looks</span>
+        <h3 class="b-disp">A look becomes a small script.</h3>
+        <p class="b-body">Today a smart look runs a fixed list of steps. Next, a look carries real logic: conditions, loops and branches that decide, photo by photo, what to mask and which adjustments to apply. For example, darken the sky if there is one, and leave the photo alone if there isn't.</p>
+      </li>
+      <li>
+        <span class="b-micro">Agents, over MCP</span>
+        <h3 class="b-disp">Any agent. Every control.</h3>
+        <p class="b-body">Playroom will open itself to AI agents through MCP, so any agent that speaks it can find photos in your library and use every slider, mask and look. An agent's edits are ordinary history steps, the same as yours, so you can review, step back or undo any of them.</p>
+      </li>
+      <li>
+        <span class="b-micro">Every day</span>
+        <h3 class="b-disp">Fixes, accessibility, a smoother interface.</h3>
+        <p class="b-body">More fixes, more accessibility features and a smoother UI, plus models for people and the sky. Feedback decides the order. Help → Report a Problem sends us what happened, and <a class="textlink" href={beta}>joining the beta</a> is how you get a say.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── faq ───────────────────────────────────────────────── -->
   <section class="wrap band faq" id="faq" aria-labelledby="faq-title">
     <h2 class="b-disp h2" id="faq-title">Questions</h2>
     <div class="faq-list">
@@ -324,13 +369,38 @@ const icon = {
     </div>
   </section>
 
-  <!-- ── engine + closing ─────────────────────────────────────── -->
+  <!-- ── maker ─────────────────────────────────────────────── -->
+  <section class="wrap band maker" id="maker" aria-labelledby="maker-title">
+    <div class="sec-head">
+      <h2 class="b-disp h2" id="maker-title">Made by one developer,<br /><span class="accent">in the open.</span></h2>
+      <p class="b-body">Playroom is built by Syed Ali, trading as PIXL Foundation, an independent developer in Ontario, Canada. Here is what you can check for yourself.</p>
+    </div>
+    <ul class="cards">
+      <li>
+        <span class="b-micro">Documented</span>
+        <h3 class="b-disp">Formats you can read.</h3>
+        <p class="b-body">The <a class="textlink" href={pixlFormat} target="_blank" rel="noopener">.pixl project format</a> is documented, and <a class="textlink" href={pixlrgb}>PixlRGB</a>, the colour space Playroom edits in, is an open specification with ICC profiles you can download.</p>
+      </li>
+      <li>
+        <span class="b-micro">Inspectable</span>
+        <h3 class="b-disp">The app's source is public.</h3>
+        <p class="b-body"><a class="textlink" href="https://github.com/xuckless/pixl-playroom" target="_blank" rel="noopener">Playroom's repository</a> is public for reference. It is not open source, and it can't be built without the private engine.</p>
+      </li>
+      <li>
+        <span class="b-micro">Honest about progress</span>
+        <h3 class="b-disp">Every release, written down.</h3>
+        <p class="b-body">Read <a class="textlink" href={own('/whats-new/')}>what each beta brought</a>, check <a class="textlink" href={own('/cameras/')}>which cameras and lenses it handles</a>, and <a class="textlink" href={href('home', '/legal/', 'playroom')}>who is behind it</a>.</p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ── engine + closing ──────────────────────────────────── -->
   <section class="wrap">
     <a class="engine-card" href={href('engine', '/', 'playroom')}>
       <div class="copy">
         <Wordmark site="engine" size={14} />
-        <h2 class="b-disp h2">Built on PIXL Engine.</h2>
-        <p class="b-body">Playroom's pictures come from PIXL Engine, a Rust imaging core made for speed and colour accuracy. What you see on screen is exactly what you export.</p>
+        <h2 class="b-disp h2">Built on PIXL Engine {BETA.engine}.</h2>
+        <p class="b-body">Every picture in Playroom is a render by PIXL Engine, our Rust imaging core, and PixlRGB is its working space. The preview goes through the same engine path as an export, so what you see is what you export.</p>
         <span class="textlink b-body">Meet the engine</span>
       </div>
       <Mark kind="engine" glow size={220} class="engine-mark" />
@@ -344,6 +414,7 @@ const icon = {
       <a class="b-cta sec" href={notify}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.mail}></path></svg>Tell me when it launches</a>
     </div>
   </section>
+  <StickyCta href={beta} version={BETA.version} />
 </Base>
 
 <script>
@@ -351,42 +422,4 @@ const icon = {
   document.querySelectorAll('.b-cta[aria-disabled="true"]').forEach((b) =>
     b.addEventListener('click', (e) => e.preventDefault())
   )
-
-  // The hero video plays only while on screen, and not under reduced motion unless asked.
-  const video = document.querySelector<HTMLVideoElement>('.hero-win video')
-  const btn = document.querySelector<HTMLButtonElement>('.vid-toggle')
-  if (video) {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    video.muted = true
-    let visible = false
-    let userPaused = reduced.matches
-    const sync = () => {
-      const want = visible && !userPaused && !document.hidden
-      if (want && video.paused) video.play().catch(() => {})
-      else if (!want && !video.paused) video.pause()
-      if (btn) {
-        btn.setAttribute('aria-pressed', String(userPaused))
-        btn.querySelector('.label')!.textContent = userPaused ? 'Play' : 'Pause'
-      }
-    }
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver((entries) => {
-        visible = entries[0].isIntersecting
-        sync()
-      }, { threshold: 0.05 }).observe(video)
-    } else visible = true
-    document.addEventListener('visibilitychange', sync)
-    reduced.addEventListener('change', () => {
-      userPaused = reduced.matches
-      sync()
-    })
-    if (btn) {
-      btn.hidden = false
-      btn.addEventListener('click', () => {
-        userPaused = !userPaused
-        sync()
-      })
-    }
-    sync()
-  }
 </script>

@@ -1,0 +1,54 @@
+---
+// What each release brought, newest first (src/data/releases.ts).
+import Base from '../../../layouts/Base.astro'
+import '../../../styles/playroom.css'
+import { BETA, NAV } from '../../../data/playroom'
+import { RELEASES } from '../../../data/releases'
+import { href } from '../../../lib/links'
+import { breadcrumbs } from '../../../lib/seo'
+
+const beta = href('playroom', '/beta/', 'playroom')
+const icon = { download: 'M12 4v11M7 10l5 5 5-5M5 20h14' }
+---
+
+<Base
+  site="playroom"
+  path="/whats-new/"
+  title="What's new · Pixl Playroom"
+  description={`What each Pixl Playroom beta release brought, newest first. The current build is ${BETA.version}.`}
+  nav={NAV}
+  cta={{ label: 'Join the beta', to: '/beta/' }}
+  jsonLd={[breadcrumbs('playroom', [{ name: 'Pixl Playroom', path: '/' }, { name: "What's new", path: '/whats-new/' }])]}
+>
+  <section class="wrap band page-top" aria-labelledby="new-title">
+    <div class="sec-head">
+      <h1 class="b-disp page-h1" id="new-title">What's new.<br /><span class="accent">Release by release.</span></h1>
+      <p class="b-body">The same notes the app shows after an update. The current build is {BETA.version}. Anything not listed here, and not on the roadmap, hasn't shipped.</p>
+    </div>
+    <div class="releases">
+      {
+        RELEASES.map((r) => (
+          <article class="release" aria-labelledby={`r-${r.version}`}>
+            <header>
+              <span class="b-micro">{r.date}</span>
+              <h2 class="b-disp" id={`r-${r.version}`}>{r.version}</h2>
+              <p class="b-body">{r.headline}</p>
+            </header>
+            <div class="release-body">
+              {r.sections.map((s) => (
+                <section>
+                  <h3 class="b-micro">{s.title}</h3>
+                  <ul class="b-body">{s.items.map((i) => <li>{i}</li>)}</ul>
+                </section>
+              ))}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+    <div class="ctas">
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Join the free beta</a>
+      <a class="b-cta sec" href={href('playroom', '/#next', 'playroom')}>What's next</a>
+    </div>
+  </section>
+</Base>

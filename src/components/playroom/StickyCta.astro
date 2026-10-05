@@ -1,0 +1,59 @@
+---
+// A bar that follows the reader down the page with the one thing to do: join
+// the beta. It shows once the hero's buttons have scrolled away, and steps
+// aside wherever the page already asks (the beta, the price, the closing call).
+interface Props {
+  href: string
+  version: string
+}
+const { href, version } = Astro.props
+---
+
+<div class="sticky-cta" data-sticky hidden>
+  <p class="b-body"><strong>Playroom {version}</strong> <span>is free while it's in beta</span></p>
+  <a class="b-cta pri" href={href}>Join the beta</a>
+</div>
+
+<style>
+  .sticky-cta {
+    position: fixed; z-index: 40; left: 50%; bottom: max(16px, env(safe-area-inset-bottom));
+    transform: translate(-50%, 24px); opacity: 0; pointer-events: none;
+    display: flex; align-items: center; gap: 22px; padding: 8px 8px 8px 22px;
+    border: 1px solid rgba(157, 139, 234, .4); border-radius: 2px;
+    background: rgba(8, 7, 13, .86); backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, .9), 0 0 0 1px rgba(0, 0, 0, .5);
+    transition: opacity .25s var(--b-ease), transform .25s var(--b-ease);
+  }
+  .sticky-cta.on { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+  .sticky-cta p { margin: 0; font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+  .sticky-cta strong { color: #fff; font-weight: 600; }
+  .sticky-cta .b-cta { height: 40px; padding: 0 20px; font-size: 14px; }
+  @media (max-width: 760px) {
+    .sticky-cta { left: 12px; right: 12px; transform: translate(0, 24px); padding: 8px 8px 8px 16px; gap: 12px; justify-content: space-between; }
+    .sticky-cta.on { transform: none; }
+    .sticky-cta span { display: none; }
+    .sticky-cta .b-cta { height: 42px; flex: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sticky-cta { transition: none; } }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-sticky]')
+  const hero = document.querySelector('.hero .ctas')
+  if (bar && hero && 'IntersectionObserver' in window) {
+    bar.hidden = false
+    // Sections that already ask for the signup: the bar steps aside while one is on screen.
+    const asking = new Set<Element>()
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.target === hero) continue
+        if (e.isIntersecting) asking.add(e.target)
+        else asking.delete(e.target)
+      }
+      const heroGone = hero.getBoundingClientRect().bottom < 0
+      bar.classList.toggle('on', heroGone && asking.size === 0)
+    })
+    io.observe(hero)
+    document.querySelectorAll('#beta, #pricing, .closing').forEach((el) => io.observe(el))
+  }
+</script>

@@ -1,0 +1,36 @@
+---
+// The full comparison. Every competitor cell was checked against the vendor's
+// own pages on the date in the footnote; keep both in step (see COMPARE).
+import Base from '../../../layouts/Base.astro'
+import '../../../styles/playroom.css'
+import Compare from '../../../components/playroom/Compare.astro'
+import { BETA, COMPARE, NAV } from '../../../data/playroom'
+import { href } from '../../../lib/links'
+import { breadcrumbs } from '../../../lib/seo'
+
+const beta = href('playroom', '/beta/', 'playroom')
+const icon = { download: 'M12 4v11M7 10l5 5 5-5M5 20h14' }
+---
+
+<Base
+  site="playroom"
+  path="/compare/"
+  title="Playroom vs Lightroom Classic, Capture One and Darkroom"
+  description="Price, privacy and features side by side: Pixl Playroom against Lightroom Classic, Capture One Pro and Darkroom, checked against each vendor's own pages. Where they are ahead, the table says so."
+  nav={NAV}
+  cta={{ label: 'Join the beta', to: '/beta/' }}
+  jsonLd={[breadcrumbs('playroom', [{ name: 'Pixl Playroom', path: '/' }, { name: 'Compare', path: '/compare/' }])]}
+>
+  <section class="wrap band page-top compare" id="compare" aria-labelledby="compare-title">
+    <div class="sec-head">
+      <h1 class="b-disp page-h1" id="compare-title">Toe to toe<br /><span class="accent">with the big names.</span></h1>
+      <p class="b-body">Price, privacy and features, side by side. Where they're ahead, we say so.</p>
+    </div>
+    <Compare compare={COMPARE} />
+    <p class="b-body fine">The other apps' columns were checked on October 2, 2026 against each vendor's own pages: Lightroom Classic 15.6 on Adobe's Lightroom plan, Capture One Pro 16.8 and Darkroom 7.4. Playroom's column is {BETA.version}, as of October 5, 2026. Prices in USD before tax. Playroom's price and trial start at 1.0; until then the beta is free. Plans and features change, so check before you buy. Lightroom is a trademark of Adobe, Capture One of Capture One A/S and Darkroom of Bergen Co.; PIXL is not affiliated with any of them.</p>
+    <div class="ctas">
+      <a class="b-cta pri" href={beta}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.download}></path></svg>Try the free beta</a>
+      <a class="b-cta sec" href={href('playroom', '/#pricing', 'playroom')}>See the pricing</a>
+    </div>
+  </section>
+</Base>

@@ -10,7 +10,7 @@ import { SITES, type SiteId } from './sites'
     Space Pixl's are its own documents, so it lists them. */
 export const SITEMAP: Record<SiteId, string[]> = {
   home: ['/', '/legal/', '/legal/beta/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
-  playroom: ['/', '/beta/'],
+  playroom: ['/', '/beta/', '/tools/', '/compare/', '/cameras/', '/whats-new/'],
   space: ['/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   engine: ['/', '/pixlrgb/', '/hdr/', '/codecs/']
 }
