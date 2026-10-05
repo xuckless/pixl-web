@@ -1,0 +1,24 @@
+---
+// The small "PIXL Engine" badge as a link to the engine's site. Same look as
+// the badge on engine.pixlfoundation.com (src/styles/engine.css).
+import Mark from './brand/Mark.astro'
+import { href } from '../lib/links'
+
+const { from = 'playroom' } = Astro.props as { from?: 'playroom' | 'space' | 'home' }
+---
+
+<a class="engine-badge" href={href('engine', '/', from)} aria-label="Built with PIXL Engine: read about the imaging core">
+  <Mark kind="engine" size={24} detail="small" />
+  <span class="b-wm en">PIXL <em>ENGINE</em></span>
+</a>
+
+<style>
+  .engine-badge {
+    display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px;
+    border: 1px solid rgba(255, 255, 255, .16); border-radius: 2px; text-decoration: none;
+    transition: border-color .2s var(--b-ease), background .2s var(--b-ease);
+  }
+  .engine-badge:hover { border-color: var(--accent); background: rgba(157, 139, 234, .08); }
+  .engine-badge:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+  .engine-badge .b-wm { font-size: 11px; }
+</style>

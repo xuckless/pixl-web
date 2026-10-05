@@ -3,7 +3,7 @@
    Breakpoints: 1100 (one column) and 760 (phones). */
 
 /* ── hero video ─────────────────────────────────────────────── */
-.hero-win { width: min(1200px, 100%); aspect-ratio: 1600 / 1064; margin-top: 36px; }
+.hero-win { width: min(1360px, 100%); aspect-ratio: 1600 / 1064; margin-top: 36px; }
 .hero-win video { width: 100%; height: 100%; object-fit: cover; }
 .vid-toggle {
   position: absolute; right: 14px; bottom: 14px; z-index: 2;
@@ -28,7 +28,6 @@
 .formats li { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600; color: var(--ink-2); }
 .formats .fmt-icon { width: 48px; height: 48px; object-fit: contain; }
 
-.why { padding-top: 120px; }
 .why code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .92em; color: var(--ink); }
 .pixl-file { display: inline-flex; align-items: center; gap: 12px; align-self: flex-start; margin-top: auto; font-size: 15px; }
 .pixl-file img { width: 48px; height: 48px; object-fit: contain; }
@@ -180,7 +179,6 @@
   .formats { margin-top: 56px; padding: 22px 0; gap: 14px 18px; }
   .formats .b-micro { flex-basis: 100%; text-align: center; }
   .formats li { font-size: 16px; }
-  .why { padding-top: 80px; }
   .developed { gap: 24px; }
   .ba-tag { top: 8px; font-size: 10px; padding: 4px 7px; }
   .ba-tag.l { left: 8px; }
@@ -197,4 +195,38 @@
   .price .b-disp { font-size: 52px; }
   .plan-ctas { flex-direction: column; align-items: stretch; }
   .faq summary { font-size: 18px; padding: 20px 0; }
+}
+
+/* ── colour science: the pro block ──────────────────────────── */
+.colour {
+  margin-top: 160px; padding: 110px 0 120px;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(60% 55% at 78% 22%, rgba(157, 139, 234, .16), transparent 70%),
+    radial-gradient(50% 45% at 8% 100%, rgba(76, 61, 158, .22), transparent 70%),
+    #030206;
+}
+.colour-in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 72px; align-items: center; }
+.colour-head { display: flex; flex-direction: column; gap: 24px; }
+.colour-head .b-micro { color: var(--accent); }
+.colour-head p { font-size: 18px; color: var(--ink-2); max-width: 560px; }
+.colour-head strong { color: var(--ink); font-weight: 600; }
+.colour-head .ctas { justify-content: flex-start; margin-top: 6px; }
+.colour-cards { margin-top: 88px; display: flex; flex-direction: column; gap: 36px; }
+.colour .cards { background: rgba(255, 255, 255, .1); }
+.colour .cards > li { background: rgba(5, 5, 7, .88); }
+.colour-stats { margin-top: 0; }
+.colour-stats .b-disp { font-size: clamp(30px, 3vw, 44px); }
+
+.switch-note { max-width: 780px; font-size: 16px; color: var(--ink-3); }
+
+@media (max-width: 1100px) {
+  .colour { margin-top: 120px; padding: 80px 0 90px; }
+  .colour-in { grid-template-columns: minmax(0, 1fr); gap: 44px; }
+  .colour-cards { margin-top: 64px; }
+}
+@media (max-width: 760px) {
+  .colour { margin-top: 96px; padding: 56px 0 64px; }
+  .colour-head p { font-size: 17px; }
+  .colour-cards { margin-top: 48px; gap: 28px; }
 }

@@ -1,6 +1,7 @@
 // Content for playroom.pixlfoundation.com. The before/after pairs and the hero
 // come from pixl-playroom's scripts/site-media.sh; the shots under shots/ and
-// shots/tools/ are screenshots of 0.2.0-beta, taken by hand (2× Retina, sRGB).
+// shots/tools/ are screenshots of 0.2.0-beta, taken by hand (2× Retina, sRGB);
+// the facts on this page are those of 0.3.0-beta (October 4, 2026).
 
 export interface Tool {
   id: string
@@ -151,6 +152,9 @@ export const FORMATS = [
   { id: 'tiff', label: 'TIFF' }
 ]
 
+/** The current beta build. */
+export const BETA = { version: '0.3.0-beta', date: 'October 4, 2026', engine: '0.17.0' }
+
 /** The planned launch price. Checkout isn't built yet; see pixl-playroom TODO.md. */
 export const PRICE = { amount: '$69.99', devices: 3, trialDays: 14 }
 
@@ -169,7 +173,8 @@ const row = (label: string, ...cells: ([Mark, string] | string)[]) => ({
 
 // Checked 2026-10-02 against each vendor's own pages (pricing, help centre,
 // release notes): Lightroom Classic 15.6, Capture One Pro 16.8.6, Darkroom 7.4.
-// Playroom's column is what 0.2.0-beta does, with its price and trial from 1.0.
+// Playroom's column is what 0.3.0-beta does (updated 2026-10-05), with its price
+// and trial from 1.0. The other columns were last checked on 2026-10-02.
 // TODO before launch: check every row again and re-date the footnote.
 export const COMPARE: Compare = {
   apps: [
@@ -214,7 +219,7 @@ export const COMPARE: Compare = {
         row('Generative remove', ['soon', 'Planned. Heal, clone and fill now'], ['yes', 'Yes, in the cloud'], ['no', 'No'], ['no', 'No']),
         row('Automatic lens correction', ['yes', 'About 1,500 lenses, offline, and defish'], ['yes', 'Yes'], ['yes', 'Yes'], ['no', 'No']),
         row('Colour grading wheels', ['yes', 'Yes'], ['yes', 'Yes'], ['yes', 'Yes'], ['yes', 'Yes']),
-        row('HDR editing and export', ['yes', 'Gain maps, PQ and HLG'], ['yes', 'Yes'], ['no', 'No'], ['no', 'No'])
+        row('HDR editing and export', ['yes', 'RAW to HDR, gain maps, PQ and HLG. You set white and peak'], ['yes', 'Yes'], ['no', 'No'], ['no', 'No'])
       ]
     },
     {
@@ -240,6 +245,14 @@ export const FAQ = [
     a: `Up to ${PRICE.devices} at a time, on macOS or Windows. Replacing a computer? Remove the old one from your account and add the new one.`
   },
   {
+    q: 'Where does Playroom\'s colour come from?',
+    a: 'From the demosaic onward, from PIXL. LibRaw decodes the RAW and demosaics it; after that the colour is PIXL\'s own: a camera profile fitted by PIXL for each of 46 camera bodies (other cameras use the colour the file carries), editing in PixlRGB, our own working space that holds every colour a camera records, and our own gamut compression, tone mapping and output conversion. PixlRGB is an open specification, published on the PIXL Engine site. Photos you edited in 0.2 can shift a little in 0.3, so Playroom keeps the old preview for you to compare, and you can switch any photo back to the file\'s own colour.'
+  },
+  {
+    q: 'Can it edit and export HDR?',
+    a: 'Yes. You can grade a RAW above white and export it as HDR, choosing the white level and the peak brightness in nits: PQ or HLG in AVIF, JPEG XL and PNG, or an SDR picture with a gain map (an Ultra HDR JPEG or an AVIF). Gain-map photos such as an iPhone HEIC open too, and you can edit on their SDR picture or on the HDR one. The editor shows HDR tone-mapped to a standard screen; showing it on an HDR display is planned.'
+  },
+  {
     q: 'Do my photos get uploaded anywhere?',
     a: 'No. Editing, previews and every AI feature run on your own machine. The AI models download once, when you first use them, and nothing of yours is uploaded.'
   },
@@ -249,11 +262,11 @@ export const FAQ = [
   },
   {
     q: 'What can it open and export?',
-    a: 'It opens camera RAW, DNG, JPEG, JPEG XL, HEIC, TIFF, PNG, WebP and AVIF. It exports JPEG, PNG, TIFF, WebP, AVIF and JPEG XL, one photo at a time or in batches. HEIC export is coming.'
+    a: 'It opens camera RAW, DNG, JPEG, JPEG XL, HEIC, TIFF, PNG, WebP and AVIF. It exports JPEG, PNG, TIFF, WebP, AVIF and JPEG XL, one photo at a time or in batches, in sRGB, Display P3, Adobe RGB or Rec.2020. HEIC files open, but export is AVIF instead.'
   },
   {
     q: 'Can an AI agent edit my photos?',
-    a: 'Not yet; it\'s planned before 1.0. Playroom will open itself to AI agents through MCP (the Model Context Protocol), so any agent that speaks it can browse your library and use every control, by conversation or on a whole shoot. Every change it makes will be a history step you can review and undo. It\'s included with the app. What you let an agent see goes wherever that agent runs, so a cloud agent means its provider sees it.'
+    a: 'Not yet; it\'s planned before 1.0. Playroom will open itself to AI agents through MCP (the Model Context Protocol), so any agent that speaks it can browse your library and use every control, by conversation or on a whole shoot. Every change it makes will be a normal history step, exactly like one you made, that you can review and undo. It\'s included with the app. What you let an agent see goes wherever that agent runs, so a cloud agent means its provider sees it.'
   },
   {
     q: 'Can I try it first?',

@@ -1,0 +1,122 @@
+---
+// PixlRGB against the gamuts it holds, on a CIE 1976 u′v′ diagram, drawn from
+// the primaries' own chromaticities (src/lib/gamut.ts). Each gamut can be
+// switched off; without script they all show.
+import { GAMUTS, VIEW, at, gamutPoints, grid, locusPoints } from '../lib/gamut'
+
+const SWATCH: Record<string, { color: string; dash: string; width: number }> = {
+  srgb: { color: '#8e8aa6', dash: '2 6', width: 3 },
+  adobe: { color: '#e7c46d', dash: '12 7', width: 3 },
+  p3: { color: '#8fd9a8', dash: '14 5 3 5', width: 3 },
+  rec2020: { color: '#7cc4e8', dash: '', width: 3.5 },
+  pixlrgb: { color: '#9d8bea', dash: '', width: 6 }
+}
+const pixlGreen = at([-0.3256, 1.3204])
+const label = 'CIE 1976 chromaticity diagram. The PixlRGB triangle contains the visible range and the sRGB, Adobe RGB, Display P3 and Rec.2020 triangles.'
+---
+
+<figure class="gamut" data-gamut>
+  <svg viewBox={`0 0 ${VIEW.w} ${VIEW.h}`} role="img" aria-label={label}>
+    <g class="grid" aria-hidden="true">
+      {grid.u.map((g) => <line x1={g.at} x2={g.at} y1="0" y2={VIEW.h} />)}
+      {grid.v.map((g) => <line y1={g.at} y2={g.at} x1="0" x2={VIEW.w} />)}
+      {grid.u.map((g) => <text x={g.at + 6} y={VIEW.h - 10}>{g.label}</text>)}
+      {grid.v.map((g) => <text x="8" y={g.at - 6}>{g.label}</text>)}
+      <text class="axis" x={VIEW.w - 14} y={VIEW.h - 30} text-anchor="end">u′</text>
+      <text class="axis" x="40" y="26">v′</text>
+    </g>
+    <polygon class="locus" points={locusPoints}><title>The visible range</title></polygon>
+    {
+      GAMUTS.map((g) => (
+        <polygon
+          class:list={['tri', g.id]}
+          data-tri={g.id}
+          points={gamutPoints(g)}
+          fill={g.id === 'pixlrgb' ? 'rgba(157,139,234,.12)' : 'none'}
+          stroke={SWATCH[g.id].color}
+          stroke-width={SWATCH[g.id].width}
+          stroke-dasharray={SWATCH[g.id].dash || undefined}
+          stroke-linejoin="round"
+        >
+          <title>{g.name}</title>
+        </polygon>
+      ))
+    }
+    <text class="tag" data-tag="pixlrgb" x={pixlGreen[0] + 18} y={pixlGreen[1] + 6}>PixlRGB</text>
+  </svg>
+  <figcaption>
+    <ul class="legend" aria-label="Show or hide a gamut">
+      <li>
+        <span class="static always">
+          <svg viewBox="0 0 28 8" aria-hidden="true"><line x1="1" x2="27" y1="4" y2="4" stroke="#a9a5c2" stroke-width="2.5" stroke-linecap="round" /></svg>
+          Visible range
+        </span>
+      </li>
+      {
+        [...GAMUTS].reverse().map((g) => (
+          <li>
+            <button type="button" data-toggle={g.id} aria-pressed="true" hidden>
+              <svg viewBox="0 0 28 8" aria-hidden="true"><line x1="1" x2="27" y1="4" y2="4" stroke={SWATCH[g.id].color} stroke-width={SWATCH[g.id].width} stroke-dasharray={SWATCH[g.id].dash || undefined} stroke-linecap="round" /></svg>
+              {g.name}
+            </button>
+            <span class="static">
+              <svg viewBox="0 0 28 8" aria-hidden="true"><line x1="1" x2="27" y1="4" y2="4" stroke={SWATCH[g.id].color} stroke-width={SWATCH[g.id].width} stroke-dasharray={SWATCH[g.id].dash || undefined} stroke-linecap="round" /></svg>
+              {g.name}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="b-body">
+      Each triangle is a set of primaries. A colour inside it can be made by that space; a colour outside is out of
+      its reach. PixlRGB's triangle holds the whole visible range, so a camera's colours are never clipped by the
+      space the edit runs in.
+    </p>
+  </figcaption>
+</figure>
+
+<style>
+  .gamut { margin: 0; display: flex; flex-direction: column; gap: 22px; }
+  .gamut > svg { width: 100%; height: auto; max-height: 78vh; background: #050507; border: 1px solid var(--line); }
+  .grid line { stroke: rgba(255, 255, 255, .07); stroke-width: 1; }
+  .grid text { fill: var(--ink-4); font: 500 13px 'JetBrains Mono', ui-monospace, monospace; }
+  .grid .axis { fill: var(--ink-3); font-size: 18px; }
+  .locus { fill: rgba(255, 255, 255, .08); stroke: #a9a5c2; stroke-width: 2.5; stroke-linejoin: round; }
+  .tag { fill: #c9bdf7; font: 700 22px 'Space Grotesk', system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+  .tri { transition: opacity .2s var(--b-ease); }
+  [data-gamut][data-js] .static:not(.always) { display: none; }
+  [data-gamut]:not([data-js]) button { display: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 0; padding: 0; list-style: none; }
+  .legend button, .legend .static {
+    display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 14px;
+    border: 1px solid var(--line); border-radius: 2px; background: none; color: var(--ink-2);
+    font: 600 13px 'Space Grotesk', system-ui, sans-serif; letter-spacing: .04em;
+  }
+  .legend button { cursor: pointer; transition: border-color .15s var(--b-ease), color .15s var(--b-ease), opacity .15s var(--b-ease); }
+  .legend button:hover { border-color: var(--accent); color: var(--ink); }
+  .legend button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+  .legend button[aria-pressed='false'] { opacity: .5; }
+  .legend svg { width: 28px; height: 8px; overflow: visible; }
+  figcaption { display: flex; flex-direction: column; gap: 20px; }
+  figcaption p { font-size: 15px; color: var(--ink-3); max-width: 640px; }
+</style>
+
+<script>
+  // Each legend entry shows or hides its triangle.
+  document.querySelectorAll<HTMLElement>('[data-gamut]').forEach((root) => {
+    root.dataset.js = ''
+    root.querySelectorAll<HTMLButtonElement>('button[data-toggle]').forEach((btn) => {
+      btn.hidden = false
+      const tri = root.querySelector<SVGElement>(`[data-tri="${btn.dataset.toggle}"]`)
+      btn.addEventListener('click', () => {
+        const on = btn.getAttribute('aria-pressed') !== 'true'
+        btn.setAttribute('aria-pressed', String(on))
+        if (tri) tri.style.opacity = on ? '' : '0'
+        if (btn.dataset.toggle === 'pixlrgb') {
+          const tag = root.querySelector<SVGElement>('[data-tag="pixlrgb"]')
+          if (tag) tag.style.opacity = on ? '' : '0'
+        }
+      })
+    })
+  })
+</script>

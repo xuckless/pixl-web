@@ -39,14 +39,14 @@
 5. **Encode and attach metadata.**
 
 Details of each stage:
-- **Working space:** scene-linear Rec.2020 (D65), 32-bit float. Grade stages can also run in a named encoded space (sRGB, Display P3, Adobe RGB, Rec.2020, PQ, HLG, or a caller's ICC profile).
+- **Working space:** linear **PixlRGB** (D65), 32-bit float, PIXL's own wide working space (0.17.0): its primaries hold every colour a camera records and every colour of sRGB, Display P3, Adobe RGB and Rec.2020. Open specification and ICC profiles (CC BY-SA 4.0): https://engine.pixlfoundation.com/pixlrgb/. Outputs leave it through PIXL's conversion into their own space (Display P3 for standard pictures, Rec.2020 for PQ and HLG), with PIXL's gamut compression. Grade stages can also run in a named encoded space (sRGB, Display P3, Adobe RGB, Rec.2020, PQ, HLG, or a caller's ICC profile).
 - **Colour management:** Little CMS for ICC profiles; built-in analytic transforms for the standard RGB spaces. The source colour comes from the embedded ICC profile, then CICP, then the format default; the report says which one answered. Policies are preserve, assign, convert, tone-map and expand.
 - **Rounding report:** the report counts pixel roundings. An unchanged image with no resize takes an integer fast path with no colour conversion at all.
 - **Dithering:** TPDF dither, optional and seeded.
-- **RAW decoding:** via `rawler` (no LibRaw), with PPG demosaicing. There are three modes:
+- **RAW decoding:** LibRaw decodes the file (since 0.16). A camera colour is chosen per call: the file's own, a stated profile, or PIXL's camera database (0.17.0: 46 bodies, fitted from measured spectral sensitivities). There are three modes:
   - the camera's embedded preview;
   - a standard develop;
-  - **Scene** (PIXL's own develop): white balance on the sensor data; a choice of highlight handling (clip, unclipped, blend, inpaint-opposed); demosaic in float; camera-to-Rec.2020 matrices interpolated by colour temperature as the DNG specification describes. Output is unclamped linear float.
+  - **Scene** (PIXL's own develop): white balance on the sensor data; a choice of highlight handling (clip, unclipped, blend, inpaint-opposed); demosaic in float; camera-to-PixlRGB matrices interpolated by colour temperature as the DNG specification describes. Output is unclamped linear float.
 
   Four-colour and monochrome sensors aren't supported in Scene mode.
 - **Threads:** the caller sets the number. Output is identical at any thread count, which is tested.

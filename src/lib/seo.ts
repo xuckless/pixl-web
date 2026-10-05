@@ -12,7 +12,7 @@ export const SITEMAP: Record<SiteId, string[]> = {
   home: ['/', '/legal/', '/legal/beta/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
   playroom: ['/', '/beta/'],
   space: ['/', '/legal/eula/', '/legal/privacy/', '/legal/third-party/'],
-  engine: ['/']
+  engine: ['/', '/pixlrgb/']
 }
 
 type Json = Record<string, unknown>
